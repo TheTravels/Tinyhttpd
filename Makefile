@@ -34,7 +34,7 @@ $(BUILD_DIR)/%.o: %.c
 
 httpd: $(OBJS)
 #	gcc -g -W -Wall $(LIBS) -o $@ $<
-	$(CC) -o $@ $(CFLAGS) $<
+	$(CC) -o $(BUILD_DIR)/$@ $(CFLAGS) $<
 
 client: simpleclient.c
 	gcc -W -Wall -o $@ $<

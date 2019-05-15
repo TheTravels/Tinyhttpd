@@ -26,6 +26,7 @@
 #include <sys/wait.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <fcntl.h>
 
 #define ISspace(x) isspace((int)(x))
 
@@ -66,6 +67,9 @@ void accept_request(void *arg)
                        * program */
     char *query_string = NULL;
 
+    int flags = fcntl(client, F_GETFL, 0);        //获取文件的flags值。
+    fcntl(client, F_SETFL, flags | O_NONBLOCK);   //设置成非阻塞模式；
+    
     numchars = get_line(client, buf, sizeof(buf));
     i = 0; j = 0;
     while (!ISspace(buf[i]) && (i < sizeof(method) - 1))
@@ -78,9 +82,11 @@ void accept_request(void *arg)
 
     if (strcasecmp(method, "GET") && strcasecmp(method, "POST"))
     {
+    	printf("TCP/IP connect: %s\n", buf);
         unimplemented(client);
         return;
     }
+    printf("httpd connect\n");
 
     if (strcasecmp(method, "POST") == 0)
         cgi = 1;
@@ -319,10 +325,16 @@ int get_line(int sock, char *buf, int size)
 
     while ((i < size - 1) && (c != '\n'))
     {
-        n = recv(sock, &c, 1, 0);
+        //n = recv(sock, &c, 1, 0);
+        n = recv(sock, &c, 1, MSG_DONTWAIT);
         /* DEBUG printf("%02X\n", c); */
         if (n > 0)
         {
+	    /*if(n!=sizeof(c))
+	    {
+                  c = '\n';
+		  continue;
+	    }*/
             if (c == '\r')
             {
                 n = recv(sock, &c, 1, MSG_PEEK);
