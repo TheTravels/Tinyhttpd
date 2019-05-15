@@ -1,5 +1,8 @@
 # Compiled #
 ############
+client
+httpd
+build/
 *.com
 *.class
 *.dll
