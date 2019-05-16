@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -12,6 +13,8 @@ int main(int argc, char *argv[])
     struct sockaddr_in address;
     int result;
     char ch = 'A';
+    (void)argc;
+    (void)argv;
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     address.sin_family = AF_INET;
