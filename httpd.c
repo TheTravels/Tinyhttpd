@@ -83,6 +83,7 @@ void accept_request(void *arg)
     if (strcasecmp(method, "GET") && strcasecmp(method, "POST"))
     {
     	printf("TCP/IP connect: %s\n", buf);
+	send(client, "ACK", 3, 0);
         unimplemented(client);
         return;
     }
