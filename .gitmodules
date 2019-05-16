@@ -1,3 +1,6 @@
 [submodule "CCU"]
 	path = CCU
 	url = git@gitee.com:TheTravels/CCU_0001.git
+[submodule "OBD_Report"]
+	path = OBD_Report
+	url = git@gitee.com:TheTravels/OBD_Report_Qt.git
