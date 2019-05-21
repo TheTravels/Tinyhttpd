@@ -518,7 +518,7 @@ int main(void)
 
     server_sock = startup(&port);
     printf("httpd running on port %d\n", port);
-
+	agreement_init();
     while (1)
     {
         client_sock = accept(server_sock,
