@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <fcntl.h>
+#include <sys/wait.h>
 
 #include "agreement/agreement.h"
 
@@ -50,6 +51,10 @@ void serve_file(int, const char *);
 int startup(u_short *);
 void unimplemented(int);
 
+static const struct agreement_ofp* _agree_obd=NULL;
+static uint8_t obd_buf[1024*10];
+static uint8_t msg_buf[4096];
+
 /**********************************************************************/
 /* A request has caused a call to accept() on the server port to
  * return.  Process the request appropriately.
@@ -72,7 +77,7 @@ void accept_request(void *arg)
 
     int flags = fcntl(client, F_GETFL, 0);        //获取文件的flags值。
     fcntl(client, F_SETFL, flags | O_NONBLOCK);   //设置成非阻塞模式；
-    
+    usleep(1000*100);   // 100ms
     numchars = get_line(client, buf, sizeof(buf));
     i = 0; j = 0;
     while (!ISspace(buf[i]) && (i < sizeof(method) - 1))
@@ -90,8 +95,10 @@ void accept_request(void *arg)
 		send(client, "ACK", 3, 0);
         unimplemented(client);
 #endif
-		printf("TCP/IP connect: %s\n", buf);
-		decode_test((const uint8_t *)buf, numchars, msg_buf, sizeof(msg_buf));
+		printf("TCP/IP connect[%d]: %s\n", numchars, buf);
+		_agree_obd = create_agree_obd_shanghai();
+		_agree_obd->init(0, (const uint8_t*)"IMEI1234567890ABCDEF", 2, "INFO");
+		decode_test(_agree_obd, (const uint8_t *)buf, numchars, msg_buf, sizeof(msg_buf));
         return;
     }
     printf("httpd connect\n");
@@ -325,6 +332,7 @@ void execute_cgi(int client, const char *path,
  *             the size of the buffer
  * Returns: the number of bytes stored (excluding null) */
 /**********************************************************************/
+#if 0
 int get_line(int sock, char *buf, int size)
 {
     int i = 0;
@@ -357,6 +365,31 @@ int get_line(int sock, char *buf, int size)
         }
         else
             c = '\n';
+    }
+    buf[i] = '\0';
+
+    return(i);
+}
+#endif
+int get_line(int sock, char *buf, int size)
+{
+    int i = 0;
+    char c = '\0';
+    int n;
+
+    //while ((i < size - 1) && (c != '\n'))
+	while ((i < size - 1))
+    {
+        //n = recv(sock, &c, 1, 0);
+        n = recv(sock, &c, 1, MSG_DONTWAIT);
+        /* DEBUG printf("%02X\n", c); */
+        if (n > 0)
+        {
+            buf[i] = c;
+            i++;
+        }
+        else
+            break;
     }
     buf[i] = '\0';
 
@@ -518,7 +551,7 @@ int main(void)
 
     server_sock = startup(&port);
     printf("httpd running on port %d\n", port);
-	agreement_init();
+	//agreement_init();
     while (1)
     {
         client_sock = accept(server_sock,
