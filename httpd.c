@@ -658,7 +658,8 @@ int main(void)
     pthread_t newthread;
 
     server_sock = startup(&port);
-    printf("httpd running on port %d\n", port);
+    printf("\nhttpd running on port %d\n", port);
+	printf("\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n");
 	//agreement_init();
 		_agree_obd = create_agree_obd_shanghai();
 		_agree_obd->init(0, (const uint8_t*)"IMEI1234567890ABCDEF", 2, "INFO");
