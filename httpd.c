@@ -194,10 +194,10 @@ void accept_request(void *arg)
 			send(client, "ACK", 3, 0);
 			unimplemented(client);
 	#endif
-			printf("TCP/IP connect[%d]: %s\n", numchars, buf);
+			printf("\n\nTCP/IP connect[%d]: %s\n", numchars, buf);
 			_agree_obd = create_agree_obd_shanghai();
 			_agree_obd->init(0, (const uint8_t*)"IMEI1234567890ABCDEF", 2, "INFO");
-			decode_test(_agree_obd, (const uint8_t *)buf, numchars, msg_buf, sizeof(msg_buf));
+			decode_server(_agree_obd, (const uint8_t *)buf, numchars, msg_buf, sizeof(msg_buf));
 			goto next;
 		}
 		printf("httpd connect\n");
