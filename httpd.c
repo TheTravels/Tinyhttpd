@@ -52,7 +52,7 @@ int startup(u_short *);
 void unimplemented(int);
 
 static const struct agreement_ofp* _agree_obd=NULL;
-static uint8_t obd_buf[1024*10];
+//static uint8_t obd_buf[1024*10];
 static uint8_t msg_buf[4096];
 
 /**********************************************************************/
