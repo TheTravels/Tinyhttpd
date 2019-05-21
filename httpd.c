@@ -173,6 +173,7 @@ void accept_request(void *arg)
     int flags = fcntl(client, F_GETFL, 0);        //获取文件的flags值。
     fcntl(client, F_SETFL, flags | O_NONBLOCK);   //设置成非阻塞模式；
     //usleep(1000*100);   // 100ms
+	printf("开始接收数据 \n\n");
 	while(1)
 	{
 		numchars = get_line(client, buf, sizeof(buf));
@@ -255,7 +256,7 @@ next:
 			break;
 		}
 	}
-	printf("disconnect\n");
+	printf("\n连接断开\n");
 
     close(client);
 }
