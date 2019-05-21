@@ -28,6 +28,8 @@
 #include <stdint.h>
 #include <fcntl.h>
 
+#include "agreement/agreement.h"
+
 #define ISspace(x) isspace((int)(x))
 
 #define SERVER_STRING "Server: jdbhttpd/0.1.0\r\n"
@@ -53,6 +55,7 @@ void unimplemented(int);
  * return.  Process the request appropriately.
  * Parameters: the socket connected to the client */
 /**********************************************************************/
+static uint8_t msg_buf[4096];
 void accept_request(void *arg)
 {
     int client = (intptr_t)arg;
@@ -82,9 +85,13 @@ void accept_request(void *arg)
 
     if (strcasecmp(method, "GET") && strcasecmp(method, "POST"))
     {
+#if 0
     	printf("TCP/IP connect: %s\n", buf);
-	send(client, "ACK", 3, 0);
+		send(client, "ACK", 3, 0);
         unimplemented(client);
+#endif
+		printf("TCP/IP connect: %s\n", buf);
+		decode_test((const uint8_t *)buf, numchars, msg_buf, sizeof(msg_buf));
         return;
     }
     printf("httpd connect\n");
