@@ -61,6 +61,8 @@ static uint8_t msg_buf[4096];
  * Parameters: the socket connected to the client */
 /**********************************************************************/
 static uint8_t msg_buf[4096];
+static int recv_status=1;
+#if 0
 void accept_request(void *arg)
 {
     int client = (intptr_t)arg;
@@ -150,6 +152,110 @@ void accept_request(void *arg)
         else
             execute_cgi(client, path, method, query_string);
     }
+
+    close(client);
+}
+#endif
+void accept_request(void *arg)
+{
+    int client = (intptr_t)arg;
+    char buf[1024];
+    size_t numchars;
+    char method[255];
+    char url[255];
+    char path[512];
+    size_t i, j;
+    struct stat st;
+    int cgi = 0;      /* becomes true if server decides this is a CGI
+                       * program */
+    char *query_string = NULL;
+
+    int flags = fcntl(client, F_GETFL, 0);        //获取文件的flags值。
+    fcntl(client, F_SETFL, flags | O_NONBLOCK);   //设置成非阻塞模式；
+    //usleep(1000*100);   // 100ms
+	while(1)
+	{
+		numchars = get_line(client, buf, sizeof(buf));
+		i = 0; j = 0;
+		while (!ISspace(buf[i]) && (i < sizeof(method) - 1))
+		{
+			method[i] = buf[i];
+			i++;
+		}
+		j=i;
+		method[i] = '\0';
+
+		if(0==numchars) goto next;
+		if (strcasecmp(method, "GET") && strcasecmp(method, "POST"))
+		{
+	#if 0
+			printf("TCP/IP connect: %s\n", buf);
+			send(client, "ACK", 3, 0);
+			unimplemented(client);
+	#endif
+			printf("TCP/IP connect[%d]: %s\n", numchars, buf);
+			_agree_obd = create_agree_obd_shanghai();
+			_agree_obd->init(0, (const uint8_t*)"IMEI1234567890ABCDEF", 2, "INFO");
+			decode_test(_agree_obd, (const uint8_t *)buf, numchars, msg_buf, sizeof(msg_buf));
+			goto next;
+		}
+		printf("httpd connect\n");
+
+		if (strcasecmp(method, "POST") == 0)
+			cgi = 1;
+
+		i = 0;
+		while (ISspace(buf[j]) && (j < numchars))
+			j++;
+		while (!ISspace(buf[j]) && (i < sizeof(url) - 1) && (j < numchars))
+		{
+			url[i] = buf[j];
+			i++; j++;
+		}
+		url[i] = '\0';
+
+		if (strcasecmp(method, "GET") == 0)
+		{
+			query_string = url;
+			while ((*query_string != '?') && (*query_string != '\0'))
+				query_string++;
+			if (*query_string == '?')
+			{
+				cgi = 1;
+				*query_string = '\0';
+				query_string++;
+			}
+		}
+
+		sprintf(path, "htdocs%s", url);
+		if (path[strlen(path) - 1] == '/')
+			strcat(path, "index.html");
+		if (stat(path, &st) == -1) {
+			while ((numchars > 0) && strcmp("\n", buf))  /* read & discard headers */
+				numchars = get_line(client, buf, sizeof(buf));
+			not_found(client);
+		}
+		else
+		{
+			if ((st.st_mode & S_IFMT) == S_IFDIR)
+				strcat(path, "/index.html");
+			if ((st.st_mode & S_IXUSR) ||
+					(st.st_mode & S_IXGRP) ||
+					(st.st_mode & S_IXOTH)    )
+				cgi = 1;
+			if (!cgi)
+				serve_file(client, path);
+			else
+				execute_cgi(client, path, method, query_string);
+		}
+next:
+		usleep(1000*10);   // 10ms delay
+		if(0==recv_status) // close
+		{
+			break;
+		}
+	}
+	printf("disconnect\n");
 
     close(client);
 }
@@ -371,6 +477,7 @@ int get_line(int sock, char *buf, int size)
     return(i);
 }
 #endif
+
 int get_line(int sock, char *buf, int size)
 {
     int i = 0;
@@ -392,7 +499,7 @@ int get_line(int sock, char *buf, int size)
             break;
     }
     buf[i] = '\0';
-
+	recv_status = n;
     return(i);
 }
 
@@ -552,6 +659,8 @@ int main(void)
     server_sock = startup(&port);
     printf("httpd running on port %d\n", port);
 	//agreement_init();
+		_agree_obd = create_agree_obd_shanghai();
+		_agree_obd->init(0, (const uint8_t*)"IMEI1234567890ABCDEF", 2, "INFO");
     while (1)
     {
         client_sock = accept(server_sock,
