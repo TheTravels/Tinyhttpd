@@ -4,3 +4,9 @@
 [submodule "OBD_Report"]
 	path = OBD_Report
 	url = git@gitee.com:TheTravels/OBD_Report_Qt.git
+[submodule "UTC"]
+	path = UTC
+	url = https://github.com/TheTravels/GpsUtcAndLocalTime.git
+[submodule "cJSON"]
+	path = cJSON
+	url = https://github.com/TheTravels/cJSON.git
