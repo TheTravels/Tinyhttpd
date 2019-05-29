@@ -9,6 +9,8 @@ INC      := -I $(ROOT)/
 BUILD_DIR:= $(ROOT)/build
 SRCS     := httpd.c
 OBJS     := $(addsuffix .o,$(addprefix $(BUILD_DIR)/,$(basename $(SRCS))))
+SRCS_EN  := encode.c
+OBJS_EN  := $(addsuffix .o,$(addprefix $(BUILD_DIR)/,$(basename $(SRCS_EN))))
 CCU_DIR  := CCU/protocol
 CCU_SRC   = $(notdir $(wildcard $(ROOT)/$(CCU_DIR)/*.c))
 CCU_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(CCU_DIR)/,$(basename $(CCU_SRC))))
@@ -23,6 +25,7 @@ cJSON_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(cJSON_DIR)/,$(basename $
 
 #OBJS     += $(CCU_OBJS) $(OBD_OBJS) $(UTC_OBJS)
 OBJS     += $(OBD_OBJS) $(UTC_OBJS) $(cJSON_OBJS)
+OBJS_EN  += $(OBD_OBJS) $(UTC_OBJS) $(cJSON_OBJS)
 
 INC      += -I $(ROOT)/cJSON
 INC      += -I $(ROOT)/OBD_Report
@@ -31,12 +34,12 @@ CFLAGS   += $(INC)
 
 #SRC      += $(CCU_SRC)
 
-all: $(BUILD_DIR) $(OBJS) httpd client
+all: $(BUILD_DIR) $(OBJS) httpd client encode
 #	echo $(CCU_DIR)
 #	echo $(CCU_SRC)
 #	echo $(CCU_OBJS)
 #	echo $(OBJS)
-	mkdir log
+	mkdir -p log
 
 $(BUILD_DIR):
 	@mkdir -p $(BUILD_DIR)
@@ -48,6 +51,8 @@ $(BUILD_DIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) -c -o $@ $(CFLAGS) $<
 
+encode:$(OBJS_EN) 
+	$(CC) -o $(BUILD_DIR)/$@ $(CFLAGS) $^
 httpd: $(OBJS)
 #	gcc -g -W -Wall $(LIBS) -o $@ $<
 #	$(CC) -o $(BUILD_DIR)/$@ $(CFLAGS) $<

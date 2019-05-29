@@ -63,100 +63,6 @@ static uint8_t msg_buf[4096];
 /**********************************************************************/
 static uint8_t msg_buf[4096];
 static int recv_status=1;
-#if 0
-void accept_request(void *arg)
-{
-	int client = (intptr_t)arg;
-	char buf[1024];
-	size_t numchars;
-	char method[255];
-	char url[255];
-	char path[512];
-	size_t i, j;
-	struct stat st;
-	int cgi = 0;      /* becomes true if server decides this is a CGI
-			   * program */
-	char *query_string = NULL;
-
-	int flags = fcntl(client, F_GETFL, 0);        //获取文件的flags值。
-	fcntl(client, F_SETFL, flags | O_NONBLOCK);   //设置成非阻塞模式；
-	usleep(1000*100);   // 100ms
-	numchars = get_line(client, buf, sizeof(buf));
-	i = 0; j = 0;
-	while (!ISspace(buf[i]) && (i < sizeof(method) - 1))
-	{
-		method[i] = buf[i];
-		i++;
-	}
-	j=i;
-	method[i] = '\0';
-
-	if (strcasecmp(method, "GET") && strcasecmp(method, "POST"))
-	{
-#if 0
-		printf("TCP/IP connect: %s\n", buf);
-		send(client, "ACK", 3, 0);
-		unimplemented(client);
-#endif
-		printf("TCP/IP connect[%d]: %s\n", numchars, buf);
-		_agree_obd = create_agree_obd_shanghai();
-		_agree_obd->init(0, (const uint8_t*)"IMEI1234567890ABCDEF", 2, "INFO");
-		decode_test(_agree_obd, (const uint8_t *)buf, numchars, msg_buf, sizeof(msg_buf));
-		return;
-	}
-	printf("httpd connect\n");
-
-	if (strcasecmp(method, "POST") == 0)
-		cgi = 1;
-
-	i = 0;
-	while (ISspace(buf[j]) && (j < numchars))
-		j++;
-	while (!ISspace(buf[j]) && (i < sizeof(url) - 1) && (j < numchars))
-	{
-		url[i] = buf[j];
-		i++; j++;
-	}
-	url[i] = '\0';
-
-	if (strcasecmp(method, "GET") == 0)
-	{
-		query_string = url;
-		while ((*query_string != '?') && (*query_string != '\0'))
-			query_string++;
-		if (*query_string == '?')
-		{
-			cgi = 1;
-			*query_string = '\0';
-			query_string++;
-		}
-	}
-
-	sprintf(path, "htdocs%s", url);
-	if (path[strlen(path) - 1] == '/')
-		strcat(path, "index.html");
-	if (stat(path, &st) == -1) {
-		while ((numchars > 0) && strcmp("\n", buf))  /* read & discard headers */
-			numchars = get_line(client, buf, sizeof(buf));
-		not_found(client);
-	}
-	else
-	{
-		if ((st.st_mode & S_IFMT) == S_IFDIR)
-			strcat(path, "/index.html");
-		if ((st.st_mode & S_IXUSR) ||
-				(st.st_mode & S_IXGRP) ||
-				(st.st_mode & S_IXOTH)    )
-			cgi = 1;
-		if (!cgi)
-			serve_file(client, path);
-		else
-			execute_cgi(client, path, method, query_string);
-	}
-
-	close(client);
-}
-#endif
 #include "DateTime.h"
 #include <stdio.h>
 void UTC2file(const uint32_t times, uint8_t buf[], const size_t _size)
@@ -175,27 +81,8 @@ void UTC2file(const uint32_t times, uint8_t buf[], const size_t _size)
 
 	GregorianCalendarDateToModifiedJulianDate(utctime);
 	localtime = GregorianCalendarDateAddHour(utctime, 8);
-	snprintf((char *)buf, (size_t)_size, "log/log-%d-%.2d-%.2d-%02d%02d%02d.txt", localtime.year, localtime.month, localtime.day, localtime.hour, localtime.minute, localtime.second);
+	snprintf((char *)buf, (size_t)_size, "log/log-%d-%.2d-%.2d-%02d%02d%02d", localtime.year, localtime.month, localtime.day, localtime.hour, localtime.minute, localtime.second);
 }
-void UTC2file_bin(const uint32_t times, uint8_t buf[], const size_t _size)
-{
-	DateTime      utctime   = {.year = 1970, .month = 1, .day = 1, .hour = 0, .minute = 0, .second = 0};
-	DateTime      localtime = {.year = 1970, .month = 1, .day = 1, .hour = 8, .minute = 0, .second = 0};
-	if(times > INT32_MAX)
-	{
-		utctime = GregorianCalendarDateAddSecond(utctime, INT32_MAX);
-		utctime = GregorianCalendarDateAddSecond(utctime, (int)(times - INT32_MAX));
-	}
-	else
-	{
-		utctime = GregorianCalendarDateAddSecond(utctime, (int)times);
-	}
-
-	GregorianCalendarDateToModifiedJulianDate(utctime);
-	localtime = GregorianCalendarDateAddHour(utctime, 8);
-	snprintf((char *)buf, (size_t)_size, "log/log-%d-%.2d-%.2d-%02d%02d%02d.bin", localtime.year, localtime.month, localtime.day, localtime.hour, localtime.minute, localtime.second);
-}
-
 void accept_request(void *arg)
 {
 	int client = (intptr_t)arg;
@@ -242,24 +129,6 @@ void accept_request(void *arg)
 			memset(filename, 0, sizeof(filename));
 			UTC2file(timer, filename, sizeof(filename));
 			printf("\n\nTCP/IP connect[%d]: %s\n", numchars, buf);
-			fd = NULL;
-			fd = fopen(filename, "w+");
-			if(NULL!=fd)
-			{
-#if 0
-				fwrite(buf, numchars, 1, fd);
-#else
-				for(i=0; i<numchars; i++)
-				{
-					fprintf(fd, " %02X", buf[i]&0xFF);
-				}
-				//fprintf(fd, "\n");
-#endif
-				fflush(fd);
-				fclose(fd);
-			}
-			memset(filename, 0, sizeof(filename));
-			UTC2file_bin(timer, filename, sizeof(filename));
 			fd = NULL;
 			fd = fopen(filename, "w+");
 			if(NULL!=fd)
@@ -719,9 +588,24 @@ void unimplemented(int client)
 }
 
 /**********************************************************************/
-
-int main(void)
+#if 0
+uint8_t hex2int(const uint8_t hex)
 {
+	uint8_t data=0;
+	if(('0'<=hex) && (hex<='9')) data = hex - '0'; // uint8_t
+	else if(('A'<=hex) && (hex<='F')) data = hex + 10 - 'A'; // uint8_t
+	else data = 0xFF; // error
+	return data;
+}
+#endif
+#define  LOG_HEX  1
+#undef   LOG_HEX
+
+static char hex_buffer[4094];
+static char bin_buffer[4094];
+int main(int argc, char *argv[])
+{
+#if 0
 	int server_sock = -1;
 	//u_short port = 4000;
 	u_short port = 9910;
@@ -751,4 +635,70 @@ int main(void)
 	close(server_sock);
 
 	return(0);
+#endif
+	FILE* fd = NULL;
+	char* filename = argv[1];
+	//char buffer[4094];
+	long _size=0;
+	long _len=0;
+	long i=0;
+	//char *p = getcwd(hex_buffer , 40);
+	//printf("buffer:%s   p:%s size:%d  \n" , hex_buffer , p , strlen(hex_buffer));
+	if(argc<2)
+	{
+		printf("argc < 2!");
+		exit(0);
+	}
+	//printf("argv[0]: %s\n", argv[0]);
+	//printf("argv[1]: %s\n", argv[1]);
+	printf("filename: %s\n", filename);
+#ifdef LOG_HEX
+	fd = fopen(filename, "r");
+#else
+	fd = fopen(filename, "rb");
+#endif
+	if(NULL==fd)
+	{
+		printf("file %s not have!\n");
+		exit(0);
+	}
+	{
+		fseek(fd, 0, SEEK_END);
+		_size = ftell(fd);
+		fseek(fd, 0, SEEK_SET);
+		printf("_size :%d \n", _size);  fflush(stdout);
+		if(_size<=0)
+		{
+			fclose(fd);
+			printf("file size error!\n");
+			return 0;
+		}
+		// read
+		memset(hex_buffer, 0, sizeof (hex_buffer));
+		memset(bin_buffer, 0, sizeof (bin_buffer));
+		_size = fread(hex_buffer, 1, _size, fd);
+		printf("read: %d | %d\n", _size, ftell(fd)); fflush(stdout);
+		//fwrite(buf, numchars, 1, fd);
+		//                                frrite(buffer, _size, 1, fd);
+		//fflush(fd);
+		fclose(fd);
+		if(_size<=0)
+		{
+			printf("file read error!\n");
+			return 0;
+		}
+		i=0;
+		_len=0;
+		while(i<_size)
+		{
+			while(' '==hex_buffer[i]) i++;
+			bin_buffer[_len++] = ((hex2int(hex_buffer[i])&0x0F)<<4) | (hex2int(hex_buffer[i+1])&0x0F);
+			i+=2;
+		}
+		printf("data len: %d\n", _len);
+	}
+	_agree_obd = create_agree_obd_shanghai();
+	_agree_obd->init(0, (const uint8_t*)"IMEI1234567890ABCDEF", 2, "INFO");
+	decode_server(_agree_obd, (const uint8_t *)bin_buffer, _len, msg_buf, sizeof(msg_buf));
+
 }
