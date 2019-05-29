@@ -36,6 +36,7 @@ all: $(BUILD_DIR) $(OBJS) httpd client
 #	echo $(CCU_SRC)
 #	echo $(CCU_OBJS)
 #	echo $(OBJS)
+	mkdir log
 
 $(BUILD_DIR):
 	@mkdir -p $(BUILD_DIR)
@@ -55,4 +56,4 @@ httpd: $(OBJS)
 client: simpleclient.c
 	gcc -W -Wall -o $@ $<
 clean:
-	rm -rf $(BUILD_DIR) httpd client
+	rm -rf $(BUILD_DIR) httpd client log

@@ -28,6 +28,7 @@
 #include <stdint.h>
 #include <fcntl.h>
 #include <sys/wait.h>
+#include <time.h>
 
 #include "agreement/agreement.h"
 
@@ -156,19 +157,43 @@ void accept_request(void *arg)
     close(client);
 }
 #endif
+#include "DateTime.h"
+#include <stdio.h>
+void UTC2file(const uint32_t times, uint8_t buf[], const size_t _size)
+{
+    DateTime      utctime   = {.year = 1970, .month = 1, .day = 1, .hour = 0, .minute = 0, .second = 0};
+    DateTime      localtime = {.year = 1970, .month = 1, .day = 1, .hour = 8, .minute = 0, .second = 0};
+    if(times > INT32_MAX)
+    {
+      utctime = GregorianCalendarDateAddSecond(utctime, INT32_MAX);
+      utctime = GregorianCalendarDateAddSecond(utctime, (int)(times - INT32_MAX));
+    }
+    else
+    {
+      utctime = GregorianCalendarDateAddSecond(utctime, (int)times);
+    }
+
+    GregorianCalendarDateToModifiedJulianDate(utctime);
+    localtime = GregorianCalendarDateAddHour(utctime, 8);
+    snprintf((char *)buf, (size_t)_size, "log/log-%d-%.2d-%.2d-%02d%02d%02d", localtime.year, localtime.month, localtime.day, localtime.hour, localtime.minute, localtime.second);
+}
 void accept_request(void *arg)
 {
     int client = (intptr_t)arg;
     char buf[1024];
     size_t numchars;
     char method[255];
+    char filename[255];
+    FILE* fd;
     char url[255];
     char path[512];
     size_t i, j;
+    time_t timer;
     struct stat st;
     int cgi = 0;      /* becomes true if server decides this is a CGI
                        * program */
     char *query_string = NULL;
+
 
     int flags = fcntl(client, F_GETFL, 0);        //获取文件的flags值。
     fcntl(client, F_SETFL, flags | O_NONBLOCK);   //设置成非阻塞模式；
@@ -194,7 +219,18 @@ void accept_request(void *arg)
 			send(client, "ACK", 3, 0);
 			unimplemented(client);
 	#endif
+			timer = time(NULL);
+			memset(filename, 0, sizeof(filename));
+			UTC2file(timer, filename, sizeof(filename));
 			printf("\n\nTCP/IP connect[%d]: %s\n", numchars, buf);
+			fd = NULL;
+			fd = fopen(filename, "w+");
+			if(NULL!=fd)
+			{
+				fwrite(buf, numchars, 1, fd);
+				fflush(fd);
+				fclose(fd);
+			}
 			_agree_obd = create_agree_obd_shanghai();
 			_agree_obd->init(0, (const uint8_t*)"IMEI1234567890ABCDEF", 2, "INFO");
 			decode_server(_agree_obd, (const uint8_t *)buf, numchars, msg_buf, sizeof(msg_buf));
