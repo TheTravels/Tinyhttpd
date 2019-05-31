@@ -17,6 +17,12 @@ CCU_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(CCU_DIR)/,$(basename $(CCU
 OBD_DIR  := OBD_Report/agreement
 OBD_SRC   = $(notdir $(wildcard $(ROOT)/$(OBD_DIR)/*.c))
 OBD_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(OBD_DIR)/,$(basename $(OBD_SRC))))
+Enc_DIR  := OBD_Report/Encrypt
+Enc_SRC   = desc.c ied.c md5c.c nn.c prime.c r_keygen.c r_random.c r_stdlib.c rsa.c
+Enc_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(Enc_DIR)/,$(basename $(Enc_SRC))))
+RSA_DIR  := RSA
+RSA_SRC   = bignum.c prime.c rsa.c
+RSA_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(RSA_DIR)/,$(basename $(RSA_SRC))))
 UTC_SRC   = UTC/GpsUtcAndLocalTime/GpsUtcAndLocalTime/DateTime.c
 UTC_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/,$(basename $(UTC_SRC))))
 cJSON_DIR  := cJSON
@@ -24,11 +30,13 @@ cJSON_SRC   = cJSON.c mem_malloc.c
 cJSON_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(cJSON_DIR)/,$(basename $(cJSON_SRC))))
 
 #OBJS     += $(CCU_OBJS) $(OBD_OBJS) $(UTC_OBJS)
-OBJS     += $(OBD_OBJS) $(UTC_OBJS) $(cJSON_OBJS)
-OBJS_EN  += $(OBD_OBJS) $(UTC_OBJS) $(cJSON_OBJS)
+OBJS     += $(OBD_OBJS) $(UTC_OBJS) $(cJSON_OBJS) $(RSA_OBJS)
+OBJS_EN  += $(OBD_OBJS) $(UTC_OBJS) $(cJSON_OBJS) $(RSA_OBJS)
 
 INC      += -I $(ROOT)/cJSON
 INC      += -I $(ROOT)/OBD_Report
+#INC      += -I $(ROOT)/OBD_Report/Encrypt
+INC      += -I $(ROOT)/RSA
 INC      += -I $(ROOT)/UTC/GpsUtcAndLocalTime/GpsUtcAndLocalTime
 CFLAGS   += $(INC)
 

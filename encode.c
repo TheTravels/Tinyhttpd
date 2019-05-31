@@ -603,39 +603,14 @@ uint8_t hex2int(const uint8_t hex)
 
 static char hex_buffer[4094];
 static char bin_buffer[4094];
+#include "agreement/encrypt.h"
 int main(int argc, char *argv[])
 {
-#if 0
-	int server_sock = -1;
-	//u_short port = 4000;
-	u_short port = 9910;
-	int client_sock = -1;
-	struct sockaddr_in client_name;
-	socklen_t  client_name_len = sizeof(client_name);
-	pthread_t newthread;
-
-	server_sock = startup(&port);
-	printf("\nhttpd running on port %d\n", port);
-	printf("\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n");
-	//agreement_init();
-	_agree_obd = create_agree_obd_shanghai();
-	_agree_obd->init(0, (const uint8_t*)"IMEI1234567890ABCDEF", 2, "INFO");
-	while (1)
-	{
-		client_sock = accept(server_sock,
-				(struct sockaddr *)&client_name,
-				&client_name_len);
-		if (client_sock == -1)
-			error_die("accept");
-		/* accept_request(&client_sock); */
-		if (pthread_create(&newthread , NULL, (void *)accept_request, (void *)(intptr_t)client_sock) != 0)
-			perror("pthread_create");
-	}
-
-	close(server_sock);
-
-	return(0);
-#endif
+#if 1
+	//rsa_test();
+	rsa_main();
+	//agreement_test();
+#else
 	FILE* fd = NULL;
 	char* filename = argv[1];
 	//char buffer[4094];
@@ -701,4 +676,6 @@ int main(int argc, char *argv[])
 	_agree_obd->init(0, (const uint8_t*)"IMEI1234567890ABCDEF", 2, "INFO");
 	decode_server(_agree_obd, (const uint8_t *)bin_buffer, _len, msg_buf, sizeof(msg_buf));
 
+#endif
 }
+

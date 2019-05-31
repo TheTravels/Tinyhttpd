@@ -10,3 +10,6 @@
 [submodule "cJSON"]
 	path = cJSON
 	url = https://github.com/TheTravels/cJSON.git
+[submodule "RSA"]
+	path = RSA
+	url = https://gitee.com/TheTravels/RSA.git
