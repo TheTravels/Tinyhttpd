@@ -1,0 +1,203 @@
+
+1. 编译服务器
+
+1.1 解压
+
+将 tar包如 Tinyhttpd_0604.tar.gz拷贝到工作目录如 work，然后使用tar命令解压。
+	$ tar xzf Tinyhttpd_0604.tar.gz
+解压后得到内容如下：
+	$ ls Tinyhttpd
+	CCU    encode.c  httpd.c  Makefile    README.md  simpleclient.c
+	cJSON  htdocs    LICENSE  OBD_Report  RSA        UTC
+
+其中 OBD_Report/agreement/目录包含通信协议实现：
+$ ls OBD_Report/agreement/
+	agreement.c         diag.h          obd_shanghai.c  storage_pack.h
+	agreement.h         encrypt.c       obd_shanghai.h
+	agreement_server.c  encrypt.h       rsa_keys.h
+	agreement_test.c    encrypt_test.c  storage_pack.c
+
+agreement.c和agreement.h为接口代码，兼容多协议时会用到，agreement_server.c是服务器端测试代码，agreement_test.c是本地测试代码，都是测试协议用的，忽略。
+obd_shanghai*为具体通信协议，encrypt*为加密相关，storage_pack*为存储接口，忽略。rsa_keys.h为密钥。测试使用提供的密钥即可。PEM格式密钥使用 openssl处理之后存入。
+
+在代码根目录下 httpd.c为后台入口代码，main函数在这里实现，采用多线程。 RSA 目录下为 RSA 加密代码。服务器会把接收到的数据保存到 log目录下，保存为 bin和 txt 格式，
+encode.c可用来对 txt格式进行解析，其工作流程与 httpd.c类似，区别在于数据的来源， httpd.c数据来源于网络。
+
+1.2 编译
+
+注：以下命令中 “Tinyhttpd]”表示在 Tinyhttpd目录中执行的命令。
+
+	编译环境为 Linux，工具链使用 gcc，同时用到 多线程库 -lpthread。另外确保系统中已安装 make。
+在 Tinyhttpd目录下执行 make即可完成编译：
+	Tinyhttpd]$ make
+	
+编译完成即可在 build目录看到编译好的程序：
+	Tinyhttpd]$ ls build/
+	cJSON  encode  encode.o  httpd  httpd.o  OBD_Report  RSA  UTC
+
+httpd为服务器后台，encode用来解析保存的 log数据的。
+
+1.3 启动服务器
+
+启动服务器命令为：
+	 Tinyhttpd]$ ./build/httpd
+
+	httpd running on port 9910
+
+服务器启动后会输出当前使用的端口。
+
+1.4 修改端口
+
+	服务器默认端口为 9910，如果你不是这个端口就需要更改端口。
+
+Tinyhttpd]$ vim httpd.c
+修改其中 main函数：
+int main(void)
+{
+        int server_sock = -1;
+        //u_short port = 4000;
+        u_short port = 9910;
+        int client_sock = -1;
+        struct sockaddr_in client_name;
+        socklen_t  client_name_len = sizeof(client_name);
+        pthread_t newthread;
+
+        server_sock = startup(&port);
+        printf("\nhttpd running on port %d\n", port);
+        printf("\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n");
+        //agreement_init();
+        _agree_obd = create_agree_obd_shanghai();
+        _agree_obd->init(0, (const uint8_t*)"IMEI1234567890ABCDEF", 2, "INFO");
+        while (1)
+        {
+                client_sock = accept(server_sock,
+                                (struct sockaddr *)&client_name,
+                                &client_name_len);
+                if (client_sock == -1)
+                        error_die("accept");
+                /* accept_request(&client_sock); */
+                if (pthread_create(&newthread , NULL, (void *)accept_request, (void *)(intptr_t)client_sock) != 0)
+                        perror("pthread_create");
+        }
+
+        close(server_sock);
+
+        return(0);
+}
+
+其中 “u_short port = 9910;”这条语句便是设置端口号，将 9910改为自己使用的端口号即可。修改完毕保存重新 make。
+
+以上为服务器编译的具体流程。
+
+2. 测试
+
+测试可使用 OBD_Report_Qt_boxed.exe模拟数据进行发送。启动后界面可以看到加密设置，包含明文和 RSA，选择数据是否加密，然后设置好IP和端口号，最后点击“网络多线程”即可发送数据给服务器。
+
+注：请务必保证 IP和端口号正确，因为该测试程序没有设置错误提示，连接不上将不会有提示。
+
+正确配置测试IP端口进行测试后服务器输出信息如下：
+-------------------------------------------------------------------------------------------------------
+开始接收数据
+
+
+
+TCP/IP connect[53]: ##VIN0123456789ABCD
+decode_test len : 53
+协议类型：上海OBD协议
+起始符: ##
+命令单元: 1
+车辆识别号: VIN0123456789ABCD
+软件版本号: 2
+数据加密方式: 0x01：数据不加密
+数据单元长度: 28
+校验码: 39
+车辆登入
+登入时间:
+#-
+登入流水号:0
+SIM 卡号:VIN1234567890ABCDEF1
+
+
+TCP/IP connect[25]: ##VIN0123456789ABCD
+decode_test len : 25
+协议类型：上海OBD协议
+起始符: ##
+命令单元: 5
+车辆识别号: VIN0123456789ABCD
+软件版本号: 2
+数据加密方式: 0x01：数据不加密
+数据单元长度: 0
+校验码: 52
+终端校时
+PuTTY
+
+TCP/IP connect[34]: ##VIN0123456789ABCD
+decode_test len : 34
+协议类型：上海OBD协议
+起始符: ##
+命令单元: 4
+车辆识别号: VIN0123456789ABCD
+软件版本号: 2
+数据加密方式: 0x01：数据不加密
+数据单元长度: 9
+校验码: 50
+车辆登出
+登出时间:
+#2
+登出流水号:0
+-------------------------------------------------------------------------------------------------------
+测试程序依次发送登录，校时，登出包进行测试，然后会间隔发送 上报包和补发包。
+
+3. 解析 log
+
+解析 log使用 编译好的 “build/encode”程序。log分两种， *.bin和 *.txt，前者是 TCP/IP接收到的二进制流直接保存到文件，后者是将二进制流按字节转成十六进制 ASCII字符。如：
+	Tinyhttpd]$ cat log/log-2019-06-04-101525.txt
+	23 23 01 56 49 4E 30 31 32 33 34 35 36 37 38 39 41 42 43 44 02 01 00 1C 13 06 04 0A 0F 18 00 00 56 49 4E 31 32 33 34 35 36 37 38 39 30 41 42 43 44 45 46 31 20
+
+其中 23 为'#'的十六进制。“build/encode”将 HEX还原成二进制，然后跟 httpd一样调用 decode_server接口完成数据解析。
+
+测试命令为：
+-------------------------------------------------------------------------------------------------------
+Tinyhttpd]$ ./build/encode ./log/log-2019-06-04-101525.txt
+filename: ./log/log-2019-06-04-101525.txt
+_size :159
+read: 159 | 159
+data len: 53
+decode_test len : 53
+协议类型：上海OBD协议
+起始符: ##
+命令单元: 1
+车辆识别号: VIN0123456789ABCD
+软件版本号: 2
+数据加密方式: 0x01：数据不加密
+数据单元长度: 28
+校验码: 20
+车辆登入
+登入时间:
+
+登入流水号:0
+SIM 卡号:VIN1234567890ABCDEF1
+-------------------------------------------------------------------------------------------------------
+解析 bin文件可自行更改数据读入本分代码，去掉中间的 HEX转二进制过程。
+
+
+至此通信测试完成。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

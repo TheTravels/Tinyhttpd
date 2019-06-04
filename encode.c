@@ -606,7 +606,7 @@ static char bin_buffer[4094];
 #include "agreement/encrypt.h"
 int main(int argc, char *argv[])
 {
-#if 1
+#if 0
 	//rsa_test();
 	rsa_main();
 	//agreement_test();
