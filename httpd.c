@@ -159,7 +159,7 @@ void accept_request(void *arg)
 #endif
 #include "DateTime.h"
 #include <stdio.h>
-void UTC2file(const uint32_t times, uint8_t buf[], const size_t _size)
+void UTC2file(const uint32_t times, void* const buf, const size_t _size)
 {
 	DateTime      utctime   = {.year = 1970, .month = 1, .day = 1, .hour = 0, .minute = 0, .second = 0};
 	DateTime      localtime = {.year = 1970, .month = 1, .day = 1, .hour = 8, .minute = 0, .second = 0};
@@ -177,7 +177,7 @@ void UTC2file(const uint32_t times, uint8_t buf[], const size_t _size)
 	localtime = GregorianCalendarDateAddHour(utctime, 8);
 	snprintf((char *)buf, (size_t)_size, "log/log-%d-%.2d-%.2d-%02d%02d%02d.txt", localtime.year, localtime.month, localtime.day, localtime.hour, localtime.minute, localtime.second);
 }
-void UTC2file_bin(const uint32_t times, uint8_t buf[], const size_t _size)
+void UTC2file_bin(const uint32_t times, void* const buf, const size_t _size)
 {
 	DateTime      utctime   = {.year = 1970, .month = 1, .day = 1, .hour = 0, .minute = 0, .second = 0};
 	DateTime      localtime = {.year = 1970, .month = 1, .day = 1, .hour = 8, .minute = 0, .second = 0};
@@ -241,7 +241,7 @@ void accept_request(void *arg)
 			timer = time(NULL);
 			memset(filename, 0, sizeof(filename));
 			UTC2file(timer, filename, sizeof(filename));
-			printf("\n\nTCP/IP connect[%d]: %s\n", numchars, buf);
+			printf("\n\nTCP/IP connect[%d]: %s\n", (int)numchars, buf);
 			fd = NULL;
 			fd = fopen(filename, "w+");
 			if(NULL!=fd)
@@ -480,7 +480,8 @@ void execute_cgi(int client, const char *path,
 			sprintf(length_env, "CONTENT_LENGTH=%d", content_length);
 			putenv(length_env);
 		}
-		execl(path, NULL);
+		//execl(path, NULL);
+		execl(path, path, NULL);
 		exit(0);
 	} else {    /* parent */
 		close(cgi_output[1]);

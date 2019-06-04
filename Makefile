@@ -47,24 +47,27 @@ all: $(BUILD_DIR) $(OBJS) httpd client encode
 #	echo $(CCU_SRC)
 #	echo $(CCU_OBJS)
 #	echo $(OBJS)
-	mkdir -p log
+	@mkdir -p log
 
 $(BUILD_DIR):
 	@mkdir -p $(BUILD_DIR)
-	@echo $(CCU_SRC)
-	@echo $(CCU_OBJS)
-	@echo $(OBJS)
+#	@echo $(CCU_SRC)
+#	@echo $(CCU_OBJS)
+#	@echo $(OBJS)
 
 $(BUILD_DIR)/%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CC) -c -o $@ $(CFLAGS) $<
+	@echo CC $@
+	@$(CC) -c -o $@ $(CFLAGS) $<
 
 encode:$(OBJS_EN) 
-	$(CC) -o $(BUILD_DIR)/$@ $(CFLAGS) $^
+	@echo LD $(BUILD_DIR)/$@
+	@$(CC) -o $(BUILD_DIR)/$@ $(CFLAGS) $^
 httpd: $(OBJS)
 #	gcc -g -W -Wall $(LIBS) -o $@ $<
 #	$(CC) -o $(BUILD_DIR)/$@ $(CFLAGS) $<
-	$(CC) -o $(BUILD_DIR)/$@ $(CFLAGS) $^
+	@echo LD $(BUILD_DIR)/$@
+	@$(CC) -o $(BUILD_DIR)/$@ $(CFLAGS) $^
 
 client: simpleclient.c
 	gcc -W -Wall -o $@ $<
