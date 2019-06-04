@@ -65,7 +65,7 @@ static uint8_t msg_buf[4096];
 static int recv_status=1;
 #include "DateTime.h"
 #include <stdio.h>
-void UTC2file(const uint32_t times, uint8_t buf[], const size_t _size)
+void UTC2file(const uint32_t times, void* const buf, const size_t _size)
 {
 	DateTime      utctime   = {.year = 1970, .month = 1, .day = 1, .hour = 0, .minute = 0, .second = 0};
 	DateTime      localtime = {.year = 1970, .month = 1, .day = 1, .hour = 8, .minute = 0, .second = 0};
@@ -128,7 +128,7 @@ void accept_request(void *arg)
 			timer = time(NULL);
 			memset(filename, 0, sizeof(filename));
 			UTC2file(timer, filename, sizeof(filename));
-			printf("\n\nTCP/IP connect[%d]: %s\n", numchars, buf);
+			printf("\n\nTCP/IP connect[%ld]: %s\n", numchars, buf);
 			fd = NULL;
 			fd = fopen(filename, "w+");
 			if(NULL!=fd)
@@ -349,7 +349,7 @@ void execute_cgi(int client, const char *path,
 			sprintf(length_env, "CONTENT_LENGTH=%d", content_length);
 			putenv(length_env);
 		}
-		execl(path, NULL);
+		execl(path, path, NULL);
 		exit(0);
 	} else {    /* parent */
 		close(cgi_output[1]);
@@ -634,14 +634,14 @@ int main(int argc, char *argv[])
 #endif
 	if(NULL==fd)
 	{
-		printf("file %s not have!\n");
+		printf("file %s not have!\n", filename);
 		exit(0);
 	}
 	{
 		fseek(fd, 0, SEEK_END);
 		_size = ftell(fd);
 		fseek(fd, 0, SEEK_SET);
-		printf("_size :%d \n", _size);  fflush(stdout);
+		printf("_size :%ld \n", _size);  fflush(stdout);
 		if(_size<=0)
 		{
 			fclose(fd);
@@ -652,7 +652,7 @@ int main(int argc, char *argv[])
 		memset(hex_buffer, 0, sizeof (hex_buffer));
 		memset(bin_buffer, 0, sizeof (bin_buffer));
 		_size = fread(hex_buffer, 1, _size, fd);
-		printf("read: %d | %d\n", _size, ftell(fd)); fflush(stdout);
+		printf("read: %ld | %ld\n", _size, ftell(fd)); fflush(stdout);
 		//fwrite(buf, numchars, 1, fd);
 		//                                frrite(buffer, _size, 1, fd);
 		//fflush(fd);
@@ -670,12 +670,13 @@ int main(int argc, char *argv[])
 			bin_buffer[_len++] = ((hex2int(hex_buffer[i])&0x0F)<<4) | (hex2int(hex_buffer[i+1])&0x0F);
 			i+=2;
 		}
-		printf("data len: %d\n", _len);
+		printf("data len: %ld\n", _len);
 	}
 	_agree_obd = create_agree_obd_shanghai();
 	_agree_obd->init(0, (const uint8_t*)"IMEI1234567890ABCDEF", 2, "INFO");
 	decode_server(_agree_obd, (const uint8_t *)bin_buffer, _len, msg_buf, sizeof(msg_buf));
 
 #endif
+	return 0;
 }
 
