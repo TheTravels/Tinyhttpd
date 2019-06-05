@@ -196,6 +196,11 @@ void UTC2file_bin(const uint32_t times, void* const buf, const size_t _size)
 	snprintf((char *)buf, (size_t)_size, "log/log-%d-%.2d-%.2d-%02d%02d%02d.bin", localtime.year, localtime.month, localtime.day, localtime.hour, localtime.minute, localtime.second);
 }
 
+static void csend(const int sockfd, const void *buf, const uint16_t len)
+{
+	send(sockfd, buf, len, 0);
+}
+
 void accept_request(void *arg)
 {
 	int client = (intptr_t)arg;
@@ -270,7 +275,7 @@ void accept_request(void *arg)
 			}
 			_agree_obd = create_agree_obd_shanghai();
 			_agree_obd->init(0, (const uint8_t*)"IMEI1234567890ABCDEF", 2, "INFO");
-			decode_server(_agree_obd, (const uint8_t *)buf, numchars, msg_buf, sizeof(msg_buf));
+			decode_server(_agree_obd, (const uint8_t *)buf, numchars, msg_buf, sizeof(msg_buf), client, csend);
 			goto next;
 		}
 		printf("httpd connect\n");
@@ -718,6 +723,7 @@ void unimplemented(int client)
 	sprintf(buf, "</BODY></HTML>\r\n");
 	send(client, buf, strlen(buf), 0);
 }
+
 
 /**********************************************************************/
 
