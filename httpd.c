@@ -206,8 +206,12 @@ void accept_request(void *arg)
 	int client = (intptr_t)arg;
 	char buf[1024];
 	size_t numchars;
+	size_t numchars2;
 	char method[255];
 	char filename[255];
+	clock_t start, finish;
+	double  duration;
+	time_t time2, time1;
 	FILE* fd;
 	char url[255];
 	char path[512];
@@ -223,9 +227,34 @@ void accept_request(void *arg)
 	fcntl(client, F_SETFL, flags | O_NONBLOCK);   //设置成非阻塞模式；
 	//usleep(1000*100);   // 100ms
 	printf("开始接收数据 \n\n");
+	start = clock();
+	time(&time1);
+	_agree_obd = create_agree_obd_shanghai();
+	_agree_obd->init(0, (const uint8_t*)"IMEI1234567890ABCDEF", 2, "INFO");
+	numchars2 = 0;
+	numchars = 0;
 	while(1)
 	{
-		numchars = get_line(client, buf, sizeof(buf));
+		//numchars = get_line(client, buf, sizeof(buf));
+		numchars = get_line(client, &buf[numchars2], sizeof(buf)-numchars2);
+		if(0==numchars) goto next;
+		numchars = numchars + numchars2;
+#if 0
+		usleep(1000*1000);   // ms * n delay
+		//sleep(1);
+		numchars2 = get_line(client, &buf[numchars], sizeof(buf)-numchars);
+		numchars = numchars + numchars2;
+#endif
+		finish = clock();
+		duration = (double)(finish - start) / CLOCKS_PER_SEC;
+		time(&time2);
+		duration = difftime(time2, time1);
+		//printf( "recv time: %f seconds\n\n", duration );
+		//printf( "recv time: tart:%ld  finish:%ld duration:%f seconds\n\n", start, finish, duration );
+		printf( "recv time: time1:%ld  time2:%ld duration:%f seconds\n\n", time1, time2, duration );
+		start = finish;
+		time1 = time2;
+
 		i = 0; j = 0;
 		while (!ISspace(buf[i]) && (i < sizeof(method) - 1))
 		{
@@ -235,7 +264,6 @@ void accept_request(void *arg)
 		j=i;
 		method[i] = '\0';
 
-		if(0==numchars) goto next;
 		if (strcasecmp(method, "GET") && strcasecmp(method, "POST"))
 		{
 #if 0
@@ -247,6 +275,12 @@ void accept_request(void *arg)
 			memset(filename, 0, sizeof(filename));
 			UTC2file(timer, filename, sizeof(filename));
 			printf("\n\nTCP/IP connect[%d]: %s\n", (int)numchars, buf);
+			if(0!=decode_server(_agree_obd, (const uint8_t *)buf, numchars, msg_buf, sizeof(msg_buf), client, csend))
+			{
+				numchars2 = numchars;
+				goto next;
+			}
+			numchars2 = 0;
 			fd = NULL;
 			fd = fopen(filename, "w+");
 			if(NULL!=fd)
@@ -273,9 +307,7 @@ void accept_request(void *arg)
 				fflush(fd);
 				fclose(fd);
 			}
-			_agree_obd = create_agree_obd_shanghai();
-			_agree_obd->init(0, (const uint8_t*)"IMEI1234567890ABCDEF", 2, "INFO");
-			decode_server(_agree_obd, (const uint8_t *)buf, numchars, msg_buf, sizeof(msg_buf), client, csend);
+			//decode_server(_agree_obd, (const uint8_t *)buf, numchars, msg_buf, sizeof(msg_buf), client, csend);
 			goto next;
 		}
 		printf("httpd connect\n");
