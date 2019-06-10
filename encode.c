@@ -59,6 +59,7 @@ uint8_t hex2int(const uint8_t hex)
 static char hex_buffer[4094];
 static char bin_buffer[4094];
 #include "agreement/encrypt.h"
+extern int create_cfg(void);
 int main(int argc, char *argv[])
 {
 #if 0
@@ -76,7 +77,8 @@ int main(int argc, char *argv[])
 	//printf("buffer:%s   p:%s size:%d  \n" , hex_buffer , p , strlen(hex_buffer));
 	if(argc<2)
 	{
-		printf("argc < 2!");
+		//printf("argc < 2!");
+		create_cfg();
 		exit(0);
 	}
 	//printf("argv[0]: %s\n", argv[0]);

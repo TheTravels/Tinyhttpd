@@ -11,6 +11,9 @@ SRCS     := httpd.c
 OBJS     := $(addsuffix .o,$(addprefix $(BUILD_DIR)/,$(basename $(SRCS))))
 SRCS_EN  := encode.c
 OBJS_EN  := $(addsuffix .o,$(addprefix $(BUILD_DIR)/,$(basename $(SRCS_EN))))
+CFG_DIR  := OBD_Report
+SRCS_CFG := cfg.c
+OBJS_CFG := $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(CFG_DIR)/,$(basename $(SRCS_CFG))))
 CCU_DIR  := CCU/protocol
 CCU_SRC   = $(notdir $(wildcard $(ROOT)/$(CCU_DIR)/*.c))
 CCU_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(CCU_DIR)/,$(basename $(CCU_SRC))))
@@ -31,7 +34,7 @@ cJSON_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(cJSON_DIR)/,$(basename $
 
 #OBJS     += $(CCU_OBJS) $(OBD_OBJS) $(UTC_OBJS)
 OBJS     += $(OBD_OBJS) $(UTC_OBJS) $(cJSON_OBJS) $(RSA_OBJS)
-OBJS_EN  += $(OBD_OBJS) $(UTC_OBJS) $(cJSON_OBJS) $(RSA_OBJS)
+OBJS_EN  += $(OBD_OBJS) $(UTC_OBJS) $(cJSON_OBJS) $(RSA_OBJS) $(OBJS_CFG)
 
 INC      += -I $(ROOT)/cJSON
 INC      += -I $(ROOT)/OBD_Report
@@ -60,6 +63,9 @@ $(BUILD_DIR)/%.o: %.c
 	@echo CC $@
 	@$(CC) -c -o $@ $(CFLAGS) $<
 
+#cfg:$(OBJS_CFG) 
+#	@echo LD $(BUILD_DIR)/$@
+#	@$(CC) -o $(BUILD_DIR)/$@ $(CFLAGS) $^
 encode:$(OBJS_EN) 
 	@echo LD $(BUILD_DIR)/$@
 	@$(CC) -o $(BUILD_DIR)/$@ $(CFLAGS) $^
@@ -72,4 +78,4 @@ httpd: $(OBJS)
 client: simpleclient.c
 	gcc -W -Wall -o $@ $<
 clean:
-	rm -rf $(BUILD_DIR) httpd client log
+	rm -rf $(BUILD_DIR) httpd client log *.cfg
