@@ -841,6 +841,7 @@ int main(int argc, char *argv[])
 				//strncpy(log,optarg,63);
 				//*logp=log;
 				printf("filter VIN : %s \n", optarg); fflush(stdout);
+				set_filter_vin(optarg);
 				break;
 			case 'l':
 				save_log = 1;
