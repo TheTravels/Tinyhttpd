@@ -29,6 +29,7 @@
 #include <fcntl.h>
 #include <sys/wait.h>
 #include <time.h>
+#include <getopt.h>
 
 #include "agreement/agreement.h"
 
@@ -63,6 +64,7 @@ static uint8_t msg_buf[4096];
 /**********************************************************************/
 static uint8_t msg_buf[4096];
 static int recv_status=1;
+static int save_log = 0;
 #if 0
 void accept_request(void *arg)
 {
@@ -281,31 +283,34 @@ void accept_request(void *arg)
 				goto next;
 			}
 			numchars2 = 0;
-			fd = NULL;
-			fd = fopen(filename, "w+");
-			if(NULL!=fd)
+			if(save_log)
 			{
-#if 0
-				fwrite(buf, numchars, 1, fd);
-#else
-				for(i=0; i<numchars; i++)
+				fd = NULL;
+				fd = fopen(filename, "w+");
+				if(NULL!=fd)
 				{
-					fprintf(fd, " %02X", buf[i]&0xFF);
-				}
-				//fprintf(fd, "\n");
+#if 0
+					fwrite(buf, numchars, 1, fd);
+#else
+					for(i=0; i<numchars; i++)
+					{
+						fprintf(fd, " %02X", buf[i]&0xFF);
+					}
+					//fprintf(fd, "\n");
 #endif
-				fflush(fd);
-				fclose(fd);
-			}
-			memset(filename, 0, sizeof(filename));
-			UTC2file_bin(timer, filename, sizeof(filename));
-			fd = NULL;
-			fd = fopen(filename, "w+");
-			if(NULL!=fd)
-			{
-				fwrite(buf, numchars, 1, fd);
-				fflush(fd);
-				fclose(fd);
+					fflush(fd);
+					fclose(fd);
+				}
+				memset(filename, 0, sizeof(filename));
+				UTC2file_bin(timer, filename, sizeof(filename));
+				fd = NULL;
+				fd = fopen(filename, "w+");
+				if(NULL!=fd)
+				{
+					fwrite(buf, numchars, 1, fd);
+					fflush(fd);
+					fclose(fd);
+				}
 			}
 			//decode_server(_agree_obd, (const uint8_t *)buf, numchars, msg_buf, sizeof(msg_buf), client, csend);
 			goto next;
@@ -759,7 +764,35 @@ void unimplemented(int client)
 
 /**********************************************************************/
 
-int main(void)
+/* parse the command option 
+ * -d(--daemon)   daemon process
+ *  -p(--port)     assign http port
+ *  -s(--port)     assign https port
+ *  -l(--log)      log path
+ *  */
+
+static void usage(void)
+{
+	//fprintf(stderr,"usage:./main [-d --daemon] [-p --port] [-s --sslport] [-l --log] [-v --version] [-h --help]\n\n");
+	fprintf(stderr,"usage:./build/httpd [-d --daemon] [-p --port] [-f --fliter] [-l --log] [-v --version] [-h --help]\n\n");
+	fprintf(stderr,"usage:./build/httpd -h\n");
+	fprintf(stderr,"usage:./build/httpd -p 9910 -f VINABCDEF1234567 -l \n");
+	fprintf(stderr,"usage:./build/httpd -v\n");
+	exit(1);
+}
+
+static void version(void)
+{
+	fprintf(stderr,"版本:1.0\n功能:接收上海中心平台数据协议\n"
+			"提供 RSA 加密通信\n"
+			"实现固件配置文件下载\n"
+			"命令行参数配置端口\n\n"
+			"提供VIN过滤功能\n\n"
+	       );
+	exit(1);
+}
+
+int main(int argc, char *argv[])
 {
 	int server_sock = -1;
 	//u_short port = 4000;
@@ -768,6 +801,74 @@ int main(void)
 	struct sockaddr_in client_name;
 	socklen_t  client_name_len = sizeof(client_name);
 	pthread_t newthread;
+
+	int opt;
+	struct option longopts[]={
+		{"daemon",0,NULL,'d'},   /* 0->hasn't arg   1-> has arg */
+		{"port",1,NULL,'p'},
+#if 0 
+		{"sslport",1,NULL,'s'},
+		{"extent",0,NULL,'e'},  /* extent function -> https */
+#endif
+		{"filter",1,NULL,'f'},
+		{"log",0,NULL,'l'},
+		{"help",0,NULL,'h'},
+		{"version",0,NULL,'v'},
+		{0,0,0,0}};   /* the last must be a zero array */
+	while((opt=getopt_long(argc,argv,":dp:f:lhv",longopts,NULL))!=-1)
+	{
+		switch(opt)
+		{
+			case 'd':
+				//*d=1;
+				break;
+			case 'p':
+				//strncpy(port,optarg,15);
+				//*portp=port;
+				port = atoi(optarg);
+				//printf("port : %s \n", optarg); fflush(stdout);
+				break;
+#if 0
+			case 's':
+				strncpy(sslport,optarg,15);
+				*sslp=sslport;
+				break;
+			case 'e':
+				*dossl=1;
+				break;
+#endif
+			case 'f':
+				//strncpy(log,optarg,63);
+				//*logp=log;
+				printf("filter VIN : %s \n", optarg); fflush(stdout);
+				break;
+			case 'l':
+				save_log = 1;
+				break;
+			case ':':
+				fprintf(stderr,"-%c:option needs a value.\n",optopt);
+				exit(1);
+				break;
+			case 'h':
+				usage();
+				break;
+			case 'v':
+				version();
+				break;
+			case '?':
+				fprintf(stderr,"unknown option:%c\n",optopt);
+				usage();
+				break;
+		}
+	}
+
+	if (optind < argc) {
+		printf("non-option ARGV-elements: ");
+		while (optind < argc)
+			printf("%s ", argv[optind++]);
+		printf("\n");
+	}
+
 
 	server_sock = startup(&port);
 	printf("\nhttpd running on port %d\n", port);
