@@ -223,6 +223,7 @@ void accept_request(void *arg)
 	int cgi = 0;      /* becomes true if server decides this is a CGI
 			   * program */
 	char *query_string = NULL;
+	int print=0;
 
 
 	int flags = fcntl(client, F_GETFL, 0);        //获取文件的flags值。
@@ -253,7 +254,7 @@ void accept_request(void *arg)
 		duration = difftime(time2, time1);
 		//printf( "recv time: %f seconds\n\n", duration );
 		//printf( "recv time: tart:%ld  finish:%ld duration:%f seconds\n\n", start, finish, duration );
-		printf( "recv time: time1:%ld  time2:%ld duration:%f seconds\n\n", time1, time2, duration );
+		if(print) printf( "recv time: time1:%ld  time2:%ld duration:%f seconds\n\n", time1, time2, duration );
 		start = finish;
 		time1 = time2;
 
@@ -276,8 +277,8 @@ void accept_request(void *arg)
 			timer = time(NULL);
 			memset(filename, 0, sizeof(filename));
 			UTC2file(timer, filename, sizeof(filename));
-			printf("\n\nTCP/IP connect[%d]: %s\n", (int)numchars, buf);
-			if(0!=decode_server(_agree_obd, (const uint8_t *)buf, numchars, msg_buf, sizeof(msg_buf), client, csend))
+			if(print) printf("\n\nTCP/IP connect[%d]: %s\n", (int)numchars, buf);
+			if(0!=decode_server(&print, _agree_obd, (const uint8_t *)buf, numchars, msg_buf, sizeof(msg_buf), client, csend))
 			{
 				numchars2 = numchars;
 				goto next;

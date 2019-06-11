@@ -73,6 +73,7 @@ int main(int argc, char *argv[])
 	long _size=0;
 	long _len=0;
 	long i=0;
+	int print=1;
 	//char *p = getcwd(hex_buffer , 40);
 	//printf("buffer:%s   p:%s size:%d  \n" , hex_buffer , p , strlen(hex_buffer));
 	if(argc<2)
@@ -131,7 +132,7 @@ int main(int argc, char *argv[])
 	}
 	_agree_obd = create_agree_obd_shanghai();
 	_agree_obd->init(0, (const uint8_t*)"IMEI1234567890ABCDEF", 2, "INFO");
-	decode_server(_agree_obd, (const uint8_t *)bin_buffer, _len, msg_buf, sizeof(msg_buf), 0, NULL);
+	decode_server(&print, _agree_obd, (const uint8_t *)bin_buffer, _len, msg_buf, sizeof(msg_buf), 0, NULL);
 
 #endif
 	return 0;
