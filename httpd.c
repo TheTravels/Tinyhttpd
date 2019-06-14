@@ -229,7 +229,7 @@ void accept_request(void *arg)
 	int flags = fcntl(client, F_GETFL, 0);        //获取文件的flags值。
 	fcntl(client, F_SETFL, flags | O_NONBLOCK);   //设置成非阻塞模式；
 	//usleep(1000*100);   // 100ms
-	printf("开始接收数据 \n\n");
+	printf("开始接收数据 TCP: %d\n\n", client);
 	start = clock();
 	time(&time1);
 	_agree_obd = create_agree_obd_shanghai();
