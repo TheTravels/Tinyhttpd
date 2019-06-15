@@ -56,7 +56,7 @@ $(BUILD_DIR):
 	@mkdir -p $(BUILD_DIR)
 #	@echo $(CCU_SRC)
 #	@echo $(CCU_OBJS)
-	@echo $(OBJS)
+#	@echo $(OBJS)
 #	echo $(OBJS_CFG)
 #	echo $(SRCS_CFG)
 
