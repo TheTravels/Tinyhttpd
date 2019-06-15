@@ -7,9 +7,9 @@ CFLAGS   := -g -W -Wall -lpthread
 ROOT	 := $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))
 INC      := -I $(ROOT)/
 BUILD_DIR:= $(ROOT)/build
-SRCS     := httpd.c
+SRCS     := httpd.c #json_list.c
 OBJS     := $(addsuffix .o,$(addprefix $(BUILD_DIR)/,$(basename $(SRCS))))
-SRCS_EN  := encode.c
+SRCS_EN  := encode.c #json_list.c
 OBJS_EN  := $(addsuffix .o,$(addprefix $(BUILD_DIR)/,$(basename $(SRCS_EN))))
 CFG_DIR  := OBD_Report
 SRCS_CFG := json_list.c
@@ -33,7 +33,7 @@ cJSON_SRC   = cJSON.c mem_malloc.c
 cJSON_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(cJSON_DIR)/,$(basename $(cJSON_SRC))))
 
 #OBJS     += $(CCU_OBJS) $(OBD_OBJS) $(UTC_OBJS)
-OBJS     += $(OBD_OBJS) $(UTC_OBJS) $(cJSON_OBJS) $(RSA_OBJS)
+OBJS     += $(OBD_OBJS) $(UTC_OBJS) $(cJSON_OBJS) $(RSA_OBJS) $(OBJS_CFG)
 OBJS_EN  += $(OBD_OBJS) $(UTC_OBJS) $(cJSON_OBJS) $(RSA_OBJS) $(OBJS_CFG)
 
 INC      += -I $(ROOT)/cJSON
@@ -56,7 +56,9 @@ $(BUILD_DIR):
 	@mkdir -p $(BUILD_DIR)
 #	@echo $(CCU_SRC)
 #	@echo $(CCU_OBJS)
-#	@echo $(OBJS)
+	@echo $(OBJS)
+#	echo $(OBJS_CFG)
+#	echo $(SRCS_CFG)
 
 $(BUILD_DIR)/%.o: %.c
 	@mkdir -p $(dir $@)

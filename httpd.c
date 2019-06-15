@@ -32,6 +32,7 @@
 #include <getopt.h>
 
 #include "agreement/agreement.h"
+#include "json_list.h"
 
 #define ISspace(x) isspace((int)(x))
 
@@ -775,7 +776,7 @@ void unimplemented(int client)
 static void usage(void)
 {
 	//fprintf(stderr,"usage:./main [-d --daemon] [-p --port] [-s --sslport] [-l --log] [-v --version] [-h --help]\n\n");
-	fprintf(stderr,"usage:./build/httpd [-d --daemon] [-p --port] [-f --fliter] [-l --log] [-v --version] [-h --help]\n\n");
+	fprintf(stderr,"usage:./build/httpd [-c --config] [-d --daemon] [-p --port] [-f --fliter] [-l --log] [-L --list] [-v --version] [-h --help]\n\n");
 	fprintf(stderr,"usage:./build/httpd -h\n");
 	fprintf(stderr,"usage:./build/httpd -p 9910 -f VINABCDEF1234567 -l \n");
 	fprintf(stderr,"usage:./build/httpd -v\n");
@@ -806,7 +807,9 @@ int main(int argc, char *argv[])
 	int opt;
 	struct option longopts[]={
 		{"daemon",0,NULL,'d'},   /* 0->hasn't arg   1-> has arg */
-		{"port",1,NULL,'p'},
+		{"config",0,NULL,'c'},   
+		{"list",  0,NULL,'L'},   
+		{"port",  1,NULL,'p'},
 #if 0 
 		{"sslport",1,NULL,'s'},
 		{"extent",0,NULL,'e'},  /* extent function -> https */
@@ -816,10 +819,20 @@ int main(int argc, char *argv[])
 		{"help",0,NULL,'h'},
 		{"version",0,NULL,'v'},
 		{0,0,0,0}};   /* the last must be a zero array */
-	while((opt=getopt_long(argc,argv,":dp:f:lhv",longopts,NULL))!=-1)
+	while((opt=getopt_long(argc,argv,":cdp:f:lLhv",longopts,NULL))!=-1)
 	{
 		switch(opt)
 		{
+			case 'c':
+				create_cfg("./upload/OBD.cfg");
+				printf("config file: %s\n", "./upload/OBD.cfg");
+				exit(1);
+				break;
+			case 'L':
+				create_list("./upload/Device.list");
+				printf("List file: %s\n", "./upload/Device.list");
+				exit(1);
+				break;
 			case 'd':
 				//*d=1;
 				break;
