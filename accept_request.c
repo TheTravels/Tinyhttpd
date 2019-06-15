@@ -53,6 +53,7 @@ void not_found(int);
 void serve_file(int, const char *);
 int startup(u_short *);
 void unimplemented(int);
+int read_threads(int sock, char *buf, int size, int *status);
 
 
 /**********************************************************************/
@@ -60,7 +61,6 @@ void unimplemented(int);
  * return.  Process the request appropriately.
  * Parameters: the socket connected to the client */
 /**********************************************************************/
-static int recv_status=1;
 int save_log = 0;
 #include "DateTime.h"
 #include <stdio.h>
@@ -118,6 +118,7 @@ void accept_request(void *arg)
 	char filename[255];
 	clock_t start, finish;
 	double  duration;
+	int recv_status=1;
 	time_t time2, time1;
 	FILE* fd;
 	char url[255];
@@ -144,15 +145,9 @@ void accept_request(void *arg)
 	while(1)
 	{
 		//numchars = get_line(client, buf, sizeof(buf));
-		numchars = get_line(client, &buf[numchars2], sizeof(buf)-numchars2);
+		numchars = read_threads(client, &buf[numchars2], sizeof(buf)-numchars2, &recv_status);
 		if(0==numchars) goto next;
 		numchars = numchars + numchars2;
-#if 0
-		usleep(1000*1000);   // ms * n delay
-		//sleep(1);
-		numchars2 = get_line(client, &buf[numchars], sizeof(buf)-numchars);
-		numchars = numchars + numchars2;
-#endif
 		finish = clock();
 		duration = (double)(finish - start) / CLOCKS_PER_SEC;
 		time(&time2);
@@ -501,6 +496,30 @@ int get_line(int sock, char *buf, int size)
 }
 #endif
 
+int read_threads(int sock, char *buf, int size, int *status)
+{
+	int i = 0;
+	char c = '\0';
+	int n;
+
+	//while ((i < size - 1) && (c != '\n'))
+	while ((i < size - 1))
+	{
+		//n = recv(sock, &c, 1, 0);
+		n = recv(sock, &c, 1, MSG_DONTWAIT);
+		/* DEBUG printf("%02X\n", c); */
+		if (n > 0)
+		{
+			buf[i] = c;
+			i++;
+		}
+		else
+			break;
+	}
+	buf[i] = '\0';
+	*status = n;
+	return(i);
+}
 int get_line(int sock, char *buf, int size)
 {
 	int i = 0;
@@ -522,7 +541,7 @@ int get_line(int sock, char *buf, int size)
 			break;
 	}
 	buf[i] = '\0';
-	recv_status = n;
+	//recv_status = n;
 	return(i);
 }
 
