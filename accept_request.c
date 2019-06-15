@@ -179,7 +179,7 @@ void accept_request(void *arg)
 		duration = difftime(time2, time1);
 		//printf( "recv time: %f seconds\n\n", duration );
 		//printf( "recv time: tart:%ld  finish:%ld duration:%f seconds\n\n", start, finish, duration );
-		if(print) printf( "recv time: time1:%ld  time2:%ld duration:%f seconds\n\n", time1, time2, duration );
+		if(print) printf( "\nrecv time: time1:%ld  time2:%ld duration:%f seconds\n", time1, time2, duration );
 		start = finish;
 		time1 = time2;
 
@@ -202,9 +202,9 @@ void accept_request(void *arg)
 			timer = time(NULL);
 			memset(filename, 0, sizeof(filename));
 			UTC2file(timer, filename, sizeof(filename));
-			if(print) printf("\n\nTCP/IP connect[%d]: %s\n", (int)numchars, buf);
+			if(print) printf("TCP/IP connect[%d]: %s SN:%s write:%d\n", (int)numchars, buf, device->sn, msg_cache->write);
 			//if(0!=decode_server(&print, _agree_obd, (const uint8_t *)buf, numchars, msg_buf, sizeof(msg_buf), client, csend))
-			if(0!=decode_server(&print, _agree_obd, (const uint8_t *)buf, numchars, msg_cache->data, DEVICE_DATA_SIZE, client, csend))
+			if(0!=decode_server(&print, _agree_obd, (const uint8_t *)buf, numchars, msg_cache->data, DEVICE_DATA_SIZE, device, csend))
 			{
 				numchars2 = numchars;
 				goto next;
