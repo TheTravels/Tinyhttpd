@@ -34,6 +34,7 @@
 
 #include "agreement/agreement.h"
 #include "json_list.h"
+#include "thread_list.h"
 
 #define ISspace(x) isspace((int)(x))
 
@@ -110,7 +111,7 @@ void accept_request(void *arg)
 {
 	const struct agreement_ofp* _agree_obd=NULL;
 	uint8_t msg_buf[4096];
-	int client = (intptr_t)arg;
+	int client = 0;//(intptr_t)arg;
 	char buf[1024];
 	size_t numchars;
 	size_t numchars2;
@@ -126,11 +127,15 @@ void accept_request(void *arg)
 	size_t i, j;
 	time_t timer;
 	struct stat st;
+	struct device_list* device;
 	int cgi = 0;      /* becomes true if server decides this is a CGI
 			   * program */
 	char *query_string = NULL;
 	int print=0;
 
+	device = (struct device_list*)arg;
+	client = device->socket;
+	online_thread_add(device);
 
 	int flags = fcntl(client, F_GETFL, 0);        //获取文件的flags值。
 	fcntl(client, F_SETFL, flags | O_NONBLOCK);   //设置成非阻塞模式；
@@ -275,6 +280,7 @@ next:
 	printf("\n连接断开\n");
 
 	close(client);
+	online_thread_free(device);
 }
 
 /**********************************************************************/

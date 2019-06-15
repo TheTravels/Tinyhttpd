@@ -129,6 +129,7 @@ int main(int argc, char *argv[])
 	socklen_t  client_name_len = sizeof(client_name);
 	pthread_t newthread;
 	char daemon=0;
+	struct device_list* device;
 
 	int opt;
 	struct option longopts[]={
@@ -222,9 +223,22 @@ int main(int argc, char *argv[])
 				&client_name_len);
 		if (client_sock == -1)
 			error_die("accept");
+		device = get_thread_free();
+		if(NULL == device)
+		{
+			printf("get_thread_free fail!\n");
+			close(client_sock);
+			continue;
+		}
+#if 0
 		/* accept_request(&client_sock); */
 		if (pthread_create(&newthread , NULL, (void *)accept_request, (void *)(intptr_t)client_sock) != 0)
 			perror("pthread_create");
+#else
+		device->socket = client_sock;
+		if (pthread_create(&newthread , NULL, (void *)accept_request, (void *)device) != 0)
+			perror("pthread_create");
+#endif
 	}
 
 	close(server_sock);
