@@ -794,6 +794,8 @@ static void version(void)
 	exit(1);
 }
 
+extern void init_daemon(void);
+
 int main(int argc, char *argv[])
 {
 	int server_sock = -1;
@@ -803,6 +805,7 @@ int main(int argc, char *argv[])
 	struct sockaddr_in client_name;
 	socklen_t  client_name_len = sizeof(client_name);
 	pthread_t newthread;
+	char daemon=0;
 
 	int opt;
 	struct option longopts[]={
@@ -834,7 +837,7 @@ int main(int argc, char *argv[])
 				exit(1);
 				break;
 			case 'd':
-				//*d=1;
+				daemon=1;
 				break;
 			case 'p':
 				//strncpy(port,optarg,15);
@@ -884,7 +887,7 @@ int main(int argc, char *argv[])
 		printf("\n");
 	}
 
-
+	if(1==daemon) init_daemon();
 	server_sock = startup(&port);
 	printf("\nhttpd running on port %d\n", port);
 	printf("\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n");
