@@ -107,10 +107,25 @@ static void csend(const int sockfd, const void *buf, const uint16_t len)
 	send(sockfd, buf, len, 0);
 }
 
+#ifdef offsetof
+#undef offsetof
+#endif
+#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
+/**
+ *  * container_of - cast a member of a structure out to the containing structure
+ *   * @ptr:    the pointer to the member.
+ *    * @type:   the type of the container struct this is embedded in.
+ *     * @member: the name of the member within the struct.
+ *      *
+ *       */
+#define container_of(ptr, type, member) ({          \
+    const typeof(((type *)0)->member)*__mptr = (ptr);    \
+             (type *)((char *)__mptr - offsetof(type, member)); })
+
 void accept_request(void *arg)
 {
 	const struct agreement_ofp* _agree_obd=NULL;
-	uint8_t msg_buf[4096];
+	//uint8_t msg_buf[4096];
 	int client = 0;//(intptr_t)arg;
 	char buf[1024];
 	size_t numchars;
@@ -128,12 +143,15 @@ void accept_request(void *arg)
 	time_t timer;
 	struct stat st;
 	struct device_list* device;
+	struct device_data  *msg_cache;
 	int cgi = 0;      /* becomes true if server decides this is a CGI
 			   * program */
 	char *query_string = NULL;
 	int print=0;
 
 	device = (struct device_list*)arg;
+	//msg_cache = (struct device_data*)container_of(&(device->msg_list), struct device_data, list);
+	msg_cache = (struct device_data*)container_of((device->msg_list.next), struct device_data, list);
 	client = device->socket;
 	online_thread_add(device);
 
@@ -147,6 +165,8 @@ void accept_request(void *arg)
 	_agree_obd->init(0, (const uint8_t*)"IMEI1234567890ABCDEF", 2, "INFO");
 	numchars2 = 0;
 	numchars = 0;
+	msg_cache->write=0;
+	msg_cache->read=0;
 	while(1)
 	{
 		//numchars = get_line(client, buf, sizeof(buf));
@@ -183,11 +203,14 @@ void accept_request(void *arg)
 			memset(filename, 0, sizeof(filename));
 			UTC2file(timer, filename, sizeof(filename));
 			if(print) printf("\n\nTCP/IP connect[%d]: %s\n", (int)numchars, buf);
-			if(0!=decode_server(&print, _agree_obd, (const uint8_t *)buf, numchars, msg_buf, sizeof(msg_buf), client, csend))
+			//if(0!=decode_server(&print, _agree_obd, (const uint8_t *)buf, numchars, msg_buf, sizeof(msg_buf), client, csend))
+			if(0!=decode_server(&print, _agree_obd, (const uint8_t *)buf, numchars, msg_cache->data, DEVICE_DATA_SIZE, client, csend))
 			{
 				numchars2 = numchars;
 				goto next;
 			}
+			msg_cache->write++;
+			if(msg_cache->write>=DEVICE_ITEM_SIZE) msg_cache->write = 0;
 			numchars2 = 0;
 			if(save_log)
 			{
