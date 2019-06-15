@@ -54,16 +54,12 @@ void serve_file(int, const char *);
 int startup(u_short *);
 void unimplemented(int);
 
-static const struct agreement_ofp* _agree_obd=NULL;
-//static uint8_t obd_buf[1024*10];
-static uint8_t msg_buf[4096];
 
 /**********************************************************************/
 /* A request has caused a call to accept() on the server port to
  * return.  Process the request appropriately.
  * Parameters: the socket connected to the client */
 /**********************************************************************/
-static uint8_t msg_buf[4096];
 static int recv_status=1;
 int save_log = 0;
 #include "DateTime.h"
@@ -112,6 +108,8 @@ static void csend(const int sockfd, const void *buf, const uint16_t len)
 
 void accept_request(void *arg)
 {
+	const struct agreement_ofp* _agree_obd=NULL;
+	uint8_t msg_buf[4096];
 	int client = (intptr_t)arg;
 	char buf[1024];
 	size_t numchars;
