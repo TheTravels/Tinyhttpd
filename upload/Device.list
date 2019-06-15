@@ -7,12 +7,6 @@
 			"Firmware":	"OBD1234567890AB.bin",
 			"Config":	"OBD1234567890AB.cfg"
 		},
-		"up_1":	{
-			"SerialNumber":	"102905420128",
-			"Model":	"OBD1234567890AB",
-			"Firmware":	"OBD1234567890AB.bin",
-			"Config":	"OBD1234567890AB.cfg"
-		}
 	},
 	"DeviceList":	{
 		"dev_1":	{
