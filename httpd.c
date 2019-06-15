@@ -30,9 +30,11 @@
 #include <sys/wait.h>
 #include <time.h>
 #include <getopt.h>
+#include "accept_request.h"
 
 #include "agreement/agreement.h"
 #include "json_list.h"
+#include "thread_list.h"
 
 #define ISspace(x) isspace((int)(x))
 
@@ -41,9 +43,7 @@
 #define STDOUT  1
 #define STDERR  2
 
-extern void accept_request(void *);
 int startup(u_short *);
-extern void error_die(const char *);
 
 
 /**********************************************************************/
@@ -211,6 +211,7 @@ int main(int argc, char *argv[])
 	}
 
 	if(1==daemon) init_daemon();
+	thread_list_init();
 	server_sock = startup(&port);
 	printf("\nhttpd running on port %d\n", port);
 	printf("\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n");

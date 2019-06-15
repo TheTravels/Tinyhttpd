@@ -30,6 +30,7 @@
 #include <sys/wait.h>
 #include <time.h>
 #include <getopt.h>
+#include "accept_request.h"
 
 #include "agreement/agreement.h"
 #include "json_list.h"
@@ -41,7 +42,6 @@
 #define STDOUT  1
 #define STDERR  2
 
-void accept_request(void *);
 void bad_request(int);
 void cat(int, FILE *);
 void cannot_execute(int);
