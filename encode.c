@@ -59,7 +59,9 @@ uint8_t hex2int(const uint8_t hex)
 static char hex_buffer[4094];
 static char bin_buffer[4094];
 #include "agreement/encrypt.h"
-extern int create_cfg(void);
+//extern int create_cfg(void);
+#include "json_list.h"
+
 int main(int argc, char *argv[])
 {
 #if 0
@@ -79,7 +81,7 @@ int main(int argc, char *argv[])
 	if(argc<2)
 	{
 		//printf("argc < 2!");
-		create_cfg();
+		create_cfg("OBD.cfg");
 		exit(0);
 	}
 	//printf("argv[0]: %s\n", argv[0]);
