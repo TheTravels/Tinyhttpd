@@ -130,6 +130,7 @@ int main(int argc, char *argv[])
 	pthread_t newthread;
 	char daemon=0;
 	struct device_list* device;
+	char pwd[128] ;
 
 	int opt;
 	struct option longopts[]={
@@ -212,6 +213,12 @@ int main(int argc, char *argv[])
 	}
 
 	if(1==daemon) init_daemon();
+	memset(pwd, 0, sizeof(pwd));
+	//char *p = getcwd(pwd, sizeof(pwd));
+	getcwd(pwd, sizeof(pwd));
+	//printf("pwd:%s   p:%s size:%d  \n", pwd, p, strlen(pwd));
+	printf("Working Directory:%s\n", pwd);
+
 	thread_list_init();
 	server_sock = startup(&port);
 	printf("\nhttpd running on port %d\n", port);
