@@ -2,7 +2,7 @@
 LIBS = -lpthread #-lsocket
 
 CC       := gcc
-CFLAGS   := -g -W -Wall -lpthread 
+CFLAGS   := -g -W -Wall -lpthread -DGCC_BUILD=1 
 
 ROOT	 := $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))
 INC      := -I $(ROOT)/
