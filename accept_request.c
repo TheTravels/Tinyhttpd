@@ -124,6 +124,7 @@ static void csend(const int sockfd, const void *buf, const uint16_t len)
 
 void accept_request(void *arg)
 {
+	const char viewer[] = "SocketViewer";
 	const struct agreement_ofp* _agree_obd=NULL;
 	uint8_t msg_buf[4096];
 	int client = 0;//(intptr_t)arg;
@@ -193,7 +194,13 @@ void accept_request(void *arg)
 		j=i;
 		method[i] = '\0';
 
-		if (strcasecmp(method, "GET") && strcasecmp(method, "POST"))
+		if(0==memcmp(buf, viewer, sizeof(viewer)))
+		{
+			printf("view: %s\n", viewer);
+			numchars2 = 0;
+			goto next;
+		}
+		else if (strcasecmp(method, "GET") && strcasecmp(method, "POST"))
 		{
 #if 0
 			printf("TCP/IP connect: %s\n", buf);
@@ -204,6 +211,7 @@ void accept_request(void *arg)
 			memset(filename, 0, sizeof(filename));
 			UTC2file(timer, filename, sizeof(filename));
 			if(print) printf("TCP/IP connect[%d]: %s SN:%s\n", (int)numchars, buf, device->sn);
+			//printf("TCP/IP connect[%d]: %s SN:%s\n", (int)numchars, buf, device->sn);
 			//if(0!=decode_server(&print, _agree_obd, (const uint8_t *)buf, numchars, msg_buf, sizeof(msg_buf), client, csend))
 			if(0!=decode_server(&print, _agree_obd, (const uint8_t *)buf, numchars, msg_buf, sizeof(msg_buf), device, csend))
 			//if(0!=decode_server(&print, _agree_obd, (const uint8_t *)buf, numchars, msg_cache->data, DEVICE_DATA_SIZE, device, csend))
