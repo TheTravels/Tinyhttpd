@@ -35,6 +35,7 @@
 #include "agreement/agreement.h"
 #include "json_list.h"
 #include "thread_list.h"
+#include "trunking.h"
 
 #define ISspace(x) isspace((int)(x))
 
@@ -198,6 +199,7 @@ void accept_request(void *arg)
 		{
 			printf("view: %s\n", viewer);
 			numchars2 = 0;
+			trunking(client);
 			goto next;
 		}
 		else if (strcasecmp(method, "GET") && strcasecmp(method, "POST"))
