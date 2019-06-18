@@ -2,11 +2,23 @@
 	"cJSON Version":	"1.7.12",
 	"Update":	{
 		"up_0":	{
-			"SerialNumber":	"102905420118",
+			"SerialNumber":	"102906420248",
 			"Model":	"OBD1234567890AB",
 			"Firmware":	"OBD1234567890AB.bin",
 			"Config":	"OBD1234567890AB.cfg"
 		},
+		"up_1":	{
+			"SerialNumber":	"102906420198",
+			"Model":	"OBD1234567890AB",
+			"Firmware":	"OBD1234567890AB.bin",
+			"Config":	"OBD1234567890AB.cfg"
+		},
+		"up_2":	{
+			"SerialNumber":	"102905420128",
+			"Model":	"OBD1234567890AB",
+			"Firmware":	"OBD1234567890AB.bin",
+			"Config":	"OBD1234567890AB.cfg"
+		}
 	},
 	"DeviceList":	{
 		"dev_1":	{

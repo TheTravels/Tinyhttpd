@@ -157,7 +157,8 @@ int main(int argc, char *argv[])
 				exit(1);
 				break;
 			case 'L':
-				create_list("./upload/Device.list");
+				//create_list("./upload/Device.list");
+				printf("JSON:%d\n", json_list_search("./upload/Device.list", "102905420128", JSON_LIST_UP));
 				printf("List file: %s\n", "./upload/Device.list");
 				exit(1);
 				break;
