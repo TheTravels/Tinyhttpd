@@ -98,7 +98,7 @@ int startup(u_short *port)
 static void usage(void)
 {
 	//fprintf(stderr,"usage:./main [-d --daemon] [-p --port] [-s --sslport] [-l --log] [-v --version] [-h --help]\n\n");
-	fprintf(stderr,"usage:./build/httpd [-c --config] [-d --daemon] [-p --port] [-f --fliter] [-l --log] [-L --list] [-v --version] [-h --help]\n\n");
+	fprintf(stderr,"usage:./build/httpd [-c --config] [-d --daemon] [-p --port] [-f --fliter] [-S --SN] [-l --log] [-L --list] [-v --version] [-h --help]\n\n");
 	fprintf(stderr,"usage:./build/httpd -h\n");
 	fprintf(stderr,"usage:./build/httpd -p 9910 -f VINABCDEF1234567 -l \n");
 	fprintf(stderr,"usage:./build/httpd -v\n");
@@ -143,11 +143,12 @@ int main(int argc, char *argv[])
 		{"extent",0,NULL,'e'},  /* extent function -> https */
 #endif
 		{"filter",1,NULL,'f'},
+		{"SN",    1,NULL,'S'},
 		{"log",0,NULL,'l'},
 		{"help",0,NULL,'h'},
 		{"version",0,NULL,'v'},
 		{0,0,0,0}};   /* the last must be a zero array */
-	while((opt=getopt_long(argc,argv,":cdp:f:lLhv",longopts,NULL))!=-1)
+	while((opt=getopt_long(argc,argv,":cdp:f:S:lLhv",longopts,NULL))!=-1)
 	{
 		switch(opt)
 		{
@@ -185,6 +186,10 @@ int main(int argc, char *argv[])
 				//*logp=log;
 				printf("filter VIN : %s \n", optarg); fflush(stdout);
 				set_filter_vin(optarg);
+				break;
+			case 'S':
+				printf("filter SN : %s \n", optarg); fflush(stdout);
+				set_filter_sn(optarg);
 				break;
 			case 'l':
 				save_log = 1;
