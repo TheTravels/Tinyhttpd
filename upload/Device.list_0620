@@ -1,10 +1,5 @@
 {
 	"cJSON Version":	"1.7.12",
-	"Push":	"0",
-	"Push.Des":	{
-		"0":	"服务器不推送更新",
-		"1":	"服务器主动推送更新"
-	},
 	"Update":	{
 		"up_0":	{
 			"SerialNumber":	"102906420248",
@@ -121,7 +116,7 @@
 			"Config":	"OBD1234567890AB.cfg"
 		},
 		"up_2":	{
-			"SerialNumber":	"102905620128",
+			"SerialNumber":	"102906420128",
 			"Model":	"OBD1234567890AB",
 			"Firmware":	"OBD1234567890AB.bin",
 			"Config":	"OBD1234567890AB.cfg"

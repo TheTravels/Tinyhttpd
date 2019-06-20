@@ -1,5 +1,10 @@
 A mirror for tinyhttpd(Tinyhttpd非官方镜像,Fork自[sourceForge](https://sourceforge.net/projects/tiny-httpd/),仅供学习)
 
+指定端口并过滤SN
+./build/httpd -p 9918 -S 102905420128
+
+
+
 测试CGI时需要本机安装PERL，同时安装perl-cgi
 
 ### Prepare 

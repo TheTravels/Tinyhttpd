@@ -18,6 +18,11 @@ extern "C"
 
 extern void accept_request(void *);
 extern void error_die(const char *);
+extern int relay_init(const char host[], const int port);
+extern int relay_exit(const int socket);
+extern int relay_msg(const int socket, const void* data, const uint16_t _dsize);
+
+
 
 #ifdef __cplusplus
 }
