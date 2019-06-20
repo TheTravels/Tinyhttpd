@@ -118,6 +118,7 @@ static void version(void)
 
 extern void init_daemon(void);
 extern int save_log;
+int relay = 0;
 
 int main(int argc, char *argv[])
 {
@@ -229,6 +230,8 @@ int main(int argc, char *argv[])
 	thread_list_init();
 	server_sock = startup(&port);
 	printf("\nhttpd running on port %d\n", port);
+	if(9910==port) relay = 0;
+	else relay = 1;
 	printf("\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n");
 	while (1)
 	{

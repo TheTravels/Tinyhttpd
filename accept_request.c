@@ -120,9 +120,18 @@ static void csend(const int sockfd, const void *buf, const uint16_t len)
  *      *
  *       */
 #define container_of(ptr, type, member) ({          \
-    const typeof(((type *)0)->member)*__mptr = (ptr);    \
-             (type *)((char *)__mptr - offsetof(type, member)); })
+		const typeof(((type *)0)->member)*__mptr = (ptr);    \
+		(type *)((char *)__mptr - offsetof(type, member)); })
 
+#if 0
+const char relay_host[] = "39.108.72.130";
+const int relay_port = 9910;
+#else
+const char relay_host[] = "106.14.52.96";
+const int relay_port = 6097;
+#endif
+
+extern int relay;
 void accept_request(void *arg)
 {
 	const char viewer[] = "SocketViewer";
@@ -161,6 +170,21 @@ void accept_request(void *arg)
 	int flags = fcntl(client, F_GETFL, 0);        //获取文件的flags值。
 	fcntl(client, F_SETFL, flags | O_NONBLOCK);   //设置成非阻塞模式；
 	//usleep(1000*100);   // 100ms
+	device->relay_fd = -1;
+	if(relay)
+	{
+		printf("转发连接建立中 host:%s port:%d\n", relay_host, relay_port);
+		for(i=0; i<1000; i++)
+		{
+			int sock=0;
+			printf("第 %ld 次建立连接 ...\n", i);
+			sock = relay_init(relay_host, relay_port);
+			device->relay_fd = sock;
+			if(sock>=0) break;
+			usleep(1000*100);   // 100ms delay
+		}
+		printf("转发连接建立结束 host:%s port:%d fd:%d\n\n", relay_host, relay_port, device->relay_fd);
+	}
 	printf("开始接收数据 TCP: %d\n\n", client);
 	start = clock();
 	time(&time1);
@@ -216,7 +240,7 @@ void accept_request(void *arg)
 			//printf("TCP/IP connect[%d]: %s SN:%s\n", (int)numchars, buf, device->sn);
 			//if(0!=decode_server(&print, _agree_obd, (const uint8_t *)buf, numchars, msg_buf, sizeof(msg_buf), client, csend))
 			if(0!=decode_server(&print, _agree_obd, (const uint8_t *)buf, numchars, msg_buf, sizeof(msg_buf), device, csend))
-			//if(0!=decode_server(&print, _agree_obd, (const uint8_t *)buf, numchars, msg_cache->data, DEVICE_DATA_SIZE, device, csend))
+				//if(0!=decode_server(&print, _agree_obd, (const uint8_t *)buf, numchars, msg_cache->data, DEVICE_DATA_SIZE, device, csend))
 			{
 				numchars2 = numchars;
 				goto next;
@@ -314,6 +338,7 @@ next:
 	}
 	printf("\n连接断开\n");
 
+	if(device->relay_fd>=0) relay_exit(device->relay_fd);
 	close(client);
 	online_thread_free(device);
 }
