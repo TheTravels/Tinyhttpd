@@ -3,6 +3,8 @@
 client
 httpd
 build/
+upload/
+log/
 *.com
 *.class
 *.dll

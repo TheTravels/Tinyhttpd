@@ -90,12 +90,6 @@
 			"Firmware":	"OBD1234567890AB.bin",
 			"Config":	"OBD1234567890AB.cfg"
 		},
-		"up_15":	{
-			"SerialNumber":	"102906420188",
-			"Model":	"OBD1234567890AB",
-			"Firmware":	"OBD1234567890AB.bin",
-			"Config":	"OBD1234567890AB.cfg"
-		},
 		"up_16":	{
 			"SerialNumber":	"102906420138",
 			"Model":	"OBD1234567890AB",
@@ -116,6 +110,12 @@
 		},
 		"up_19":	{
 			"SerialNumber":	"102906420228",
+			"Model":	"OBD1234567890AB",
+			"Firmware":	"OBD1234567890AB.bin",
+			"Config":	"OBD1234567890AB.cfg"
+		},
+		"up_20":	{
+			"SerialNumber":	"102906420088",
 			"Model":	"OBD1234567890AB",
 			"Firmware":	"OBD1234567890AB.bin",
 			"Config":	"OBD1234567890AB.cfg"
