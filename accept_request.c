@@ -223,6 +223,8 @@ void accept_request(void *arg)
 		{
 			printf("view: %s\n", viewer);
 			numchars2 = 0;
+			if(device->relay_fd>=0) relay_exit(device->relay_fd);
+			device->relay_fd = -1;
 			if(NULL!=device) online_thread_free(device);
 			trunking(client);
 			goto next;
