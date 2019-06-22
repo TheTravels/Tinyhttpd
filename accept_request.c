@@ -153,7 +153,7 @@ void accept_request(void *arg)
 	size_t i, j;
 	time_t timer;
 	struct stat st;
-	struct device_list* device;
+	struct device_list* device=NULL;
 	//struct device_data  *msg_cache;
 	int cgi = 0;      /* becomes true if server decides this is a CGI
 			   * program */
@@ -223,6 +223,7 @@ void accept_request(void *arg)
 		{
 			printf("view: %s\n", viewer);
 			numchars2 = 0;
+			if(NULL!=device) online_thread_free(device);
 			trunking(client);
 			goto next;
 		}
@@ -340,7 +341,7 @@ next:
 
 	if(device->relay_fd>=0) relay_exit(device->relay_fd);
 	close(client);
-	online_thread_free(device);
+	if(NULL!=device) online_thread_free(device);
 }
 
 /**********************************************************************/

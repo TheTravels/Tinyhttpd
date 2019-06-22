@@ -7,12 +7,12 @@ CFLAGS   := -g -W -Wall -lpthread -DGCC_BUILD=1
 ROOT	 := $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))
 INC      := -I $(ROOT)/
 BUILD_DIR:= $(ROOT)/build
-SRCS     := main.c daemon_init.c accept_request.c trunking.c
+SRCS     := main.c daemon_init.c accept_request.c #trunking.c
 OBJS     := $(addsuffix .o,$(addprefix $(BUILD_DIR)/,$(basename $(SRCS))))
 SRCS_EN  := encode.c #json_list.c
 OBJS_EN  := $(addsuffix .o,$(addprefix $(BUILD_DIR)/,$(basename $(SRCS_EN))))
 CFG_DIR  := OBD_Report
-SRCS_CFG := json_list.c thread_list.c msg_relay.c
+SRCS_CFG := json_list.c thread_list.c msg_relay.c trunking.c
 OBJS_CFG := $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(CFG_DIR)/,$(basename $(SRCS_CFG))))
 CCU_DIR  := CCU/protocol
 CCU_SRC   = $(notdir $(wildcard $(ROOT)/$(CCU_DIR)/*.c))
