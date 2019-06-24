@@ -230,7 +230,7 @@ int main(int argc, char *argv[])
 	thread_list_init();
 	server_sock = startup(&port);
 	printf("\nhttpd running on port %d\n", port);
-	if(9910==port) relay = 0;
+	if(9910==port) relay = 1;
 	else relay = 1;
 	printf("\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n");
 	while (1)
