@@ -32,7 +32,7 @@ void init_daemon(void)
 	sa.sa_flags=0;
 	sigaction(SIGHUP,&sa,NULL);
 
-#if 0
+#if 1
 	pid=fork();
 	if(pid>0)
 		exit(0);
