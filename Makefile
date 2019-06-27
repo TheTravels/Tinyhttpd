@@ -51,6 +51,7 @@ all: $(BUILD_DIR) $(OBJS) httpd client encode
 #	echo $(CCU_OBJS)
 #	echo $(OBJS)
 	@mkdir -p log
+	@mkdir -p daemon
 	@mkdir -p ./upload/cfg
 	@mkdir -p ./upload/bin
 

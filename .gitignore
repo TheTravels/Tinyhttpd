@@ -5,6 +5,7 @@ httpd
 build/
 upload/
 log/
+daemon/
 *.com
 *.class
 *.dll

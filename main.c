@@ -31,6 +31,8 @@
 #include <time.h>
 #include <getopt.h>
 #include "accept_request.h"
+#include <pwd.h>
+#include <unistd.h>
 
 #include "agreement/agreement.h"
 #include "json_list.h"
@@ -114,6 +116,30 @@ static void version(void)
 			"提供VIN过滤功能\n\n"
 	       );
 	exit(1);
+}
+
+#include "DateTime.h"
+#include <stdio.h>
+static void UTC2file(const uint32_t times, void* const buf, const size_t _size)
+{
+    DateTime      utctime   = {.year = 1970, .month = 1, .day = 1, .hour = 0, .minute = 0, .second = 0};
+    DateTime      localtime = {.year = 1970, .month = 1, .day = 1, .hour = 8, .minute = 0, .second = 0};
+	struct passwd *npwd;
+	npwd = getpwuid(getuid());
+	//printf("当前登陆的用户名为：%s\n", npwd->pw_name);
+    if(times > INT32_MAX)
+    {
+        utctime = GregorianCalendarDateAddSecond(utctime, INT32_MAX);
+        utctime = GregorianCalendarDateAddSecond(utctime, (int)(times - INT32_MAX));
+    }
+    else
+    {
+        utctime = GregorianCalendarDateAddSecond(utctime, (int)times);
+    }
+
+    GregorianCalendarDateToModifiedJulianDate(utctime);
+    localtime = GregorianCalendarDateAddHour(utctime, 8);
+    snprintf((char *)buf, (size_t)_size, "./daemon/server-%s-%d-%.2d-%.2d-%02d%02d%02d.txt", npwd->pw_name, localtime.year, localtime.month, localtime.day, localtime.hour, localtime.minute, localtime.second);
 }
 
 extern void init_daemon(void);
@@ -219,8 +245,29 @@ int main(int argc, char *argv[])
 			printf("%s ", argv[optind++]);
 		printf("\n");
 	}
-
 	if(1==daemon) init_daemon();
+#if 0
+     fflush(stdout);
+     setvbuf(stdout,NULL,_IONBF,0);
+     printf("test stdout\n");
+     freopen("test1.txt","w",stdout); //注: 不要使用这类的代码 stdout = fopen("test1.txt","w");   这样的话输出很诡异的. 最好使用  freopen 这类的函数来替换它.
+     printf("test file\n");
+     //freopen("/dev/tty","w",stdout);
+     //printf("test tty\n");
+#else
+     memset(pwd, 0, sizeof(pwd));
+     UTC2file(time(NULL), pwd, sizeof (pwd));
+     fflush(stdout);
+     setvbuf(stdout,NULL,_IONBF,0);
+     //printf("test stdout\n");
+     //int save_fd = dup(STDOUT_FILENO); // 保存标准输出 文件描述符 注:这里一定要用 dup 复制一个文件描述符. 不要用 = 就像是Winodws下的句柄.
+     dup(STDOUT_FILENO); // 保存标准输出 文件描述符 注:这里一定要用 dup 复制一个文件描述符. 不要用 = 就像是Winodws下的句柄.
+     //int fd = open("test1.txt",(O_RDWR | O_CREAT), 0644);
+     int fd = open(pwd, (O_RDWR | O_CREAT), 0644);
+     dup2(fd,STDOUT_FILENO); // 用我们新打开的文件描述符替换掉 标准输出
+     //printf("test file\n");
+#endif
+	//if(1==daemon) init_daemon();
 	memset(pwd, 0, sizeof(pwd));
 	//char *p = getcwd(pwd, sizeof(pwd));
 	getcwd(pwd, sizeof(pwd));
@@ -233,6 +280,7 @@ int main(int argc, char *argv[])
 	if(9910==port) relay = 1;
 	else relay = 1;
 	printf("\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n");
+	//fflush(stdout);
 	while (1)
 	{
 		client_sock = accept(server_sock,

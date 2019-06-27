@@ -16,7 +16,7 @@
 
 void init_daemon(void)
 {
-	int i;
+	//int i;
 	pid_t pid;
 	struct sigaction sa;
 	umask(0);
@@ -38,9 +38,10 @@ void init_daemon(void)
 		exit(0);
 	else if(pid<0)
 		exit(1);
-
+#if 0
 	for(i=0;i<NOFILE;++i)
 		close(i);
+#endif
 #endif
 	//chdir("/");
 	chdir("/home/public/server");
