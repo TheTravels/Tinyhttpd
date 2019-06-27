@@ -42,7 +42,7 @@ INC      += -I $(ROOT)/OBD_Report
 INC      += -I $(ROOT)/RSA
 INC      += -I $(ROOT)/UTC/GpsUtcAndLocalTime/GpsUtcAndLocalTime
 CFLAGS   += $(INC)
-
+IPATH    = "./bin"
 #SRC      += $(CCU_SRC)
 
 all: $(BUILD_DIR) $(OBJS) httpd client encode
@@ -54,6 +54,20 @@ all: $(BUILD_DIR) $(OBJS) httpd client encode
 	@mkdir -p daemon
 	@mkdir -p ./upload/cfg
 	@mkdir -p ./upload/bin
+
+install: all
+	@echo $(IPATH)
+	@mkdir -p $(IPATH)
+	@mkdir -p $(IPATH)/log
+	@mkdir -p $(IPATH)/daemon
+	@mkdir -p $(IPATH)/upload/cfg
+	@mkdir -p $(IPATH)/upload/bin
+	@cp ./build/httpd $(IPATH)/httpd
+#	@cd $(IPATH) && echo $(shell pwd)
+#	@cd $(IPATH) && ./httpd -c 
+#	@cd $(IPATH) && ./httpd -L 
+	@cp ./upload/OBD.cfg $(IPATH)/upload/OBD.cfg
+	@cp ./upload/Device.list $(IPATH)/upload/Device.list
 
 $(BUILD_DIR):
 	@mkdir -p $(BUILD_DIR)

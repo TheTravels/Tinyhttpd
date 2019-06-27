@@ -6,6 +6,7 @@ build/
 upload/
 log/
 daemon/
+bin/
 *.com
 *.class
 *.dll
