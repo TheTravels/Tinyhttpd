@@ -288,6 +288,7 @@ int main(int argc, char *argv[])
 	fflush(stdout);
 	while (1)
 	{
+		pthread_attr_t attr;
 		client_sock = accept(server_sock,
 				(struct sockaddr *)&client_name,
 				&client_name_len);
@@ -306,7 +307,10 @@ int main(int argc, char *argv[])
 			perror("pthread_create");
 #else
 		device->socket = client_sock;
-		if (pthread_create(&newthread , NULL, (void *)accept_request, (void *)device) != 0)
+		pthread_attr_init(&attr);
+		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);       //因为你的线程不便于等待的关系，设置为分离线程吧 
+		//if (pthread_create(&newthread , NULL, (void *)accept_request, (void *)device) != 0)
+		if (pthread_create(&newthread , &attr, (void *)accept_request, (void *)device) != 0)
 			perror("pthread_create");
 #endif
 	}

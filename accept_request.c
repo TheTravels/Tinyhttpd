@@ -360,6 +360,7 @@ next:
 	if(device->relay_fd>=0) relay_exit(device->relay_fd);
 	close(client);
 	if(NULL!=device) online_thread_free(device);
+	pthread_exit(NULL);
 }
 
 /**********************************************************************/
