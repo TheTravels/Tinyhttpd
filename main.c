@@ -37,6 +37,7 @@
 #include "agreement/agreement.h"
 #include "json_list.h"
 #include "thread_list.h"
+#include "lock.h"
 
 #define ISspace(x) isspace((int)(x))
 
@@ -286,6 +287,9 @@ int main(int argc, char *argv[])
 	else relay = 1;
 	printf("\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n");
 	fflush(stdout);
+	pthread_lock_init();
+	//pool_init (1024); 
+	pool_init (128); 
 	while (1)
 	{
 		pthread_attr_t attr;
@@ -307,11 +311,15 @@ int main(int argc, char *argv[])
 			perror("pthread_create");
 #else
 		device->socket = client_sock;
+#if 0
 		pthread_attr_init(&attr);
 		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);       //因为你的线程不便于等待的关系，设置为分离线程吧 
 		//if (pthread_create(&newthread , NULL, (void *)accept_request, (void *)device) != 0)
 		if (pthread_create(&newthread , &attr, (void *)accept_request, (void *)device) != 0)
 			perror("pthread_create");
+#else
+		pool_add_worker(accept_request, device);
+#endif
 #endif
 	}
 

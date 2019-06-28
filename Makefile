@@ -7,7 +7,7 @@ CFLAGS   := -g -W -Wall -lpthread -DGCC_BUILD=1
 ROOT	 := $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))
 INC      := -I $(ROOT)/
 BUILD_DIR:= $(ROOT)/build
-SRCS     := main.c daemon_init.c accept_request.c #trunking.c
+SRCS     := main.c daemon_init.c accept_request.c lock.c thread_pool.c #trunking.c
 OBJS     := $(addsuffix .o,$(addprefix $(BUILD_DIR)/,$(basename $(SRCS))))
 SRCS_EN  := encode.c #json_list.c
 OBJS_EN  := $(addsuffix .o,$(addprefix $(BUILD_DIR)/,$(basename $(SRCS_EN))))

@@ -36,6 +36,7 @@
 #include "json_list.h"
 #include "thread_list.h"
 #include "trunking.h"
+#include "lock.h"
 
 #define ISspace(x) isspace((int)(x))
 
@@ -258,12 +259,15 @@ void accept_request(void *arg)
 			if(print) printf("TCP/IP connect[%d]: %s SN:%s\n", (int)numchars, buf, device->sn);
 			//printf("TCP/IP connect[%d]: %s SN:%s\n", (int)numchars, buf, device->sn);
 			//if(0!=decode_server(&print, _agree_obd, (const uint8_t *)buf, numchars, msg_buf, sizeof(msg_buf), client, csend))
+			pthread_lock();
 			if(0!=decode_server(&print, _agree_obd, (const uint8_t *)buf, numchars, msg_buf, sizeof(msg_buf), device, csend))
 				//if(0!=decode_server(&print, _agree_obd, (const uint8_t *)buf, numchars, msg_cache->data, DEVICE_DATA_SIZE, device, csend))
 			{
 				numchars2 = numchars;
+				pthread_unlock();
 				goto next;
 			}
+			pthread_unlock();
 			//msg_cache->write++;
 			//if(msg_cache->write>=DEVICE_ITEM_SIZE) msg_cache->write = 0;
 			numchars2 = 0;
@@ -360,7 +364,7 @@ next:
 	if(device->relay_fd>=0) relay_exit(device->relay_fd);
 	close(client);
 	if(NULL!=device) online_thread_free(device);
-	pthread_exit(NULL);
+	//pthread_exit(NULL);
 }
 
 /**********************************************************************/
