@@ -171,6 +171,7 @@ void accept_request(void *arg)
 	fcntl(client, F_SETFL, flags | O_NONBLOCK);   //设置成非阻塞模式；
 	//usleep(1000*100);   // 100ms
 	device->relay_fd = -1;
+#if 0
 	if(relay)
 	{
 		printf("转发连接建立中 host:%s port:%d\n", relay_host, relay_port);
@@ -185,6 +186,7 @@ void accept_request(void *arg)
 		}
 		printf("转发连接建立结束 host:%s port:%d fd:%d\n\n", relay_host, relay_port, device->relay_fd);
 	}
+#endif
 	printf("开始接收数据 TCP: %d\n\n", client);
 	start = clock();
 	time(&time1);
@@ -231,6 +233,20 @@ void accept_request(void *arg)
 		}
 		else if (strcasecmp(method, "GET") && strcasecmp(method, "POST"))
 		{
+			if(relay && (-1==device->relay_fd))
+			{
+				printf("转发连接建立中 host:%s port:%d\n", relay_host, relay_port);
+				for(i=0; i<1000; i++)
+				{
+					int sock=0;
+					printf("第 %ld 次建立连接 ...\n", i);
+					sock = relay_init(relay_host, relay_port);
+					device->relay_fd = sock;
+					if(sock>=0) break;
+					usleep(1000*100);   // 100ms delay
+				}
+				printf("转发连接建立结束 host:%s port:%d fd:%d\n\n", relay_host, relay_port, device->relay_fd);
+			}
 #if 0
 			printf("TCP/IP connect: %s\n", buf);
 			send(client, "ACK", 3, 0);

@@ -249,16 +249,18 @@ int main(int argc, char *argv[])
 #if 0
      fflush(stdout);
      setvbuf(stdout,NULL,_IONBF,0);
+     UTC2file(time(NULL), pwd, sizeof (pwd));
      printf("test stdout\n");
-     freopen("test1.txt","w",stdout); //注: 不要使用这类的代码 stdout = fopen("test1.txt","w");   这样的话输出很诡异的. 最好使用  freopen 这类的函数来替换它.
+     //freopen("test1.txt","w",stdout); //注: 不要使用这类的代码 stdout = fopen("test1.txt","w");   这样的话输出很诡异的. 最好使用  freopen 这类的函数来替换它.
+     freopen(pwd,"w",stdout); //注: 不要使用这类的代码 stdout = fopen("test1.txt","w");   这样的话输出很诡异的. 最好使用  freopen 这类的函数来替换它.
      printf("test file\n");
      //freopen("/dev/tty","w",stdout);
      //printf("test tty\n");
-#else
+//#else
      memset(pwd, 0, sizeof(pwd));
      UTC2file(time(NULL), pwd, sizeof (pwd));
      fflush(stdout);
-     setvbuf(stdout,NULL,_IONBF,0);
+     //setvbuf(stdout,NULL,_IONBF,0);
      //printf("test stdout\n");
      //int save_fd = dup(STDOUT_FILENO); // 保存标准输出 文件描述符 注:这里一定要用 dup 复制一个文件描述符. 不要用 = 就像是Winodws下的句柄.
      dup(STDOUT_FILENO); // 保存标准输出 文件描述符 注:这里一定要用 dup 复制一个文件描述符. 不要用 = 就像是Winodws下的句柄.
@@ -267,6 +269,9 @@ int main(int argc, char *argv[])
      dup2(fd,STDOUT_FILENO); // 用我们新打开的文件描述符替换掉 标准输出
      //printf("test file\n");
 #endif
+	struct passwd *npwd;
+	npwd = getpwuid(getuid());
+	printf("当前登陆的用户名为：%s\n", npwd->pw_name);
 	//if(1==daemon) init_daemon();
 	memset(pwd, 0, sizeof(pwd));
 	//char *p = getcwd(pwd, sizeof(pwd));
@@ -280,7 +285,7 @@ int main(int argc, char *argv[])
 	if(9910==port) relay = 1;
 	else relay = 1;
 	printf("\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n");
-	//fflush(stdout);
+	fflush(stdout);
 	while (1)
 	{
 		client_sock = accept(server_sock,
