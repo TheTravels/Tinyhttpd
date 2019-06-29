@@ -33,6 +33,19 @@
 #include "accept_request.h"
 #include <pwd.h>
 #include <unistd.h>
+#include <stdio.h>
+#include <time.h>
+#include <string.h>
+#include <signal.h>
+#include <sys/param.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <ctype.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <pwd.h>
+#include <syslog.h>
+#include <dirent.h>
 
 #include "agreement/agreement.h"
 #include "json_list.h"
@@ -101,21 +114,33 @@ int startup(u_short *port)
 static void usage(void)
 {
 	//fprintf(stderr,"usage:./main [-d --daemon] [-p --port] [-s --sslport] [-l --log] [-v --version] [-h --help]\n\n");
-	fprintf(stderr,"usage:./build/httpd [-c --config] [-d --daemon] [-p --port] [-f --fliter] [-S --SN] [-l --log] [-L --list] [-v --version] [-h --help]\n\n");
+	fprintf(stderr,"usage:./build/httpd [-c --config] [-d --daemon] [-p --port] [-N --NULL] [-f --fliter] [-S --SN] [-l --log] [-L --list] [-v --version] [-h --help]\n\n");
 	fprintf(stderr,"usage:./build/httpd -h\n");
 	fprintf(stderr,"usage:./build/httpd -p 9910 -f VINABCDEF1234567 -l \n");
 	fprintf(stderr,"usage:./build/httpd -v\n");
+	fprintf(stderr,"Options:\n");
+	fprintf(stderr,"  --config 生成配置文件模板\n");
+	fprintf(stderr,"  --daemon 作为服务进程运行在后台\n");
+	fprintf(stderr,"  --port 服务器端口\n");
+	fprintf(stderr,"  --NULL 运行过程中无终端输出\n");
+	fprintf(stderr,"  --fliter 通过 VIN过滤信息\n");
+	fprintf(stderr,"  --SN 通过 序列号过滤信息\n");
+	fprintf(stderr,"  --log 保存原始数据\n");
+	fprintf(stderr,"  --list 生成设备列表文件模板\n");
+	fprintf(stderr,"  --version 显示当前版本\n");
+	fprintf(stderr,"  --help 显示帮助信息\n");
 	exit(1);
 }
 
 static void version(void)
 {
-	fprintf(stderr,"版本:1.0\n功能:接收上海中心平台数据协议\n"
-			"提供 RSA 加密通信\n"
-			"实现固件配置文件下载\n"
-			"命令行参数配置端口\n\n"
-			"提供VIN过滤功能\n\n"
+	fprintf(stderr,"版本:1.0\n  功能:接收上海中心平台数据协议\n"
+			"  提供 RSA 加密通信\n"
+			"  实现固件配置文件下载\n"
+			"  命令行参数配置端口\n"
+			"  提供VIN过滤功能\n"
 	       );
+	fprintf(stderr,"  Build: %s %s \n\n", __DATE__, __TIME__);
 	exit(1);
 }
 
@@ -155,10 +180,11 @@ int main(int argc, char *argv[])
 	int client_sock = -1;
 	struct sockaddr_in client_name;
 	socklen_t  client_name_len = sizeof(client_name);
-	pthread_t newthread;
+	//pthread_t newthread;
 	char daemon=0;
 	struct device_list* device;
 	char pwd[128] ;
+	int null=0;
 
 	int opt;
 	struct option longopts[]={
@@ -166,6 +192,7 @@ int main(int argc, char *argv[])
 		{"config",0,NULL,'c'},   
 		{"list",  0,NULL,'L'},   
 		{"port",  1,NULL,'p'},
+		{"NULL",  1,NULL,'N'},
 #if 0 
 		{"sslport",1,NULL,'s'},
 		{"extent",0,NULL,'e'},  /* extent function -> https */
@@ -176,7 +203,7 @@ int main(int argc, char *argv[])
 		{"help",0,NULL,'h'},
 		{"version",0,NULL,'v'},
 		{0,0,0,0}};   /* the last must be a zero array */
-	while((opt=getopt_long(argc,argv,":cdp:f:S:lLhv",longopts,NULL))!=-1)
+	while((opt=getopt_long(argc,argv,":cdNp:f:S:lLhv",longopts,NULL))!=-1)
 	{
 		switch(opt)
 		{
@@ -194,6 +221,9 @@ int main(int argc, char *argv[])
 				break;
 			case 'd':
 				daemon=1;
+				break;
+			case 'N':
+				null = 1;
 				break;
 			case 'p':
 				//strncpy(port,optarg,15);
@@ -247,6 +277,12 @@ int main(int argc, char *argv[])
 		printf("\n");
 	}
 	if(1==daemon) init_daemon();
+	if(1==null)
+	{
+		int i = 0;
+		for(i=0;i<NOFILE;++i)
+                	close(i);
+	}
 #if 0
      fflush(stdout);
      setvbuf(stdout,NULL,_IONBF,0);
@@ -292,7 +328,7 @@ int main(int argc, char *argv[])
 	pool_init (128); 
 	while (1)
 	{
-		pthread_attr_t attr;
+		//pthread_attr_t attr;
 		client_sock = accept(server_sock,
 				(struct sockaddr *)&client_name,
 				&client_name_len);
