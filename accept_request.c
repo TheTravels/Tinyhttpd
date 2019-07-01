@@ -304,6 +304,7 @@ void accept_request(void *arg)
 			goto next;
 		}
 		printf("httpd connect\n");
+		printf("TCP/IP connect[%d]: %s SN:%s\n", (int)numchars, buf, device->sn);
 
 		if (strcasecmp(method, "POST") == 0)
 			cgi = 1;

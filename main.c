@@ -172,6 +172,39 @@ extern void init_daemon(void);
 extern int save_log;
 int relay = 0;
 
+int init_signals(void)
+{
+    struct sigaction   sa;
+#if 0
+    for (sig = signals; sig->signo != 0; sig++) {
+        ngx_memzero(&sa, sizeof(struct sigaction));
+
+        if (sig->handler) {
+            sa.sa_sigaction = sig->handler;
+            sa.sa_flags = SA_SIGINFO;
+
+        } else {
+            sa.sa_handler = SIG_IGN;
+        }
+
+        sigemptyset(&sa.sa_mask);
+        if (sigaction(sig->signo, &sa, NULL) == -1) {
+#if (NGX_VALGRIND)
+            ngx_log_error(NGX_LOG_ALERT, log, ngx_errno,
+                          "sigaction(%s) failed, ignored", sig->signame);
+#else
+            ngx_log_error(NGX_LOG_EMERG, log, ngx_errno,
+                          "sigaction(%s) failed", sig->signame);
+            return NGX_ERROR;
+#endif
+        }
+    }
+#endif
+    sa.sa_handler = SIG_IGN;
+    sigemptyset(&sa.sa_mask);
+    return sigaction(SIGPIPE, &sa, NULL);
+}
+
 int main(int argc, char *argv[])
 {
 	int server_sock = -1;
@@ -306,6 +339,7 @@ int main(int argc, char *argv[])
      dup2(fd,STDOUT_FILENO); // 用我们新打开的文件描述符替换掉 标准输出
      //printf("test file\n");
 #endif
+	init_signals();
 	struct passwd *npwd;
 	npwd = getpwuid(getuid());
 	printf("当前登陆的用户名为：%s\n", npwd->pw_name);
