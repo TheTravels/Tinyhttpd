@@ -93,7 +93,8 @@ httpd: $(OBJS)
 #	gcc -g -W -Wall $(LIBS) -o $@ $<
 #	$(CC) -o $(BUILD_DIR)/$@ $(CFLAGS) $<
 	@echo LD $(BUILD_DIR)/$@
-	@$(CC) -o $(BUILD_DIR)/$@ $(CFLAGS) $^
+#	@$(CC) -o $(BUILD_DIR)/$@ $(CFLAGS) $^
+	@$(CC) -o $(BUILD_DIR)/$@ $^ $(CFLAGS)
 
 client: simpleclient.c
 	gcc -W -Wall -o $@ $<

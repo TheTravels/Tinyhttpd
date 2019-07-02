@@ -10,6 +10,7 @@ extern "C"
 extern int pthread_lock_init(void);
 extern int pthread_lock(void);
 extern int pthread_unlock(void);
+extern int get_wait_thread_num(void);
 
 
 

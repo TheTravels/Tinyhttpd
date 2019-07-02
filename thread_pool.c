@@ -31,6 +31,7 @@ typedef struct
 	pthread_t *threadid;  
 	/*线程池中允许的活动线程数目*/  
 	int max_thread_num;  
+	int run_thread_num;  // 当前活动的任务数
 	/*当前等待队列的任务数目*/  
 	int cur_queue_size;  
 
@@ -52,6 +53,7 @@ void pool_init (int max_thread_num)
 	pool->queue_head = NULL;  
 
 	pool->max_thread_num = max_thread_num;  
+	pool->run_thread_num = 0;
 	pool->cur_queue_size = 0;  
 
 	pool->shutdown = 0;  
@@ -136,7 +138,15 @@ int pool_destroy (void)
 	return 0;  
 }  
 
-
+static int wait_thread_num=0;  // 当前等待任务数
+int get_wait_thread_num(void)
+{
+    int num=0;
+    pthread_mutex_lock (&(pool->queue_lock));
+    num = wait_thread_num;
+    pthread_mutex_unlock (&(pool->queue_lock));
+    return num;
+}
 
 void* thread_routine (void *arg)  
 {  
@@ -148,6 +158,7 @@ void* thread_routine (void *arg)
 		 *         pthread_cond_wait是一个原子操作，等待前会解锁，唤醒后会加锁*/  
 		while (pool->cur_queue_size == 0 && !pool->shutdown)  
 		{  
+			if(pool->run_thread_num>0) pool->run_thread_num--;
 			printf ("thread 0x%x is waiting\n", pthread_self ());  
 			pthread_cond_wait (&(pool->queue_ready), &(pool->queue_lock));  
 		}  
@@ -177,6 +188,8 @@ void* thread_routine (void *arg)
 		pool->cur_queue_size--;  
 		CThread_worker *worker = pool->queue_head;  
 		pool->queue_head = worker->next;  
+        	pool->run_thread_num++;
+	        wait_thread_num = pool->max_thread_num-pool->run_thread_num;
 		pthread_mutex_unlock (&(pool->queue_lock));  
 
 		/*调用回调函数，执行任务*/  
