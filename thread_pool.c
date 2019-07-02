@@ -166,6 +166,12 @@ void* thread_routine (void *arg)
 		/*assert是调试的好帮手*/  
 		assert (pool->cur_queue_size != 0);  
 		assert (pool->queue_head != NULL);  
+		if(NULL==pool->queue_head)
+		{
+			pthread_mutex_unlock (&(pool->queue_lock));
+			sleep(1);
+			continue;
+		}
 
 		/*等待队列长度减去1，并取出链表中的头元素*/  
 		pool->cur_queue_size--;  

@@ -2,17 +2,18 @@
 LIBS = -lpthread #-lsocket
 
 CC       := gcc
-CFLAGS   := -g -W -Wall -lpthread -DGCC_BUILD=1 
+CFLAGS   := -g -rdynamic -DNDEBUG -W -Wall -lpthread -DGCC_BUILD=1 
 
 ROOT	 := $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))
 INC      := -I $(ROOT)/
 BUILD_DIR:= $(ROOT)/build
-SRCS     := main.c daemon_init.c accept_request.c lock.c thread_pool.c #trunking.c
+#SRCS     := main.c daemon_init.c accept_request.c lock.c thread_pool.c #trunking.c
+SRCS     := main.c daemon_init.c lock.c thread_pool.c #trunking.c
 OBJS     := $(addsuffix .o,$(addprefix $(BUILD_DIR)/,$(basename $(SRCS))))
 SRCS_EN  := encode.c #json_list.c
 OBJS_EN  := $(addsuffix .o,$(addprefix $(BUILD_DIR)/,$(basename $(SRCS_EN))))
 CFG_DIR  := OBD_Report
-SRCS_CFG := json_list.c thread_list.c msg_relay.c trunking.c
+SRCS_CFG := json_list.c thread_list.c msg_relay.c trunking.c service.c
 OBJS_CFG := $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(CFG_DIR)/,$(basename $(SRCS_CFG))))
 CCU_DIR  := CCU/protocol
 CCU_SRC   = $(notdir $(wildcard $(ROOT)/$(CCU_DIR)/*.c))
@@ -45,7 +46,7 @@ CFLAGS   += $(INC)
 IPATH    = "./bin"
 #SRC      += $(CCU_SRC)
 
-all: $(BUILD_DIR) $(OBJS) httpd client encode
+all: $(BUILD_DIR) $(OBJS) httpd client #encode
 #	echo $(CCU_DIR)
 #	echo $(CCU_SRC)
 #	echo $(CCU_OBJS)

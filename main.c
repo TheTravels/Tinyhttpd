@@ -170,7 +170,9 @@ static void UTC2file(const uint32_t times, void* const buf, const size_t _size)
 
 extern void init_daemon(void);
 extern int save_log;
-int relay = 0;
+extern int relay;
+
+//int relay = 0;
 
 int init_signals(void)
 {
@@ -203,6 +205,16 @@ int init_signals(void)
     sa.sa_handler = SIG_IGN;
     sigemptyset(&sa.sa_mask);
     return sigaction(SIGPIPE, &sa, NULL);
+}
+
+void do_backtrace() { void *array[100]; char **strings; int size, i; size = backtrace(array, 100); strings = backtrace_symbols(array, size); printf("%p\n", strings); for(i = 0; i < size; i++) printf("sigsegv at :%p:%s\n", array[i], strings[i]); free(strings); }
+//jmp_buf env[MAX];
+void when_sigsegv() 
+{ 
+	do_backtrace(); 
+//	int i = find_index((long)pthread_self()); 
+//	printf("sigsegv...%d...\n", i); 
+//	siglongjmp(env[i], MAX); 
 }
 
 int main(int argc, char *argv[])
@@ -339,7 +351,8 @@ int main(int argc, char *argv[])
      dup2(fd,STDOUT_FILENO); // 用我们新打开的文件描述符替换掉 标准输出
      //printf("test file\n");
 #endif
-	init_signals();
+	//init_signals();
+	signal(SIGSEGV, when_sigsegv);
 	struct passwd *npwd;
 	npwd = getpwuid(getuid());
 	printf("当前登陆的用户名为：%s\n", npwd->pw_name);
@@ -359,7 +372,8 @@ int main(int argc, char *argv[])
 	fflush(stdout);
 	pthread_lock_init();
 	//pool_init (1024); 
-	pool_init (128); 
+	//pool_init (128); 
+	pool_init (8); 
 	while (1)
 	{
 		//pthread_attr_t attr;
