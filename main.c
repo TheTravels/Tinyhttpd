@@ -351,7 +351,7 @@ int main(int argc, char *argv[])
      dup2(fd,STDOUT_FILENO); // 用我们新打开的文件描述符替换掉 标准输出
      //printf("test file\n");
 #endif
-	//init_signals();
+	init_signals();
 	signal(SIGSEGV, when_sigsegv);
 	struct passwd *npwd;
 	npwd = getpwuid(getuid());
