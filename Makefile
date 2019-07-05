@@ -10,6 +10,8 @@ BUILD_DIR:= $(ROOT)/build
 #SRCS     := main.c daemon_init.c accept_request.c lock.c thread_pool.c #trunking.c
 SRCS     := main.c daemon_init.c lock.c thread_pool.c #trunking.c
 OBJS     := $(addsuffix .o,$(addprefix $(BUILD_DIR)/,$(basename $(SRCS))))
+SRCS_LIST     := list.c daemon_init.c lock.c thread_pool.c #trunking.c
+OBJS_LIST     := $(addsuffix .o,$(addprefix $(BUILD_DIR)/,$(basename $(SRCS_LIST))))
 SRCS_EN  := encode.c #json_list.c
 OBJS_EN  := $(addsuffix .o,$(addprefix $(BUILD_DIR)/,$(basename $(SRCS_EN))))
 CFG_DIR  := OBD_Report
@@ -38,6 +40,7 @@ JSON_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(JSON_DIR)/,$(basename $(J
 
 #OBJS     += $(CCU_OBJS) $(OBD_OBJS) $(UTC_OBJS)
 OBJS     += $(OBD_OBJS) $(UTC_OBJS) $(cJSON_OBJS) $(RSA_OBJS) $(OBJS_CFG) $(JSON_OBJS)
+OBJS_LIST     += $(OBD_OBJS) $(UTC_OBJS) $(cJSON_OBJS) $(RSA_OBJS) $(OBJS_CFG) $(JSON_OBJS)
 OBJS_EN  += $(OBD_OBJS) $(UTC_OBJS) $(cJSON_OBJS) $(RSA_OBJS) $(OBJS_CFG)
 
 INC      += -I $(ROOT)/cJSON
@@ -49,7 +52,7 @@ CFLAGS   += $(INC)
 IPATH    = "./bin"
 #SRC      += $(CCU_SRC)
 
-all: $(BUILD_DIR) $(OBJS) httpd client #encode
+all: $(BUILD_DIR) $(OBJS) httpd client list #encode
 #	echo $(CCU_DIR)
 #	echo $(CCU_SRC)
 #	echo $(CCU_OBJS)
@@ -97,6 +100,10 @@ httpd: $(OBJS)
 #	$(CC) -o $(BUILD_DIR)/$@ $(CFLAGS) $<
 	@echo LD $(BUILD_DIR)/$@
 #	@$(CC) -o $(BUILD_DIR)/$@ $(CFLAGS) $^
+	@$(CC) -o $(BUILD_DIR)/$@ $^ $(CFLAGS)
+
+list: $(OBJS_LIST)
+	@echo LD $(BUILD_DIR)/$@
 	@$(CC) -o $(BUILD_DIR)/$@ $^ $(CFLAGS)
 
 client: simpleclient.c
