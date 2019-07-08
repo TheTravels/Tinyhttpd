@@ -366,7 +366,7 @@ int main(int argc, char *argv[])
 	thread_list_init();
 	server_sock = startup(&port);
 	printf("\nhttpd running on port %d\n", port);
-	if(9910==port) relay = 1;
+	if(9910==port) relay = 0;
 	else relay = 1;
 	printf("\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n");
 	fflush(stdout);
@@ -395,6 +395,7 @@ int main(int argc, char *argv[])
 			perror("pthread_create");
 #else
 		device->socket = client_sock;
+		printf("device->socket:%d\n", device->socket);
 #if 0
 		pthread_attr_init(&attr);
 		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);       //因为你的线程不便于等待的关系，设置为分离线程吧 

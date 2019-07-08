@@ -2,7 +2,7 @@
 LIBS = -lpthread #-lsocket
 
 CC       := gcc
-CFLAGS   := -g -rdynamic -DNDEBUG -W -Wall -lpthread -DGCC_BUILD=1 
+CFLAGS   := -g -rdynamic -lmysqlclient -DNDEBUG -W -Wall -lpthread -DGCC_BUILD=1 
 
 ROOT	 := $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))
 INC      := -I $(ROOT)/
@@ -37,10 +37,14 @@ cJSON_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(cJSON_DIR)/,$(basename $
 JSON_DIR  := OBD_Report/json
 JSON_SRC   = configure.c  vin_list.c
 JSON_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(JSON_DIR)/,$(basename $(JSON_SRC))))
+MYSQL_DIR  := OBD_Report/mysql
+MYSQL_SRC   = MySql.c
+MYSQL_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(MYSQL_DIR)/,$(basename $(MYSQL_SRC))))
 
 #OBJS     += $(CCU_OBJS) $(OBD_OBJS) $(UTC_OBJS)
-OBJS     += $(OBD_OBJS) $(UTC_OBJS) $(cJSON_OBJS) $(RSA_OBJS) $(OBJS_CFG) $(JSON_OBJS)
-OBJS_LIST     += $(OBD_OBJS) $(UTC_OBJS) $(cJSON_OBJS) $(RSA_OBJS) $(OBJS_CFG) $(JSON_OBJS)
+SUB_OBJS     := $(OBD_OBJS) $(UTC_OBJS) $(cJSON_OBJS) $(RSA_OBJS) $(OBJS_CFG) $(JSON_OBJS) $(MYSQL_OBJS)
+OBJS     += $(SUB_OBJS)
+OBJS_LIST     += $(SUB_OBJS) 
 OBJS_EN  += $(OBD_OBJS) $(UTC_OBJS) $(cJSON_OBJS) $(RSA_OBJS) $(OBJS_CFG)
 
 INC      += -I $(ROOT)/cJSON
@@ -48,6 +52,7 @@ INC      += -I $(ROOT)/OBD_Report
 #INC      += -I $(ROOT)/OBD_Report/Encrypt
 INC      += -I $(ROOT)/RSA
 INC      += -I $(ROOT)/UTC/GpsUtcAndLocalTime/GpsUtcAndLocalTime
+INC      += -I $(ROOT)/OBD_Report/mysql
 CFLAGS   += $(INC)
 IPATH    = "./bin"
 #SRC      += $(CCU_SRC)

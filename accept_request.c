@@ -159,7 +159,7 @@ void accept_request(void *arg)
 	int cgi = 0;      /* becomes true if server decides this is a CGI
 			   * program */
 	char *query_string = NULL;
-	int print=0;
+	int print=1;
 
 	device = (struct device_list*)arg;
 	device->save_log = 1;

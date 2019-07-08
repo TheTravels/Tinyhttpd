@@ -51,6 +51,7 @@
 #include "json_list.h"
 #include "thread_list.h"
 #include "lock.h"
+#include "MySql.h"
 
 #define ISspace(x) isspace((int)(x))
 
@@ -114,7 +115,7 @@ int startup(u_short *port)
 static void usage(void)
 {
 	//fprintf(stderr,"usage:./main [-d --daemon] [-p --port] [-s --sslport] [-l --log] [-v --version] [-h --help]\n\n");
-	fprintf(stderr,"usage:./build/httpd [-c --config] [-d --daemon] [-p --port] [-N --NULL] [-f --fliter] [-S --SN] [-l --log] [-L --list] [-v --version] [-h --help]\n\n");
+	fprintf(stderr,"usage:./build/httpd [-c --config] [-d --daemon] [-p --port] [-N --NULL] [-f --fliter] [-S --sql] [-l --log] [-L --list] [-v --version] [-h --help]\n\n");
 	fprintf(stderr,"usage:./build/httpd -h\n");
 	fprintf(stderr,"usage:./build/httpd -p 9910 -f VINABCDEF1234567 -l \n");
 	fprintf(stderr,"usage:./build/httpd -v\n");
@@ -124,7 +125,7 @@ static void usage(void)
 	fprintf(stderr,"  --port 服务器端口\n");
 	fprintf(stderr,"  --NULL 运行过程中无终端输出\n");
 	fprintf(stderr,"  --fliter 通过 VIN过滤信息\n");
-	fprintf(stderr,"  --SN 通过 序列号过滤信息\n");
+	fprintf(stderr,"  --sql SQL测试\n");
 	fprintf(stderr,"  --log 保存原始数据\n");
 	fprintf(stderr,"  --list 生成设备列表文件模板\n");
 	fprintf(stderr,"  --version 显示当前版本\n");
@@ -168,55 +169,6 @@ static void UTC2file(const uint32_t times, void* const buf, const size_t _size)
     snprintf((char *)buf, (size_t)_size, "./daemon/server-%s-%d-%.2d-%.2d-%02d%02d%02d.txt", npwd->pw_name, localtime.year, localtime.month, localtime.day, localtime.hour, localtime.minute, localtime.second);
 }
 
-extern void init_daemon(void);
-extern int save_log;
-extern int relay;
-
-//int relay = 0;
-
-int init_signals(void)
-{
-    struct sigaction   sa;
-#if 0
-    for (sig = signals; sig->signo != 0; sig++) {
-        ngx_memzero(&sa, sizeof(struct sigaction));
-
-        if (sig->handler) {
-            sa.sa_sigaction = sig->handler;
-            sa.sa_flags = SA_SIGINFO;
-
-        } else {
-            sa.sa_handler = SIG_IGN;
-        }
-
-        sigemptyset(&sa.sa_mask);
-        if (sigaction(sig->signo, &sa, NULL) == -1) {
-#if (NGX_VALGRIND)
-            ngx_log_error(NGX_LOG_ALERT, log, ngx_errno,
-                          "sigaction(%s) failed, ignored", sig->signame);
-#else
-            ngx_log_error(NGX_LOG_EMERG, log, ngx_errno,
-                          "sigaction(%s) failed", sig->signame);
-            return NGX_ERROR;
-#endif
-        }
-    }
-#endif
-    sa.sa_handler = SIG_IGN;
-    sigemptyset(&sa.sa_mask);
-    return sigaction(SIGPIPE, &sa, NULL);
-}
-
-void do_backtrace() { void *array[100]; char **strings; int size, i; size = backtrace(array, 100); strings = backtrace_symbols(array, size); printf("%p\n", strings); for(i = 0; i < size; i++) printf("sigsegv at :%p:%s\n", array[i], strings[i]); free(strings); }
-//jmp_buf env[MAX];
-void when_sigsegv() 
-{ 
-	do_backtrace(); 
-//	int i = find_index((long)pthread_self()); 
-//	printf("sigsegv...%d...\n", i); 
-//	siglongjmp(env[i], MAX); 
-}
-
 void vin_list(void)
 {
     char vin[32];
@@ -231,12 +183,55 @@ void vin_list(void)
     }
     printf("SN:%s VIN:%s\n", sn, vin);
 }
+void sql_test(void)
+{
+    MySqlInit();
+    insert_item_string("vin", "VINVIN-1234567890");
+    insert_item_int("prot", 0);
+    insert_item_int("mil", 1);
+    insert_item_int("status", 2);
+    insert_item_int("ready", 3);
+    insert_item_string("svin", "OBDII-123456789");
+    insert_item_string("cin", "Jul 5 2019 11:17");
+    insert_item_string("iupr", "0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 ");
+    insert_item_int("fault_total", 2);
+    insert_item_string("fault", "0002 0003");
+    insert_item("speed", 0.1);
+    insert_item("kpa", 0.2);
+    insert_item("nm", 0.3);
+    insert_item("nmf", 0.4);
+    insert_item("rpm", 0.5);
+    insert_item("Lh", 0.6);
+    insert_item("ppm_up", 0.7);
+    insert_item("ppm_down", 0.8);
+    insert_item("urea", 0.9);
+    insert_item("kgh", 1.0);
+    insert_item("SCR_in", 2.0);
+    insert_item("SCR_out", 3.0);
+    insert_item("DPF", 4.0);
+    insert_item("coolant_temp", 5.0);
+    insert_item("tank", 6.0);
+    insert_item_int("gps_status", 7);
+    insert_item("lat", 8.0);
+    insert_item("lng", 9.0);
+    insert_item("mil_total", 10.0);
+    insert_item_int("Nm_mode", 20);
+    insert_item("accelerator", 30.0);
+    insert_item("oil_consume", 40.0);
+    insert_item("urea_temp", 50.0);
+    insert_item("urea_actual", 60.0);
+    insert_item("urea_total", 70.0);
+    insert_item("gas_temp", 80.0);
+    insert_item_int("version", 6789);
+    insert_sql();
+    MySqlClose();
+}
 
 int main(int argc, char *argv[])
 {
 	//socklen_t  client_name_len = sizeof(client_name);
 	char pwd[128] ;
-	int null=0;
+	//int null=0;
 
 	int opt;
 	struct option longopts[]={
@@ -255,7 +250,7 @@ int main(int argc, char *argv[])
 		{"help",0,NULL,'h'},
 		{"version",0,NULL,'v'},
 		{0,0,0,0}};   /* the last must be a zero array */
-	while((opt=getopt_long(argc,argv,":cVNp:f:S:lLhv",longopts,NULL))!=-1)
+	while((opt=getopt_long(argc,argv,":cVNp:f:SlLhv",longopts,NULL))!=-1)
 	{
 		switch(opt)
 		{
@@ -276,7 +271,7 @@ int main(int argc, char *argv[])
 				exit(1);
 				break;
 			case 'N':
-				null = 1;
+				//null = 1;
 				break;
 			case 'p':
 				//strncpy(port,optarg,15);
@@ -300,11 +295,10 @@ int main(int argc, char *argv[])
 				set_filter_vin(optarg);
 				break;
 			case 'S':
-				printf("filter SN : %s \n", optarg); fflush(stdout);
-				set_filter_sn(optarg);
+				sql_test();
 				break;
 			case 'l':
-				save_log = 1;
+				//save_log = 1;
 				break;
 			case ':':
 				fprintf(stderr,"-%c:option needs a value.\n",optopt);
