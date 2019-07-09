@@ -226,6 +226,7 @@ void sql_test(void)
     insert_sql();
     MySqlClose();
 }
+extern int sql_main(void);
 
 int main(int argc, char *argv[])
 {
@@ -332,5 +333,6 @@ int main(int argc, char *argv[])
 
 	fflush(stdout);
 	pool_init (8); 
+	sql_main();
 	return(0);
 }
