@@ -403,7 +403,7 @@ int main(int argc, char *argv[])
 	getcwd(pwd, sizeof(pwd));
 	//printf("pwd:%s   p:%s size:%d  \n", pwd, p, strlen(pwd));
 	printf("Working Directory:%s\n", pwd);
-	reset();
+	if(1==daemon) reset();
 
 	thread_list_init();
 	server_sock = startup(&port);
