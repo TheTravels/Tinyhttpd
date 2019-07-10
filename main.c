@@ -148,24 +148,24 @@ static void version(void)
 #include <stdio.h>
 static void UTC2file(const uint32_t times, void* const buf, const size_t _size)
 {
-    DateTime      utctime   = {.year = 1970, .month = 1, .day = 1, .hour = 0, .minute = 0, .second = 0};
-    DateTime      localtime = {.year = 1970, .month = 1, .day = 1, .hour = 8, .minute = 0, .second = 0};
+	DateTime      utctime   = {.year = 1970, .month = 1, .day = 1, .hour = 0, .minute = 0, .second = 0};
+	DateTime      localtime = {.year = 1970, .month = 1, .day = 1, .hour = 8, .minute = 0, .second = 0};
 	struct passwd *npwd;
 	npwd = getpwuid(getuid());
 	//printf("当前登陆的用户名为：%s\n", npwd->pw_name);
-    if(times > INT32_MAX)
-    {
-        utctime = GregorianCalendarDateAddSecond(utctime, INT32_MAX);
-        utctime = GregorianCalendarDateAddSecond(utctime, (int)(times - INT32_MAX));
-    }
-    else
-    {
-        utctime = GregorianCalendarDateAddSecond(utctime, (int)times);
-    }
+	if(times > INT32_MAX)
+	{
+		utctime = GregorianCalendarDateAddSecond(utctime, INT32_MAX);
+		utctime = GregorianCalendarDateAddSecond(utctime, (int)(times - INT32_MAX));
+	}
+	else
+	{
+		utctime = GregorianCalendarDateAddSecond(utctime, (int)times);
+	}
 
-    GregorianCalendarDateToModifiedJulianDate(utctime);
-    localtime = GregorianCalendarDateAddHour(utctime, 8);
-    snprintf((char *)buf, (size_t)_size, "./daemon/server-%s-%d-%.2d-%.2d-%02d%02d%02d.txt", npwd->pw_name, localtime.year, localtime.month, localtime.day, localtime.hour, localtime.minute, localtime.second);
+	GregorianCalendarDateToModifiedJulianDate(utctime);
+	localtime = GregorianCalendarDateAddHour(utctime, 8);
+	snprintf((char *)buf, (size_t)_size, "./daemon/server-%s-%d-%.2d-%.2d-%02d%02d%02d.txt", npwd->pw_name, localtime.year, localtime.month, localtime.day, localtime.hour, localtime.minute, localtime.second);
 }
 
 extern void init_daemon(void);
@@ -176,35 +176,35 @@ extern int relay;
 
 int init_signals(void)
 {
-    struct sigaction   sa;
+	struct sigaction   sa;
 #if 0
-    for (sig = signals; sig->signo != 0; sig++) {
-        ngx_memzero(&sa, sizeof(struct sigaction));
+	for (sig = signals; sig->signo != 0; sig++) {
+		ngx_memzero(&sa, sizeof(struct sigaction));
 
-        if (sig->handler) {
-            sa.sa_sigaction = sig->handler;
-            sa.sa_flags = SA_SIGINFO;
+		if (sig->handler) {
+			sa.sa_sigaction = sig->handler;
+			sa.sa_flags = SA_SIGINFO;
 
-        } else {
-            sa.sa_handler = SIG_IGN;
-        }
+		} else {
+			sa.sa_handler = SIG_IGN;
+		}
 
-        sigemptyset(&sa.sa_mask);
-        if (sigaction(sig->signo, &sa, NULL) == -1) {
+		sigemptyset(&sa.sa_mask);
+		if (sigaction(sig->signo, &sa, NULL) == -1) {
 #if (NGX_VALGRIND)
-            ngx_log_error(NGX_LOG_ALERT, log, ngx_errno,
-                          "sigaction(%s) failed, ignored", sig->signame);
+			ngx_log_error(NGX_LOG_ALERT, log, ngx_errno,
+					"sigaction(%s) failed, ignored", sig->signame);
 #else
-            ngx_log_error(NGX_LOG_EMERG, log, ngx_errno,
-                          "sigaction(%s) failed", sig->signame);
-            return NGX_ERROR;
+			ngx_log_error(NGX_LOG_EMERG, log, ngx_errno,
+					"sigaction(%s) failed", sig->signame);
+			return NGX_ERROR;
 #endif
-        }
-    }
+		}
+	}
 #endif
-    sa.sa_handler = SIG_IGN;
-    sigemptyset(&sa.sa_mask);
-    return sigaction(SIGPIPE, &sa, NULL);
+	sa.sa_handler = SIG_IGN;
+	sigemptyset(&sa.sa_mask);
+	return sigaction(SIGPIPE, &sa, NULL);
 }
 
 void do_backtrace() { void *array[100]; char **strings; int size, i; size = backtrace(array, 100); strings = backtrace_symbols(array, size); printf("%p\n", strings); for(i = 0; i < size; i++) printf("sigsegv at :%p:%s\n", array[i], strings[i]); free(strings); }
@@ -212,9 +212,50 @@ void do_backtrace() { void *array[100]; char **strings; int size, i; size = back
 void when_sigsegv() 
 { 
 	do_backtrace(); 
-//	int i = find_index((long)pthread_self()); 
-//	printf("sigsegv...%d...\n", i); 
-//	siglongjmp(env[i], MAX); 
+	//	int i = find_index((long)pthread_self()); 
+	//	printf("sigsegv...%d...\n", i); 
+	//	siglongjmp(env[i], MAX); 
+}
+
+void handler(int arg)
+{
+	printf("receive SIGCHLD\n");
+}
+int reset(void)
+{
+	signal(SIGCHLD,handler); //注册信号回调函数，当信号发生会调用handler
+	pid_t pid;
+reboot:
+	pid = fork();
+	if(pid < 0)
+	{
+		perror("fork fail ");
+		exit(1);
+	}
+	else if(pid == 0) //子进程
+	{
+#if 0
+		while(1)
+		{
+			//printf("child \n");
+			printf("child pid:%d\n", getpid());
+			sleep(1);
+		}
+#endif
+		sleep(1);
+	}
+	else  //父进程
+	{
+		sleep(3600*3);  // 每 3 小时重启一次服务器
+		kill(pid,SIGKILL);//杀死 pid 发送进程的信号,kill 给其他进程发送信号，指定进程号
+		printf("child killed\n");
+		//printf("father \n");
+		printf("father pid:%d | %d\n", getpid(), pid);
+		wait(NULL); //等待回收子进程的资源
+		//raise(SIGKILL); //杀死自己的信号,函数raise 给自己发送信号
+		goto reboot;
+	}
+	return 0;
 }
 
 int main(int argc, char *argv[])
@@ -326,30 +367,30 @@ int main(int argc, char *argv[])
 	{
 		int i = 0;
 		for(i=0;i<NOFILE;++i)
-                	close(i);
+			close(i);
 	}
 #if 0
-     fflush(stdout);
-     setvbuf(stdout,NULL,_IONBF,0);
-     UTC2file(time(NULL), pwd, sizeof (pwd));
-     printf("test stdout\n");
-     //freopen("test1.txt","w",stdout); //注: 不要使用这类的代码 stdout = fopen("test1.txt","w");   这样的话输出很诡异的. 最好使用  freopen 这类的函数来替换它.
-     freopen(pwd,"w",stdout); //注: 不要使用这类的代码 stdout = fopen("test1.txt","w");   这样的话输出很诡异的. 最好使用  freopen 这类的函数来替换它.
-     printf("test file\n");
-     //freopen("/dev/tty","w",stdout);
-     //printf("test tty\n");
-//#else
-     memset(pwd, 0, sizeof(pwd));
-     UTC2file(time(NULL), pwd, sizeof (pwd));
-     fflush(stdout);
-     //setvbuf(stdout,NULL,_IONBF,0);
-     //printf("test stdout\n");
-     //int save_fd = dup(STDOUT_FILENO); // 保存标准输出 文件描述符 注:这里一定要用 dup 复制一个文件描述符. 不要用 = 就像是Winodws下的句柄.
-     dup(STDOUT_FILENO); // 保存标准输出 文件描述符 注:这里一定要用 dup 复制一个文件描述符. 不要用 = 就像是Winodws下的句柄.
-     //int fd = open("test1.txt",(O_RDWR | O_CREAT), 0644);
-     int fd = open(pwd, (O_RDWR | O_CREAT), 0644);
-     dup2(fd,STDOUT_FILENO); // 用我们新打开的文件描述符替换掉 标准输出
-     //printf("test file\n");
+	fflush(stdout);
+	setvbuf(stdout,NULL,_IONBF,0);
+	UTC2file(time(NULL), pwd, sizeof (pwd));
+	printf("test stdout\n");
+	//freopen("test1.txt","w",stdout); //注: 不要使用这类的代码 stdout = fopen("test1.txt","w");   这样的话输出很诡异的. 最好使用  freopen 这类的函数来替换它.
+	freopen(pwd,"w",stdout); //注: 不要使用这类的代码 stdout = fopen("test1.txt","w");   这样的话输出很诡异的. 最好使用  freopen 这类的函数来替换它.
+	printf("test file\n");
+	//freopen("/dev/tty","w",stdout);
+	//printf("test tty\n");
+	//#else
+	memset(pwd, 0, sizeof(pwd));
+	UTC2file(time(NULL), pwd, sizeof (pwd));
+	fflush(stdout);
+	//setvbuf(stdout,NULL,_IONBF,0);
+	//printf("test stdout\n");
+	//int save_fd = dup(STDOUT_FILENO); // 保存标准输出 文件描述符 注:这里一定要用 dup 复制一个文件描述符. 不要用 = 就像是Winodws下的句柄.
+	dup(STDOUT_FILENO); // 保存标准输出 文件描述符 注:这里一定要用 dup 复制一个文件描述符. 不要用 = 就像是Winodws下的句柄.
+	//int fd = open("test1.txt",(O_RDWR | O_CREAT), 0644);
+	int fd = open(pwd, (O_RDWR | O_CREAT), 0644);
+	dup2(fd,STDOUT_FILENO); // 用我们新打开的文件描述符替换掉 标准输出
+	//printf("test file\n");
 #endif
 	init_signals();
 	signal(SIGSEGV, when_sigsegv);
@@ -362,6 +403,7 @@ int main(int argc, char *argv[])
 	getcwd(pwd, sizeof(pwd));
 	//printf("pwd:%s   p:%s size:%d  \n", pwd, p, strlen(pwd));
 	printf("Working Directory:%s\n", pwd);
+	reset();
 
 	thread_list_init();
 	server_sock = startup(&port);
