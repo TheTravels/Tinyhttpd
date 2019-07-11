@@ -415,7 +415,7 @@ int main(int argc, char *argv[])
 	pthread_lock_init();
 	//pool_init (1024); 
 	//pool_init (128); 
-	pool_init (8); 
+	pool_init (128); 
 	while (1)
 	{
 		//pthread_attr_t attr;
