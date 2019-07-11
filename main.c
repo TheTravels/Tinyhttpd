@@ -392,7 +392,7 @@ int main(int argc, char *argv[])
 	dup2(fd,STDOUT_FILENO); // 用我们新打开的文件描述符替换掉 标准输出
 	//printf("test file\n");
 #endif
-	init_signals();
+	//init_signals();
 	signal(SIGSEGV, when_sigsegv);
 	struct passwd *npwd;
 	npwd = getpwuid(getuid());
@@ -415,7 +415,7 @@ int main(int argc, char *argv[])
 	pthread_lock_init();
 	//pool_init (1024); 
 	//pool_init (128); 
-	pool_init (128); 
+	pool_init (8); 
 	while (1)
 	{
 		//pthread_attr_t attr;
