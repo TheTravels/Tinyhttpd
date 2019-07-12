@@ -1,7 +1,7 @@
 #include "mysql.h"
 #include "my_global.h"
 
-int sql_main(void)
+int sql_main_01(void)
 {
 	MYSQL conn;
 	mysql_init(&conn);  //如果传入的指针为空，会分配一个MYSQL的结构体，并由mysql_close()释放掉

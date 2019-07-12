@@ -51,7 +51,8 @@
 #include "json_list.h"
 #include "thread_list.h"
 #include "lock.h"
-#include "MySql.h"
+//#include "MySql.h"
+#include "sql.h"
 
 #define ISspace(x) isspace((int)(x))
 
@@ -227,6 +228,7 @@ void sql_test(void)
     MySqlClose();
 }
 extern int sql_main(void);
+extern int sql_main_01(void);
 
 int main(int argc, char *argv[])
 {
@@ -333,6 +335,7 @@ int main(int argc, char *argv[])
 
 	fflush(stdout);
 	pool_init (8); 
+	//sql_main_01();
 	sql_main();
 	return(0);
 }
