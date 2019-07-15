@@ -337,5 +337,6 @@ int main(int argc, char *argv[])
 	pool_init (8); 
 	//sql_main_01();
 	sql_main();
+	sql_insert_fw_update("VIN-TEST", "V1.2.3", "测试", "1029034202480123", "102903420248", 12345678);
 	return(0);
 }
