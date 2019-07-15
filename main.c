@@ -259,6 +259,16 @@ reboot:
 	return 0;
 }
 
+void daemon_thread(void *arg)
+{
+	(void)arg;
+	while(1)
+	{
+		sleep(100);  // 100s
+		get_fw();
+	}
+}
+
 int main(int argc, char *argv[])
 {
 	int server_sock = -1;
@@ -267,7 +277,7 @@ int main(int argc, char *argv[])
 	int client_sock = -1;
 	struct sockaddr_in client_name;
 	socklen_t  client_name_len = sizeof(client_name);
-	//pthread_t newthread;
+	pthread_t newthread;
 	char daemon=0;
 	struct device_list* device;
 	char pwd[128] ;
@@ -417,6 +427,7 @@ int main(int argc, char *argv[])
 	//pool_init (1024); 
 	//pool_init (128); 
 	get_fw();
+	pthread_create(&newthread , NULL, (void *)daemon_thread, NULL);
 	pool_init (8); 
 	while (1)
 	{
