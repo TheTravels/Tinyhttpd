@@ -229,6 +229,40 @@ void sql_test(void)
 }
 extern int sql_main(void);
 extern int sql_main_01(void);
+extern int sql_select(const char* const tbl_name, const char* const field, const char* const value, char* const sql_field[], char* const sql_value[]);
+#if 0
+void get_fw(void)
+{
+	int i=0;
+    char _sql_field[8][16];
+    char* const sql_field[8] = {_sql_field[0], _sql_field[1], _sql_field[2], _sql_field[3], \
+                               _sql_field[4], _sql_field[5], _sql_field[6], _sql_field[7], };
+    char sql_value_id[32];
+    char sql_value_create_time[32];
+    char sql_value_vin[32];
+    char sql_value_version[32];
+    char sql_value_Des[512];
+    char sql_value_hard_id[32];
+    char sql_value_SN[32];
+    char sql_value_fw_crc[32];
+    char* const sql_value[8] = {sql_value_id, sql_value_create_time, sql_value_vin, sql_value_version, \
+                               sql_value_Des, sql_value_hard_id, sql_value_SN, sql_value_fw_crc};
+    memset(_sql_field, 0, sizeof (_sql_field));
+    memset(sql_value_id, 0, sizeof (sql_value_id));
+    memset(sql_value_create_time, 0, sizeof (sql_value_create_time));
+    memset(sql_value_vin, 0, sizeof (sql_value_vin));
+    memset(sql_value_version, 0, sizeof (sql_value_version));
+    memset(sql_value_Des, 0, sizeof (sql_value_Des));
+    memset(sql_value_hard_id, 0, sizeof (sql_value_hard_id));
+    memset(sql_value_SN, 0, sizeof (sql_value_SN));
+    memset(sql_value_fw_crc, 0, sizeof (sql_value_fw_crc));
+    sql_select("tbl_obd_4g_fw_update", "vin", "FW_11111111111111", sql_field, sql_value);
+    for( i=0; i<8; i++)
+    {
+        printf("%s : %s\n", sql_field[i], sql_value[i]);
+    }
+}
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -336,7 +370,14 @@ int main(int argc, char *argv[])
 	fflush(stdout);
 	pool_init (8); 
 	//sql_main_01();
-	sql_main();
-	sql_insert_fw_update("VIN-TEST", "V1.2.3", "测试", "1029034202480123", "102903420248", 12345678);
+	//sql_select("tbl_obd_4g_fw_update", "SN", "102906420208");
+	//sql_select("tbl_obd_4g_fw_update", "vin", "");
+	get_fw();
+	//sql_main();
+	//sql_insert_fw_update("VIN-TEST", "V1.2.3", "测试", "1029034202480123", "102903420248", 12345678);
+	//sql_insert_fw_update("FW_11111111111111", "V0.0.0", "FW_11111111111111用于记录服务器上的固件版本", "服务器上版本没有硬件ID，用于存放 CVN值", "", 0);
+	//sql_insert_fw_update("FW_11111111111111", "V1.2.3", "upload/bin/OBDII-4G.bin", "Jul 12 2019 14:30:", "", 61216);
+	printf("fw[Jul 12 2019 14:30:]:%d\n", match_fw("Jul 12 2019 14:30:"));
+	printf("atoi:%d\n", atoi("12345678"));
 	return(0);
 }

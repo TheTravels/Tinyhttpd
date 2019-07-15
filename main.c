@@ -51,6 +51,7 @@
 #include "json_list.h"
 #include "thread_list.h"
 #include "lock.h"
+#include "sql.h"
 
 #define ISspace(x) isspace((int)(x))
 
@@ -415,6 +416,7 @@ int main(int argc, char *argv[])
 	pthread_lock_init();
 	//pool_init (1024); 
 	//pool_init (128); 
+	get_fw();
 	pool_init (8); 
 	while (1)
 	{

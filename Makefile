@@ -40,7 +40,7 @@ JSON_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(JSON_DIR)/,$(basename $(J
 #MYSQL_DIR  := OBD_Report/mysql
 #MYSQL_SRC   = MySql.c
 MYSQL_DIR  := OBD_Report/lib
-MYSQL_SRC   = data_base.c sql.c
+MYSQL_SRC   = data_base.c sql.c fw.c
 MYSQL_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(MYSQL_DIR)/,$(basename $(MYSQL_SRC))))
 
 #OBJS     += $(CCU_OBJS) $(OBD_OBJS) $(UTC_OBJS)
