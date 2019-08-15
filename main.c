@@ -428,7 +428,7 @@ int main(int argc, char *argv[])
 	//pool_init (128); 
 	get_fw();
 	pthread_create(&newthread , NULL, (void *)daemon_thread, NULL);
-	pool_init (8); 
+	pool_init (16); 
 	while (1)
 	{
 		//pthread_attr_t attr;
