@@ -40,6 +40,7 @@
 		"up_18":	["102906420228", "OBDII-4G", "fw_102906420228_OBDII-4G.bin", "OBDII-4G.cfg"],
 		"up_H1":	["102905420108", "OBDII-4G", "fw_102905420108_OBDII-4G.bin", "OBDII-4G.cfg"],
 		"up_H2":	["102901426678", "OBDII-4G", "fw_102901426678_OBDII-4G.bin", "OBDII-4G.cfg"],
+		"up_H3":	["ZA0CK20N0000", "OBDII-4G", "fw_ZA0CK20N0000_OBDII-4G.bin", "OBDII-4G_T1.cfg"],
 		"up_19":	["102905620128", "OBDII-4G", "fw_102905620128_OBDII-4G.bin", "OBDII-4G.cfg"]
 	},
 	"Dev.Des":	["SerialNumber", "Model", "Firmware", "Config"],
