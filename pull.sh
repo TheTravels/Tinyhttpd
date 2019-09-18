@@ -13,6 +13,7 @@
 #git push origin OBD
 #fi
 
+make clean
 cd OBD_Report
 git fetch --all
 git reset --hard origin/master
