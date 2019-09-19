@@ -148,6 +148,7 @@ static void version(void)
 
 #include "DateTime.h"
 #include <stdio.h>
+#if 0
 static void UTC2file(const uint32_t times, void* const buf, const size_t _size)
 {
     DateTime      utctime   = {.year = 1970, .month = 1, .day = 1, .hour = 0, .minute = 0, .second = 0};
@@ -169,7 +170,7 @@ static void UTC2file(const uint32_t times, void* const buf, const size_t _size)
     localtime = GregorianCalendarDateAddHour(utctime, 8);
     snprintf((char *)buf, (size_t)_size, "./daemon/server-%s-%d-%.2d-%.2d-%02d%02d%02d.txt", npwd->pw_name, localtime.year, localtime.month, localtime.day, localtime.hour, localtime.minute, localtime.second);
 }
-
+#endif
 void vin_list(void)
 {
     char vin[32];
