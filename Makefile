@@ -60,6 +60,7 @@ INC      += -I $(ROOT)/OBD_Report/lib
 INC      += -I $(ROOT)/OBD_Report/lib/include
 CFLAGS   += $(INC)
 IPATH    = "./bin"
+#IPATH    = "~/tools/Tinyhttpd"
 #SRC      += $(CCU_SRC)
 
 all: $(BUILD_DIR) $(OBJS) httpd client list #encode
@@ -73,7 +74,7 @@ all: $(BUILD_DIR) $(OBJS) httpd client list #encode
 	@mkdir -p ./upload/bin
 
 install: all
-	@echo $(IPATH)
+	@echo install path: $(IPATH)
 	@mkdir -p $(IPATH)
 	@mkdir -p $(IPATH)/log
 	@mkdir -p $(IPATH)/daemon

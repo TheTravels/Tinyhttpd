@@ -44,5 +44,6 @@ void init_daemon(void)
 #endif
 #endif
 	//chdir("/");
-	chdir("/home/public/server");
+	//chdir("/home/public/server");
+	//chdir(_daemon_path);
 }

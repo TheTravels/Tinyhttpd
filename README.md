@@ -5,6 +5,7 @@ A mirror for tinyhttpd(Tinyhttpd非官方镜像,Fork自[sourceForge](https://sou
 安装，IPATH为安装目录
 make install IPATH=./test
 make install IPATH=/home/public/server
+make install IPATH=~/tools/Tinyhttpd
 
 
 测试CGI时需要本机安装PERL，同时安装perl-cgi

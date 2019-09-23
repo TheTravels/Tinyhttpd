@@ -115,13 +115,14 @@ int startup(u_short *port)
 static void usage(void)
 {
 	//fprintf(stderr,"usage:./main [-d --daemon] [-p --port] [-s --sslport] [-l --log] [-v --version] [-h --help]\n\n");
-	fprintf(stderr,"usage:./build/httpd [-c --config] [-d --daemon] [-p --port] [-N --NULL] [-f --fliter] [-S --SN] [-l --log] [-L --list] [-v --version] [-h --help]\n\n");
+	fprintf(stderr,"usage:./build/httpd [-c --config] [-d --daemon] [-D --Dir] [-p --port] [-N --NULL] [-f --fliter] [-S --SN] [-l --log] [-L --list] [-v --version] [-h --help]\n\n");
 	fprintf(stderr,"usage:./build/httpd -h\n");
 	fprintf(stderr,"usage:./build/httpd -p 9910 -f VINABCDEF1234567 -l \n");
 	fprintf(stderr,"usage:./build/httpd -v\n");
 	fprintf(stderr,"Options:\n");
 	fprintf(stderr,"  --config 生成配置文件模板\n");
 	fprintf(stderr,"  --daemon 作为服务进程运行在后台\n");
+	fprintf(stderr,"  --Dir 指定工作目录, 默认为当前目录\n");
 	fprintf(stderr,"  --port 服务器端口\n");
 	fprintf(stderr,"  --NULL 运行过程中无终端输出\n");
 	fprintf(stderr,"  --fliter 通过 VIN过滤信息\n");
@@ -268,6 +269,20 @@ void daemon_thread(void *arg)
 		get_fw();
 	}
 }
+#include <stdio.h>
+#include <time.h>
+#include <string.h>
+#include <signal.h>
+#include <sys/param.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <ctype.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <pwd.h>
+#include <syslog.h>
+#include <dirent.h>
+
 
 int main(int argc, char *argv[])
 {
@@ -282,10 +297,13 @@ int main(int argc, char *argv[])
 	struct device_list* device;
 	char pwd[128] ;
 	int null=0;
+        //char _daemon_path[128] = "~/tools/Tinyhttpd";
+        char _daemon_path[128] = "./";
 
 	int opt;
 	struct option longopts[]={
 		{"daemon",0,NULL,'d'},   /* 0->hasn't arg   1-> has arg */
+		{"Dir"   ,0,NULL,'D'},   /* 0->hasn't arg   1-> has arg */
 		{"config",0,NULL,'c'},   
 		{"list",  0,NULL,'L'},   
 		{"port",  1,NULL,'p'},
@@ -300,7 +318,7 @@ int main(int argc, char *argv[])
 		{"help",0,NULL,'h'},
 		{"version",0,NULL,'v'},
 		{0,0,0,0}};   /* the last must be a zero array */
-	while((opt=getopt_long(argc,argv,":cdNp:f:S:lLhv",longopts,NULL))!=-1)
+	while((opt=getopt_long(argc,argv,":cdD:Np:f:S:lLhv",longopts,NULL))!=-1)
 	{
 		switch(opt)
 		{
@@ -347,6 +365,14 @@ int main(int argc, char *argv[])
 				printf("filter SN : %s \n", optarg); fflush(stdout);
 				set_filter_sn(optarg);
 				break;
+			case 'D':
+				printf("Work Dir: %s \n", optarg); fflush(stdout);
+				if(strlen(optarg)<sizeof(_daemon_path)) 
+				{
+					memset(_daemon_path, 0, sizeof(_daemon_path));
+					memcpy(_daemon_path, optarg, strlen(optarg));
+				}
+				break;
 			case 'l':
 				save_log = 1;
 				break;
@@ -374,6 +400,7 @@ int main(int argc, char *argv[])
 		printf("\n");
 	}
 	if(1==daemon) init_daemon();
+	chdir(_daemon_path);
 	if(1==null)
 	{
 		int i = 0;
