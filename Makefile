@@ -85,6 +85,7 @@ install: all
 #	@cd $(IPATH) && ./httpd -c 
 #	@cd $(IPATH) && ./httpd -L 
 	@cp ./upload/OBD.cfg $(IPATH)/upload/OBD.cfg
+	@cp -a ./upload $(IPATH)/upload
 #	@cp ./upload/Device.list $(IPATH)/upload/Device.list
 
 $(BUILD_DIR):
