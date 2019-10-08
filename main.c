@@ -453,14 +453,15 @@ int main(int argc, char *argv[])
 	printf("\nhttpd running on port %d\n", port);
 	if(9910==port) relay = 0;
 	else relay = 1;
-	printf("\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n");
+	//printf("\n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n \n\n\n\n\n\n\n\n\n\n");
+	printf("\n\n\n");
 	fflush(stdout);
 	pthread_lock_init();
 	//pool_init (1024); 
 	//pool_init (128); 
 	get_fw();
 	pthread_create(&newthread , NULL, (void *)daemon_thread, NULL);
-	//pthread_create(&vinthread , NULL, (void *)thread_get_vin, NULL);
+	pthread_create(&vinthread , NULL, (void *)thread_get_vin, NULL);
 	pool_init (8); 
 	while (1)
 	{
