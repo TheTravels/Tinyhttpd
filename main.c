@@ -460,7 +460,7 @@ int main(int argc, char *argv[])
 	//pool_init (128); 
 	get_fw();
 	pthread_create(&newthread , NULL, (void *)daemon_thread, NULL);
-	pthread_create(&vinthread , NULL, (void *)thread_get_vin, NULL);
+	//pthread_create(&vinthread , NULL, (void *)thread_get_vin, NULL);
 	pool_init (8); 
 	while (1)
 	{
