@@ -300,8 +300,8 @@ int main(int argc, char *argv[])
 	char pwd[128] ;
 	int null=0;
         //char _daemon_path[128] = "~/tools/Tinyhttpd";
-        //char _daemon_path[128] = "./";
-        char _daemon_path[128] = "/home/public/server";
+        char _daemon_path[128] = "./";
+        //char _daemon_path[128] = "/home/public/server";
 
 	int opt;
 	struct option longopts[]={
