@@ -321,6 +321,11 @@ int main(int argc, char *argv[])
 		{"help",0,NULL,'h'},
 		{"version",0,NULL,'v'},
 		{0,0,0,0}};   /* the last must be a zero array */
+	struct passwd *npwd;
+	npwd = getpwuid(getuid());
+	//printf("当前登陆的用户名为：%s\n", npwd->pw_name);
+	memset(_daemon_path, 0, sizeof(_daemon_path));
+	snprintf(_daemon_path, sizeof(_daemon_path)-1, "/home/%s/tools/Tinyhttpd", npwd->pw_name);
 	while((opt=getopt_long(argc,argv,":cdD:Np:f:S:lLhv",longopts,NULL))!=-1)
 	{
 		switch(opt)
@@ -437,14 +442,15 @@ int main(int argc, char *argv[])
 #endif
 	//init_signals();
 	signal(SIGSEGV, when_sigsegv);
-	struct passwd *npwd;
+	/*struct passwd *npwd;
 	npwd = getpwuid(getuid());
-	printf("当前登陆的用户名为：%s\n", npwd->pw_name);
+	printf("当前登陆的用户名为：%s\n", npwd->pw_name);*/
 	//if(1==daemon) init_daemon();
 	memset(pwd, 0, sizeof(pwd));
 	//char *p = getcwd(pwd, sizeof(pwd));
 	getcwd(pwd, sizeof(pwd));
 	//printf("pwd:%s   p:%s size:%d  \n", pwd, p, strlen(pwd));
+	printf("当前登陆的用户名为：%s\n", npwd->pw_name);
 	printf("Working Directory:%s\n", pwd);
 	if(1==daemon) reset();
 

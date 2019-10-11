@@ -9,9 +9,9 @@ HOME_PATH=/home/$(whoami)
 NGINX_PATH=$HOME_PATH/tools/nginx
 HTTPD_PATH=$HOME_PATH/tools/Tinyhttpd
 SERVER_PATH=/home/public/server
-echo "home path:   " $HOME_PATH
-echo "nginx_path:  " $NGINX_PATH
-echo "server path: " $HTTPD_PATH
+#echo "home path:   " $HOME_PATH
+#echo "nginx_path:  " $NGINX_PATH
+#echo "server path: " $HTTPD_PATH
 kill -s 9 `ps -aux | grep nginx | awk '{print $2}'`
 kill -s 9 `ps -aux | grep httpd | awk '{print $2}'`
 #nginx -c /home/obd/tools/nginx/conf/nginx.conf
