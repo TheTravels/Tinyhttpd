@@ -5,23 +5,32 @@
 #cd /home/obd
 #cd Tinyhttpd
 #make install IPATH=/home/obd/tools/Tinyhttpd
+HOME_PATH=/home/$(whoami)
+NGINX_PATH=$HOME_PATH/tools/nginx
+HTTPD_PATH=$HOME_PATH/tools/Tinyhttpd
+SERVER_PATH=/home/public/server
+echo "home path:   " $HOME_PATH
+echo "nginx_path:  " $NGINX_PATH
+echo "server path: " $HTTPD_PATH
+kill -s 9 `ps -aux | grep nginx | awk '{print $2}'`
+kill -s 9 `ps -aux | grep httpd | awk '{print $2}'`
 #nginx -c /home/obd/tools/nginx/conf/nginx.conf
-#kill -s 9 `ps -aux | grep httpd | awk '{print $2}'`
-#kill -s 9 `ps -aux | grep 10004 | awk '{print $2}'`
-#kill -s 9 `ps -aux | grep 10005 | awk '{print $2}'`
-#kill -s 9 `ps -aux | grep 10006 | awk '{print $2}'`
-#kill -s 9 `ps -aux | grep 10007 | awk '{print $2}'`
-#kill -s 9 `ps -aux | grep 10008 | awk '{print $2}'`
-./build/httpd -p 10004 -d
-./build/httpd -p 10005 -d
-./build/httpd -p 10006 -d
-./build/httpd -p 10007 -d
-./build/httpd -p 10008 -d
-#httpd -p 10009 -d
-#httpd -p 10010 -d
-#httpd -p 10011 -d
-#httpd -p 10012 -d
-#httpd -p 10013 -d
+cd $NGINX_PATH
+nginx -c ./conf/nginx.conf
+cd $SERVER_PATH
+#cd $HTTPD_PATH
+cp $HTTPD_PATH/httpd /home/public/server/httpd
+$SERVER_PATH/httpd -p 10004 -d -N -D $SERVER_PATH
+$SERVER_PATH/httpd -p 10005 -d -N -D $SERVER_PATH
+$SERVER_PATH/httpd -p 10006 -d -N -D $SERVER_PATH
+$SERVER_PATH/httpd -p 10007 -d -N -D $SERVER_PATH
+$SERVER_PATH/httpd -p 10008 -d -N -D $SERVER_PATH
+#httpd -p 10009 -d -N
+#httpd -p 10010 -d -N
+#httpd -p 10011 -d -N
+#httpd -p 10012 -d -N
+#httpd -p 10013 -d -N
 
-
+ps -aux | grep nginx
+ps -aux | grep httpd
 

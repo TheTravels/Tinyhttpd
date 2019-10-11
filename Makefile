@@ -59,7 +59,9 @@ INC      += -I $(ROOT)/UTC/GpsUtcAndLocalTime/GpsUtcAndLocalTime
 INC      += -I $(ROOT)/OBD_Report/lib
 INC      += -I $(ROOT)/OBD_Report/lib/include
 CFLAGS   += $(INC)
-IPATH    = "./bin"
+HOME     = /home/$(shell whoami)
+#IPATH    = "./bin"
+IPATH    = $(HOME)/tools/Tinyhttpd
 #IPATH    = "~/tools/Tinyhttpd"
 #SRC      += $(CCU_SRC)
 
@@ -75,6 +77,7 @@ all: $(BUILD_DIR) $(OBJS) httpd client list #encode
 
 install: all
 	@echo install path: $(IPATH)
+#	@echo $(IPATH)
 	@mkdir -p $(IPATH)
 	@mkdir -p $(IPATH)/log
 	@mkdir -p $(IPATH)/daemon
@@ -85,7 +88,7 @@ install: all
 #	@cd $(IPATH) && ./httpd -c 
 #	@cd $(IPATH) && ./httpd -L 
 	@cp ./upload/OBD.cfg $(IPATH)/upload/OBD.cfg
-	@cp -a ./upload $(IPATH)/upload
+	cp -a ./upload $(IPATH)
 #	@cp ./upload/Device.list $(IPATH)/upload/Device.list
 
 $(BUILD_DIR):
