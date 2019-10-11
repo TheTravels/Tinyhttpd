@@ -136,7 +136,8 @@ static void usage(void)
 
 static void version(void)
 {
-	fprintf(stderr,"版本:1.0\n  功能:接收上海中心平台数据协议\n"
+	fprintf(stderr,"版本:2.0\n  功能:接收上海中心平台数据协议\n"
+			"  支持广州云景协议\n"
 			"  提供 RSA 加密通信\n"
 			"  实现固件配置文件下载\n"
 			"  命令行参数配置端口\n"
