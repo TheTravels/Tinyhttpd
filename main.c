@@ -410,7 +410,7 @@ int main(int argc, char *argv[])
 	}
 	if(1==daemon) init_daemon();
 	chdir(_daemon_path);
-	thread_vin_init();
+	thread_vin_init(port);
 	vin_list_load("./upload/vin.list");
 	if(1==null)
 	{
@@ -468,7 +468,7 @@ int main(int argc, char *argv[])
 	//pool_init (128); 
 	get_fw();
 	pthread_create(&newthread , NULL, (void *)daemon_thread, NULL);
-	//pthread_create(&vinthread , NULL, (void *)thread_get_vin, NULL);
+	pthread_create(&vinthread , NULL, (void *)thread_get_vin, NULL);
 	pool_init (8); 
 	while (1)
 	{
