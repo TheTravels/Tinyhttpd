@@ -3,6 +3,8 @@ LIBS = -lpthread #-lsocket
 
 CC       := gcc
 CFLAGS   := -g -rdynamic -lmysqlclient -DNDEBUG -W -Wall -lpthread -DGCC_BUILD=1 
+CFLAGS   += -DBUILD_THREAD_VIN=1 
+#CFLAGS   += -DBUILD_SERVER_YN=1 
 
 ROOT	 := $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))
 INC      := -I $(ROOT)/
