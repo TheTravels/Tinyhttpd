@@ -1,0 +1,25 @@
+
+使用最新版服务器请按如下方式配置：
+
+1. 添加环境变量
+cd 
+vim .bash_profile
+
+再文件末尾添加如下信息(不包括双引号)：
+"PATH=$PATH:/home/public/server"
+
+2.创建工作目录
+cd 
+mkdir -p tools/Tinyhttpd
+将自己原 Tinyhttpd目录下的 upload 目录拷贝到 tools/Tinyhttpd 目录下
+
+3.更新环境变量
+cd 
+source .bash_profile
+或者重新登录服务器
+
+4.验证是否可用
+执行命令 "which httpd" 当显示信息为："/home/public/server/httpd"时表示可用
+
+
+
