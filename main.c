@@ -411,6 +411,7 @@ int main(int argc, char *argv[])
 	if(1==daemon) init_daemon();
 	chdir(_daemon_path);
 	thread_vin_init(port);
+	server_log_init(port);
 	vin_list_load("./upload/vin.list");
 	if(1==null)
 	{
