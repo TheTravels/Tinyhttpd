@@ -33,9 +33,15 @@ RSA_SRC   = bignum.c prime.c rsa.c
 RSA_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(RSA_DIR)/,$(basename $(RSA_SRC))))
 UTC_SRC   = UTC/GpsUtcAndLocalTime/GpsUtcAndLocalTime/DateTime.c
 UTC_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/,$(basename $(UTC_SRC))))
-cJSON_DIR  := cJSON
+cJSON_DIR  := modules/cJSON
 cJSON_SRC   = cJSON.c mem_malloc.c
 cJSON_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(cJSON_DIR)/,$(basename $(cJSON_SRC))))
+CONFIG_DIR  := modules/config
+CONFIG_SRC   = config_load.c config_data.c
+CONFIG_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(CONFIG_DIR)/,$(basename $(CONFIG_SRC))))
+MODULE_DIR  := modules/lib
+MODULE_SRC   = data_base.c
+MODULE_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(MODULE_DIR)/,$(basename $(MODULE_SRC))))
 JSON_DIR  := OBD_Report/json
 JSON_SRC   = configure.c  vin_list.c
 JSON_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(JSON_DIR)/,$(basename $(JSON_SRC))))
@@ -46,7 +52,7 @@ MYSQL_SRC   = data_base.c sql.c fw.c
 MYSQL_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(MYSQL_DIR)/,$(basename $(MYSQL_SRC))))
 
 #OBJS     += $(CCU_OBJS) $(OBD_OBJS) $(UTC_OBJS)
-SUB_OBJS     := $(OBD_OBJS) $(UTC_OBJS) $(cJSON_OBJS) $(RSA_OBJS) $(OBJS_CFG) $(JSON_OBJS) $(MYSQL_OBJS)
+SUB_OBJS     := $(OBD_OBJS) $(UTC_OBJS) $(cJSON_OBJS) $(RSA_OBJS) $(OBJS_CFG) $(JSON_OBJS) $(MYSQL_OBJS) $(CONFIG_OBJS)
 OBJS     += $(SUB_OBJS)
 OBJS_LIST     += $(SUB_OBJS) 
 OBJS_EN  += $(OBD_OBJS) $(UTC_OBJS) $(cJSON_OBJS) $(RSA_OBJS) $(OBJS_CFG)
@@ -60,6 +66,7 @@ INC      += -I $(ROOT)/UTC/GpsUtcAndLocalTime/GpsUtcAndLocalTime
 #INC      += -I $(ROOT)/OBD_Report/mysql/include
 INC      += -I $(ROOT)/OBD_Report/lib
 INC      += -I $(ROOT)/OBD_Report/lib/include
+INC      += -I $(ROOT)/modules
 CFLAGS   += $(INC)
 HOME     = /home/$(shell whoami)
 #IPATH    = "./bin"
@@ -76,6 +83,7 @@ all: $(BUILD_DIR) $(OBJS) httpd client list #encode
 	@mkdir -p daemon
 	@mkdir -p ./upload/cfg
 	@mkdir -p ./upload/bin
+	@cp modules/config/ServerConfig.cfg ./
 
 install: all
 	@echo install path: $(IPATH)

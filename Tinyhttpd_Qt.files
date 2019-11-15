@@ -11,6 +11,7 @@ CCU/protocol/simpleclient.c
 CCU/protocol/simpleclient.h
 CCU/protocol/socketclient.cpp
 CCU/protocol/socketclient.h
+Makefile
 OBD_Report/Algorithm/des.c
 OBD_Report/Algorithm/desc.c
 OBD_Report/Algorithm/digit.c
@@ -921,6 +922,14 @@ modules/Report/testwindow.cpp
 modules/Report/testwindow.h
 modules/Report/viewwindow.cpp
 modules/Report/viewwindow.h
+modules/lib/cfg.c
+modules/lib/cfg.h
+modules/lib/data_base.c
+modules/lib/data_base.h
+modules/lib/fw.c
+modules/lib/fw.h
+modules/lib/sql.c
+modules/lib/sql.h
 msg_relay.c
 simpleclient.c
 sql.c

@@ -52,6 +52,7 @@
 #include "thread_list.h"
 #include "lock.h"
 #include "sql.h"
+#include "modules/config/config_data.h"
 
 #define ISspace(x) isspace((int)(x))
 
@@ -410,6 +411,8 @@ int main(int argc, char *argv[])
 	}
 	if(1==daemon) init_daemon();
 	chdir(_daemon_path);
+    local_config_data_init();
+    _local_config_data->load(_local_config_data);
 	thread_vin_init(port);
 	server_log_init(port);
 	vin_list_load("./upload/vin.list");
