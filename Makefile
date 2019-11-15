@@ -42,6 +42,9 @@ CONFIG_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(CONFIG_DIR)/,$(basename
 MODULE_DIR  := modules/lib
 MODULE_SRC   = data_base.c
 MODULE_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(MODULE_DIR)/,$(basename $(MODULE_SRC))))
+EPOLL_DIR  := modules/epoll
+EPOLL_SRC   = epoll.c epoll_server.c
+EPOLL_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(EPOLL_DIR)/,$(basename $(EPOLL_SRC))))
 JSON_DIR  := OBD_Report/json
 JSON_SRC   = configure.c  vin_list.c
 JSON_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(JSON_DIR)/,$(basename $(JSON_SRC))))
@@ -52,7 +55,7 @@ MYSQL_SRC   = data_base.c sql.c fw.c
 MYSQL_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(MYSQL_DIR)/,$(basename $(MYSQL_SRC))))
 
 #OBJS     += $(CCU_OBJS) $(OBD_OBJS) $(UTC_OBJS)
-SUB_OBJS     := $(OBD_OBJS) $(UTC_OBJS) $(cJSON_OBJS) $(RSA_OBJS) $(OBJS_CFG) $(JSON_OBJS) $(MYSQL_OBJS) $(CONFIG_OBJS)
+SUB_OBJS     := $(OBD_OBJS) $(UTC_OBJS) $(cJSON_OBJS) $(RSA_OBJS) $(OBJS_CFG) $(JSON_OBJS) $(MYSQL_OBJS) $(CONFIG_OBJS) $(EPOLL_OBJS)
 OBJS     += $(SUB_OBJS)
 OBJS_LIST     += $(SUB_OBJS) 
 OBJS_EN  += $(OBD_OBJS) $(UTC_OBJS) $(cJSON_OBJS) $(RSA_OBJS) $(OBJS_CFG)
@@ -84,6 +87,14 @@ all: $(BUILD_DIR) $(OBJS) httpd client list #encode
 	@mkdir -p ./upload/cfg
 	@mkdir -p ./upload/bin
 	@cp modules/config/ServerConfig.cfg ./
+# 添加编译
+define add_build
+    @echo "file my name is $(0)"
+    @echo "file  => $(1)"
+    @echo "dir   => $(2)"
+    cp ./$(1) $(2)/$(1)
+
+endef
 
 install: all
 	@echo install path: $(IPATH)
