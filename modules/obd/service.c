@@ -136,13 +136,7 @@ void UTC2file_bin(const uint32_t times, void* const buf, const size_t _size)
 
 /*static*/ void csend(const int sockfd, const void *buf, const uint16_t len)
 {
-#if GCC_BUILD
     send(sockfd, buf, len, 0);
-#else
-    (void)sockfd;
-    (void)buf;
-    (void)len;
-#endif
 }
 
 #ifdef offsetof

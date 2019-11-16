@@ -1,6 +1,6 @@
 # target list
 
-OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/modules/main/,$(basename main.c daemon_init.c lock.c thread_pool.c)))
+OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/modules/main/,$(basename main.c lock.c thread_pool.c parameter.c)))
 CFG_DIR  := OBD_Report
 CFG_SRC  := json_list.c thread_list.c msg_relay.c trunking.c service.c thread_vin.c
 #TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/OBD_Report/,$(basename $(CFG_SRC))))

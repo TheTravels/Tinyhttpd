@@ -1,3 +1,4 @@
+modules/main/parameter.c
 trunking.c
 CCU/ccu_client.cpp
 CCU/ccu_client.cpp
