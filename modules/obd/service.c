@@ -616,9 +616,7 @@ void thread_request(void *arg)
             {
                 //printf("@%s-%d Send to client: %3d:%s\n", __func__, __LINE__, _ofp_data._tlen, _ofp_data._tbuf);
                 //csend(_ofp_data._tbuf, _ofp_data._tlen);
-                #if GCC_BUILD
-                    send(sockfd, buf, len, 0);
-                #endif
+                    send(device->socket, buf, len, 0);
             }
             if(0!=decode)
             {

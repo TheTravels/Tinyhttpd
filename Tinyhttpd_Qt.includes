@@ -78,3 +78,13 @@ modules/lib/mysql-connector-c-6.1.11-winx64/include/mysql/psi
 modules/epoll
 modules/json
 modules/lib/mysql-connector-c-6.1.11-win32/include
+modules/main
+cJSON/tests/unity/extras/fixture/test/main
+cJSON/tests/unity/examples/example_1/test/test_runners
+cJSON/tests/unity/examples/example_2/test/test_runners
+cJSON/tests/unity/examples/example_1/test
+cJSON/tests/unity/test/tests
+cJSON/fuzzing
+cJSON/tests/unity/examples/example_3/test
+OBD_Report/json
+cJSON/tests/unity/examples/example_2/test

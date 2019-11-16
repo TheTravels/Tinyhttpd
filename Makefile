@@ -29,7 +29,8 @@ Enc_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(Enc_DIR)/,$(basename $(Enc
 
 OBJS  =
 TARGET_OBJS =
-include target.mk
+#include target.mk
+include target_modules.mk
 OBJS     += $(TARGET_OBJS)
 OBJS_LIST     += $(TARGET_OBJS)
 OBJS_EN  += $(OBD_OBJS) $(UTC_OBJS) $(cJSON_OBJS) $(RSA_OBJS) $(OBJS_CFG)
@@ -43,7 +44,7 @@ IPATH    = $(HOME)/tools/Tinyhttpd
 #SRC      += $(CCU_SRC)
 
 #all: modules $(BUILD_DIR) $(OBJS) httpd client list #encode
-all: $(BUILD_DIR) $(OBJS) httpd client list #encode
+all: $(BUILD_DIR) $(OBJS) httpd #client list #encode
 #	echo $(CCU_DIR)
 #	echo $(CCU_SRC)
 #	echo $(CCU_OBJS)
