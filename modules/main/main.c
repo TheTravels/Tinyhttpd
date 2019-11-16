@@ -169,23 +169,23 @@ int main(int argc, char *argv[])
 #if 0
 	fflush(stdout);
 	setvbuf(stdout,NULL,_IONBF,0);
-	UTC2file(time(NULL), pwd, sizeof (pwd));
+    //UTC2file(time(NULL), pwd, sizeof (pwd));
 	printf("test stdout\n");
-	//freopen("test1.txt","w",stdout); //注: 不要使用这类的代码 stdout = fopen("test1.txt","w");   这样的话输出很诡异的. 最好使用  freopen 这类的函数来替换它.
-	freopen(pwd,"w",stdout); //注: 不要使用这类的代码 stdout = fopen("test1.txt","w");   这样的话输出很诡异的. 最好使用  freopen 这类的函数来替换它.
+    freopen("test1.txt","w",stdout); //注: 不要使用这类的代码 stdout = fopen("test1.txt","w");   这样的话输出很诡异的. 最好使用  freopen 这类的函数来替换它.
+    //freopen(pwd,"w",stdout); //注: 不要使用这类的代码 stdout = fopen("test1.txt","w");   这样的话输出很诡异的. 最好使用  freopen 这类的函数来替换它.
 	printf("test file\n");
 	//freopen("/dev/tty","w",stdout);
 	//printf("test tty\n");
 	//#else
 	memset(pwd, 0, sizeof(pwd));
-	UTC2file(time(NULL), pwd, sizeof (pwd));
+    //UTC2file(time(NULL), pwd, sizeof (pwd));
 	fflush(stdout);
 	//setvbuf(stdout,NULL,_IONBF,0);
 	//printf("test stdout\n");
 	//int save_fd = dup(STDOUT_FILENO); // 保存标准输出 文件描述符 注:这里一定要用 dup 复制一个文件描述符. 不要用 = 就像是Winodws下的句柄.
 	dup(STDOUT_FILENO); // 保存标准输出 文件描述符 注:这里一定要用 dup 复制一个文件描述符. 不要用 = 就像是Winodws下的句柄.
-	//int fd = open("test1.txt",(O_RDWR | O_CREAT), 0644);
-	int fd = open(pwd, (O_RDWR | O_CREAT), 0644);
+    int fd = open("test1.txt",(O_RDWR | O_CREAT), 0644);
+    //int fd = open(pwd, (O_RDWR | O_CREAT), 0644);
 	dup2(fd,STDOUT_FILENO); // 用我们新打开的文件描述符替换掉 标准输出
 	//printf("test file\n");
 #endif
@@ -216,7 +216,7 @@ int main(int argc, char *argv[])
 	//pool_init (128); 
 	get_fw();
 	pthread_create(&newthread , NULL, (void *)daemon_thread, NULL);
-	pthread_create(&vinthread , NULL, (void *)thread_get_vin, NULL);
+    //pthread_create(&vinthread , NULL, (void *)thread_get_vin, NULL);
 	pool_init (8); 
 	while (1)
 	{

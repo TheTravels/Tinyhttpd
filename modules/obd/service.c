@@ -608,9 +608,10 @@ void thread_request(void *arg)
             }
             if(_ofp_data._tlen>10)
             {
-                //printf("@%s-%d Send to client: %3d:%s\n", __func__, __LINE__, _ofp_data._tlen, _ofp_data._tbuf);
+                printf("@%s-%d Send to client: %3d:%s\n", __func__, __LINE__, _ofp_data._tlen, _ofp_data._tbuf);
                 //csend(_ofp_data._tbuf, _ofp_data._tlen);
-                    send(device->socket, buf, len, 0);
+                //send(device->socket, buf, len, 0);
+                write(device->socket, _ofp_data._tbuf, _ofp_data._tlen);
             }
             if(0!=decode)
             {
