@@ -43,6 +43,7 @@
 #include "accept_request.h"
 #include "../epoll/epoll.h"
 #include "thread_pool.h"
+#include "../epoll/epoll_server.h"
 
 //#define ISspace(x) isspace((int)(x))
 
@@ -163,6 +164,7 @@ int main(int argc, char *argv[])
 	char pwd[128] ;
 	struct passwd *npwd;
     struct epoll_obj* _epoll_listen=NULL;
+    char _epoll_listen_buf[sizeof(struct epoll_obj)];
 	npwd = getpwuid(getuid());
     port = cmd_parameter(argc, argv);
     local_config_data_init();
@@ -222,9 +224,11 @@ int main(int argc, char *argv[])
 	pthread_create(&newthread , NULL, (void *)daemon_thread, NULL);
     //pthread_create(&vinthread , NULL, (void *)thread_get_vin, NULL);
     //pool_init (8);
-    epoll_pthread_init(8);
+    epoll_pthread_init(2);
+
     printf("[%s-%d] \n", __func__, __LINE__);
-    _epoll_listen = epoll_listen_init();
+    _epoll_listen = epoll_listen_init(_epoll_listen_buf);
+    //printf("[%s-%d] \n", __func__, __LINE__);
     if(NULL==_epoll_listen)
     {
         printf("[%s-%d] listen fail!\n", __func__, __LINE__);
@@ -232,6 +236,7 @@ int main(int argc, char *argv[])
     }
     while(1)
     {
+        //printf("[%s-%d] \n", __func__, __LINE__);
         _epoll_listen->do_epoll(_epoll_listen, server_sock);
         //printf("[%s-%d] \n", __func__, __LINE__);
         //sleep(10);

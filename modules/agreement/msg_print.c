@@ -10,16 +10,6 @@
 #include "DateTime.h"
 #include <stdio.h>
 
-static struct msg_print_obj* msg_print_constructed(struct msg_print_obj* const _print_fops, void* const _obj_fops, const char _prefix[], char* const _stream, const size_t _n)
-{
-    struct msg_print_obj _fops = { _print_fops->fops, "PathPrefix", _stream, _n};
-    char* const prefix = _fops.PathPrefix;
-    struct msg_print_obj* _obj = (struct msg_print_obj*)_obj_fops;
-    memset(prefix, 0, sizeof(_fops.PathPrefix));
-    memcpy(prefix, _prefix, strlen(_prefix));
-    memcpy(_obj, &_fops, sizeof(_fops));
-    return _obj;
-}
 static int init(struct msg_print_obj* const _fops)
 {
     memset(_fops->__stream, 0, _fops->__n);
@@ -159,6 +149,16 @@ static void utc_format(struct msg_print_obj* const _fops, const uint32_t times, 
     buf[5] = localtime.second%59;
 }
 
+static struct msg_print_obj* msg_print_constructed(struct msg_print_obj* const _print_fops, void* const _obj_fops, const char _prefix[], char* const _stream, const size_t _n)
+{
+    struct msg_print_obj _fops = { _print_fops->fops, "PathPrefix", _stream, _n};
+    char* const prefix = _fops.PathPrefix;
+    struct msg_print_obj* _obj = (struct msg_print_obj*)_obj_fops;
+    memset(prefix, 0, sizeof(_fops.PathPrefix));
+    memcpy(prefix, _prefix, strlen(_prefix));
+    memcpy(_obj_fops, &_fops, sizeof(_fops));
+    return _obj;
+}
 const struct msg_print_fops _msg_print_fops = {
     .constructed = msg_print_constructed,
     .init = init,

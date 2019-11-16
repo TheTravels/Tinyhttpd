@@ -47,7 +47,7 @@ struct epoll_fops{
     // 构造函数
     struct epoll_obj* (*const constructed)(struct epoll_obj* const _this, void* const _obj_buf, const epoll_do_epoll_func_t _do_epoll, const epoll_handle_events_func_t _events, const epoll_handle_accept_func_t _accept, void* const data);
     int (*const do_read)(struct epoll_obj* const _this, int const fd, char* const buf, const int _max_size);
-    void (*const do_write)(struct epoll_obj* const _this, int fd, char* buf);
+    void (*const do_write)(struct epoll_obj* const _this, int fd, char* buf, const int _size);
     void (*const add_event)(struct epoll_obj* const _this, int fd, int state);
     void (*const modify_event)(struct epoll_obj* const _this, int fd, int state);
     void (*const delete_event)(struct epoll_obj* const _this, int fd, int state);

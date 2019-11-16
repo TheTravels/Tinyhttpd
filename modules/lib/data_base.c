@@ -85,8 +85,8 @@ static int data_base_fops_close(struct data_base_obj *const _db)
 }
 static int data_base_fops_create_sql(struct data_base_obj *const _db)
 {
-    static char sql_field[1024 * 10];   // 字段
-    static char sql_value[1024 * 10];   // 值
+    char sql_field[1024 * 5];   // 字段
+    char sql_value[1024 * 5];   // 值
     //static char sql_query[1024 * 10];   // SQL语句
     unsigned int index = 0;
     char* _field = NULL;

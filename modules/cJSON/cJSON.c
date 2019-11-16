@@ -146,8 +146,8 @@ static void * CJSON_CDECL internal_realloc(void *pointer, size_t size)
     return realloc(pointer, size);
 }
 #else
-#define SMEM_MALLOC  1
-#if (!SMEM_MALLOC)
+#define SMEM_MALLOC  0
+#if (!SMEM_MALLOC)  // 多线程应用使用系统动态内存分配
 #define internal_malloc malloc
 #define internal_free free
 #define internal_realloc realloc

@@ -19,7 +19,10 @@ extern "C" {
         char field[32];      // 字段
         char format[32];     // 格式
         char value[512];     // 值
-	};
+    };
+    struct db_sql_pool{
+        char sql[1024 * 10];                      // SQL语句
+    };
     struct data_base_obj;
     struct data_base_fops{ // 操作函数集
         // 构造函数
@@ -27,7 +30,10 @@ extern "C" {
         int (* const init)(struct data_base_obj *const _db);
         int (* const clear)(struct data_base_obj *const _db);
         int (* const close)(struct data_base_obj *const _db);
+        // 创建生成 SQL 语句
         int (* const create_sql)(struct data_base_obj *const _db);
+        // 执行 SQL 语句
+        //int (* const exec_sql)(struct data_base_obj *const _db);
         int (* const insert_sql)(struct data_base_obj *const _db);
         int (* const insert_item_format)(struct data_base_obj *const _db, const char* const field, ...);
         int (* const insert_item)(struct data_base_obj *const _db, const char* const field, const double _value);
@@ -46,6 +52,8 @@ extern "C" {
         const char* const tbl_name;  // 表名
         int update_flag;    // 更新标志
         char sql_query[1024 * 10];                      // SQL语句
+        struct db_sql_pool sql_pool[1];          // SQL语句
+        int sql_pool_size;
     };
 
     extern const struct data_base_fops _data_base_fops;

@@ -43,7 +43,7 @@ static void handle_events_listen(struct epoll_obj* const _this, struct epoll_eve
         }
 		else if(events[i].events & EPOLLOUT)
         {
-            _this->fops.do_write(_this, fd, buf);
+            _this->fops.do_write(_this, fd, buf, strlen(buf));
         }
 	}
 }
@@ -199,28 +199,30 @@ static void handle_events_server(struct epoll_obj* const _this, struct epoll_eve
                 if(_ofp_data._tlen>10)
                 {
                     printf("@%s-%d Send to client: %3d:%s\n", __func__, __LINE__, _ofp_data._tlen, _ofp_data._tbuf);
-                    write(fd, _ofp_data._tbuf, _ofp_data._tlen);
+                    //write(fd, _ofp_data._tbuf, _ofp_data._tlen);
+                    _this->fops.do_write(_this, fd, _ofp_data._tbuf, _ofp_data._tlen);
                 }
             }
         }
         else if(events[i].events & EPOLLOUT)
         {
-            _this->fops.do_write(_this, fd, buf);
+            _this->fops.do_write(_this, fd, buf, strlen(buf));
         }
     }
 }
 
 //监听
-static struct epoll_obj* epoll_obj_listen=NULL;
-static char epoll_obj_listen_buf[sizeof(struct epoll_obj)];
+//static struct epoll_obj* epoll_obj_listen=NULL;
+//static char epoll_obj_listen_buf[sizeof(struct epoll_obj)];
 //server
 //struct epoll_obj* epoll_obj_server=NULL;
 //static char epoll_obj_server_buf[sizeof(struct epoll_obj)];
 
-struct epoll_obj* epoll_listen_init(void)
+struct epoll_obj* epoll_listen_init(void* const _epoll_buf)
 {
-    epoll_obj_listen = epoll_obj_base.fops.constructed(&epoll_obj_base, epoll_obj_listen_buf, do_epoll_listen, handle_events_listen, handle_accept_listen, NULL);
-    return epoll_obj_listen;
+    struct epoll_obj* _epoll=NULL;
+    _epoll = epoll_obj_base.fops.constructed(&epoll_obj_base, _epoll_buf, do_epoll_listen, handle_events_listen, handle_accept_listen, NULL);
+    return _epoll;
 }
 struct epoll_obj* epoll_server_init(void* const _epoll_buf, void* const data)
 {

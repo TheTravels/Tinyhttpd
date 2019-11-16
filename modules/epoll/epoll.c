@@ -20,6 +20,18 @@
 #include<sys/types.h>
 #include "epoll.h"
 
+#define  debug_log     0
+#ifndef debug_log
+#define  debug_log     1
+#endif
+
+//#ifdef debug_log
+#if debug_log
+#define pr_debug(fmt, ...) printf(fmt, ##__VA_ARGS__); fflush(stdout);
+#else
+#define pr_debug(fmt, ...) ; //
+#endif
+
 #define IPADDRESS "127.0.0.1"
 #define PORT 6666
 //#define MAXSIZE 1024
@@ -83,7 +95,7 @@ static void epoll_do_epoll(struct epoll_obj* const _this, int listenfd)
 	memset(buf, 0, MAXSIZE);
     _this->epollfd = epoll_create(FDSIZE);
     _this->fops.add_event(_this, listenfd, EPOLLIN);
-    printf("[%s-%d] \n", __func__, __LINE__);
+    pr_debug("[%s-%d] \n", __func__, __LINE__);
     while(1)
 	{
         ret = epoll_wait(_this->epollfd, _this->events, EPOLLEVENTS, -1);
@@ -102,7 +114,7 @@ static void epoll_handle_events(struct epoll_obj* const _this, struct epoll_even
 		else if(events[i].events & EPOLLIN)
             _this->fops.do_read(_this, fd, buf, _max_size);
 		else if(events[i].events & EPOLLOUT)
-            _this->fops.do_write(_this, fd, buf);
+            _this->fops.do_write(_this, fd, buf, strlen(buf));
 	}
 }
 static void epoll_handle_accept(struct epoll_obj* const _this, int listenfd)
@@ -115,7 +127,7 @@ static void epoll_handle_accept(struct epoll_obj* const _this, int listenfd)
 		perror("accept error:");
 	else
 	{
-        printf("[%s-%d] accept a new client: %s:%d\n", __func__, __LINE__, inet_ntoa(cliaddr.sin_addr), cliaddr.sin_port);
+        pr_debug("[%s-%d] accept a new client: %s:%d\n", __func__, __LINE__, inet_ntoa(cliaddr.sin_addr), cliaddr.sin_port);
         _this->fops.add_event(_this, clifd, EPOLLIN);  //  这里应该添加到处理线程
 	}
 }
@@ -132,22 +144,23 @@ static int epoll_do_read(struct epoll_obj* const _this, int const fd, char* cons
 	}
 	else if(nread == 0)
 	{
-		fprintf(stderr, "client close.\n");
+        fprintf(stderr, "client close.\n");
 		close(fd);
         _this->fops.delete_event(_this, fd, EPOLLIN);
 	}
 	else
 	{
-		printf("read message is : %s", buf);
+        pr_debug("read message is : %s", buf);
         _this->fops.modify_event(_this, fd, EPOLLOUT);
 	}
     return nread;
 }
 
-static void epoll_do_write(struct epoll_obj* const _this, int fd, char* buf)
+static void epoll_do_write(struct epoll_obj* const _this, int fd, char* buf, const int _size)
 {
 	int nwrite;
-	nwrite = write(fd, buf, strlen(buf));
+    //nwrite = write(fd, buf, strlen(buf));
+    nwrite = write(fd, buf, _size);
 	if(nwrite == -1)
 	{
 		perror("write error:");
@@ -166,7 +179,7 @@ static void epoll_add_event(struct epoll_obj* const _this, int fd, int state)
 	ev.data.fd = fd;
     epoll_ctl(_this->epollfd, EPOLL_CTL_ADD, fd, &ev);
     _this->fd_count++;
-    printf("[%s-%d] \n", __func__, __LINE__);
+    pr_debug("[%s-%d] \n", __func__, __LINE__);
 }
 
 static void epoll_delete_event(struct epoll_obj* const _this, int fd, int state)
@@ -176,7 +189,7 @@ static void epoll_delete_event(struct epoll_obj* const _this, int fd, int state)
 	ev.data.fd = fd;
     epoll_ctl(_this->epollfd, EPOLL_CTL_DEL, fd, &ev);
     _this->fd_count--;
-    printf("[%s-%d] \n", __func__, __LINE__);
+    pr_debug("[%s-%d] \n", __func__, __LINE__);
 }
 
 static void epoll_modify_event(struct epoll_obj* const _this, int fd, int state)
@@ -185,7 +198,7 @@ static void epoll_modify_event(struct epoll_obj* const _this, int fd, int state)
 	ev.events = state;
 	ev.data.fd = fd;
     epoll_ctl(_this->epollfd, EPOLL_CTL_MOD, fd, &ev);
-    printf("[%s-%d] \n", __func__, __LINE__);
+    pr_debug("[%s-%d] \n", __func__, __LINE__);
 }
 
 static struct epoll_obj* epoll_obj_list[epoll_obj_list_size];
@@ -193,13 +206,13 @@ static int add_epoll_obj(struct epoll_obj* const _this)
 {
     int index;
     struct epoll_obj* _obj=NULL;
-    printf("[%s-%d] \n", __func__, __LINE__);
+    pr_debug("[%s-%d] \n", __func__, __LINE__);
     for(index=0; index<epoll_obj_list_size; index++)
     {
         _obj=epoll_obj_list[index];
         if(NULL == _obj)
         {
-            printf("[%s-%d] \n", __func__, __LINE__);
+            pr_debug("[%s-%d] \n", __func__, __LINE__);
             epoll_obj_list[index] = _this;
             return 0;
         }
@@ -210,13 +223,13 @@ static int del_epoll_obj(struct epoll_obj* const _this)
 {
     int index;
     struct epoll_obj* _obj=NULL;
-    printf("[%s-%d] \n", __func__, __LINE__);
+    pr_debug("[%s-%d] \n", __func__, __LINE__);
     for(index=0; index<epoll_obj_list_size; index++)
     {
         _obj=epoll_obj_list[index];
         if(_this == _obj)
         {
-            printf("[%s-%d] \n", __func__, __LINE__);
+            pr_debug("[%s-%d] \n", __func__, __LINE__);
             epoll_obj_list[index] = NULL;
             return 0;
         }
@@ -244,7 +257,7 @@ static struct epoll_obj* __this_constructed(struct epoll_obj* const _this, void*
         .data = data,
     };
     struct epoll_obj* const _obj = (struct epoll_obj*)_obj_buf;
-    //printf("[%s-%d] _n:%d\n", __func__, __LINE__, _n);  fflush(stdout);
+    pr_debug("[%s-%d] _n:%d\n", __func__, __LINE__, _n);  fflush(stdout);
     memset(_fops.events, 0, sizeof(_fops.events));
     memcpy(_obj_buf, &_fops, sizeof(_fops));
     return _obj;

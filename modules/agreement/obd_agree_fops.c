@@ -403,7 +403,7 @@ int obd_fops_decode_server(struct obd_agree_obj* const _obd_fops, const uint8_t 
             break;
     }*/
     //protocol_yunjing(print, &relay, _agree_ofp, (const struct general_pack_shanghai* const)_msg_buf, device, csend, _buf, _bsize);
-    //printf("@%s-%d \n", __func__, __LINE__);
+    printf("[@%s-%d] _print:%p fops:%p print:%p \n", __func__, __LINE__, _print, _print->fops, _print->fops->print);
     _print->fops->print(_print, "协议:[%s]\t", _obd_fops->fops->agree_des);
     _obd_fops->fops->protocol_server(_obd_fops, _ofp_data, &_db_report, _print);
     //printf("@%s-%d \n", __func__, __LINE__);
