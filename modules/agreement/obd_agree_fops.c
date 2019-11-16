@@ -444,7 +444,7 @@ int obd_fops_decode_server(struct obd_agree_obj* const _obd_fops, const uint8_t 
     {
         //printf("%s", _ofp_data->_print_buf);
         printf("%s", _print->__stream);
-        _print->fops->fflush(_print);
+        //_print->fops->fflush(_print);
         fflush(stdout);
     }
     return 0;

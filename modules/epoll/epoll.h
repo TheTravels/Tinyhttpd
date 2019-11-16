@@ -32,7 +32,7 @@ extern "C" {
 #define LISTENQ 5
 //#define FDSIZE 1000
 //#define EPOLLEVENTS 100
-#define FDSIZE 10000
+#define FDSIZE 10240
 #define EPOLLEVENTS 4096
 
 struct epoll_obj;
@@ -43,7 +43,7 @@ typedef void (*epoll_handle_accept_func_t)(struct epoll_obj* const _this, int li
 // epoll 个数
 #define epoll_obj_list_size   128
 // epoll 中数据即连接个数，每个连接对应一个数据
-#define epoll_obj_data_size   1024
+#define epoll_obj_data_size   10240
 
 struct epoll_fops{
     // 构造函数
