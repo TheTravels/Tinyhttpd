@@ -1611,6 +1611,7 @@ modules/obd/trunking.h
 msg_relay.c
 simpleclient.c
 sql.c
+target.mk
 thread_pool.c
 thread_pool.h
 trunking.c

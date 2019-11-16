@@ -1,0 +1,49 @@
+# target list
+
+#SRCS     := main.c daemon_init.c lock.c thread_pool.c #trunking.c
+OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/,$(basename main.c daemon_init.c lock.c thread_pool.c)))
+CFG_DIR  := OBD_Report
+CFG_SRC  := json_list.c thread_list.c msg_relay.c trunking.c service.c thread_vin.c
+TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/OBD_Report/,$(basename $(CFG_SRC))))
+OBD_DIR  := OBD_Report/agreement
+OBD_SRC   = $(notdir $(wildcard $(ROOT)/$(OBD_DIR)/*.c))
+TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(OBD_DIR)/,$(basename $(OBD_SRC))))
+#RSA_DIR  := RSA
+#RSA_SRC   = bignum.c prime.c rsa.c
+TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/RSA/,$(basename bignum.c prime.c rsa.c)))
+#UTC_SRC   = UTC/GpsUtcAndLocalTime/GpsUtcAndLocalTime/DateTime.c
+TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/modules/UTC/,$(basename DateTime.c)))
+#cJSON_DIR  := modules/cJSON
+#cJSON_SRC   = cJSON.c mem_malloc.c
+TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/modules/cJSON/,$(basename cJSON.c mem_malloc.c)))
+#CONFIG_DIR  := modules/config
+#CONFIG_SRC   = config_load.c config_data.c
+#CONFIG_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(CONFIG_DIR)/,$(basename $(CONFIG_SRC))))
+TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/modules/config/,$(basename config_load.c config_data.c)))
+#MODULE_DIR  := modules/lib
+#MODULE_SRC   = data_base.c
+#MODULE_OBJS  = $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(MODULE_DIR)/,$(basename $(MODULE_SRC))))
+#TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/modules/lib/,$(basename data_base.c)))
+#EPOLL_DIR  := modules/epoll
+#EPOLL_SRC   = epoll.c epoll_server.c
+TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/modules/epoll/,$(basename epoll.c epoll_server.c)))
+#JSON_DIR  := OBD_Report/json
+#JSON_SRC   = configure.c  vin_list.c
+TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/OBD_Report/json/,$(basename configure.c  vin_list.c)))
+#MYSQL_DIR  := OBD_Report/mysql
+#MYSQL_SRC   = MySql.c
+#MYSQL_DIR  := OBD_Report/lib
+#MYSQL_SRC   = data_base.c sql.c fw.c
+#MYSQL
+TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/OBD_Report/lib/,$(basename data_base.c sql.c fw.c)))
+
+INC      += -I $(ROOT)/modules/cJSON
+INC      += -I $(ROOT)/OBD_Report
+#INC      += -I $(ROOT)/OBD_Report/Encrypt
+INC      += -I $(ROOT)/RSA
+INC      += -I $(ROOT)/UTC/GpsUtcAndLocalTime/GpsUtcAndLocalTime
+#INC      += -I $(ROOT)/OBD_Report/mysql
+#INC      += -I $(ROOT)/OBD_Report/mysql/include
+INC      += -I $(ROOT)/OBD_Report/lib
+INC      += -I $(ROOT)/OBD_Report/lib/include
+INC      += -I $(ROOT)/modules
