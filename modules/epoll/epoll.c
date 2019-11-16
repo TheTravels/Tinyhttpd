@@ -40,9 +40,11 @@ static int socket_bind(const char* ip, int port);
 
 int epoll_main(int argc, char* argv[])
 {
+    (void)argc;
+    (void)argv;
     struct epoll_obj* _epoll_obj=NULL;
     char _epoll_obj_buf[sizeof(struct epoll_obj)];
-    _epoll_obj = epoll_obj_base.fops.constructed(&epoll_obj_base, _epoll_obj_buf, NULL, NULL, NULL);
+    _epoll_obj = epoll_obj_base.fops.constructed(&epoll_obj_base, _epoll_obj_buf, NULL, NULL, NULL, NULL);
 	int listenfd;
 	listenfd = socket_bind(IPADDRESS, PORT);   //绑定socket
 	listen(listenfd, LISTENQ);       //监听
@@ -223,13 +225,14 @@ static int del_epoll_obj(struct epoll_obj* const _this)
 }
 static struct epoll_obj* get_epoll_obj(struct epoll_obj* const _this, const int _index)
 {
+    (void)_this;
     if(_index<epoll_obj_list_size) return epoll_obj_list[_index];
     return NULL;
 }
 
 // 构造函数
 //static struct config_load_obj* __this_constructed(struct config_load_obj* const _load_obj, void* const _obj_buf, const config_load_func_t _load_func, const char _cfg_path[], char* const _stream, const size_t _n, void* const _data)
-static struct epoll_obj* __this_constructed(struct epoll_obj* const _this, void* const _obj_buf, const epoll_do_epoll_func_t _do_epoll, const epoll_handle_events_func_t _events, const epoll_handle_accept_func_t _accept)
+static struct epoll_obj* __this_constructed(struct epoll_obj* const _this, void* const _obj_buf, const epoll_do_epoll_func_t _do_epoll, const epoll_handle_events_func_t _events, const epoll_handle_accept_func_t _accept, void* const data)
 {
     struct epoll_obj _fops = {
         .fops = _this->fops,
@@ -238,14 +241,15 @@ static struct epoll_obj* __this_constructed(struct epoll_obj* const _this, void*
         .handle_accept = _accept,
         .epollfd = 0,
         .fd_count = 0,
+        .data = data,
     };
-    struct config_load_obj* const _obj = (struct config_load_obj*)_obj_buf;
+    struct epoll_obj* const _obj = (struct epoll_obj*)_obj_buf;
     //printf("[%s-%d] _n:%d\n", __func__, __LINE__, _n);  fflush(stdout);
     memset(_fops.events, 0, sizeof(_fops.events));
     memcpy(_obj_buf, &_fops, sizeof(_fops));
     return _obj;
 }
-static struct epoll_obj* this_constructed(struct epoll_obj* const _this, void* const _obj_buf, const epoll_do_epoll_func_t _do_epoll, const epoll_handle_events_func_t _events, const epoll_handle_accept_func_t _accept)
+static struct epoll_obj* this_constructed(struct epoll_obj* const _this, void* const _obj_buf, const epoll_do_epoll_func_t _do_epoll, const epoll_handle_events_func_t _events, const epoll_handle_accept_func_t _accept, void* const data)
 {
     epoll_do_epoll_func_t do_epoll = _do_epoll;
     if(NULL == do_epoll) do_epoll = _this->do_epoll;
@@ -253,7 +257,7 @@ static struct epoll_obj* this_constructed(struct epoll_obj* const _this, void* c
     if(NULL == events) events = _this->handle_events;
     epoll_handle_accept_func_t accept = _accept;
     if(NULL == accept) accept = _this->handle_accept;
-    return __this_constructed(_this, _obj_buf, do_epoll, events, accept);
+    return __this_constructed(_this, _obj_buf, do_epoll, events, accept, data);
 }
 //监听
 struct epoll_obj epoll_obj_base = {
@@ -274,4 +278,5 @@ struct epoll_obj epoll_obj_base = {
     .epollfd = 0,
     .fd_count = 0,
     .events = {0},
+    .data = NULL,
 };

@@ -37,14 +37,15 @@ extern "C" {
 
 struct epoll_obj;
 typedef void (*epoll_do_epoll_func_t)(struct epoll_obj* const _this, int listenfd);
-typedef void (*epoll_handle_events_func_t)(struct epoll_obj* const _this, struct epoll_event* events, int num, int listenfd, char* buf);
+typedef void (*epoll_handle_events_func_t)(struct epoll_obj* const _this, struct epoll_event* const events, const int num, const int listenfd, char* const buf, const int _max_size);
 typedef void (*epoll_handle_accept_func_t)(struct epoll_obj* const _this, int listenfd);
 
 #define epoll_obj_list_size   1024
+#define epoll_obj_data_size   1024
 
 struct epoll_fops{
     // 构造函数
-    struct epoll_obj* (*const constructed)(struct epoll_obj* const _this, void* const _obj_buf, const epoll_do_epoll_func_t _do_epoll, const epoll_handle_events_func_t _events, const epoll_handle_accept_func_t _accept);
+    struct epoll_obj* (*const constructed)(struct epoll_obj* const _this, void* const _obj_buf, const epoll_do_epoll_func_t _do_epoll, const epoll_handle_events_func_t _events, const epoll_handle_accept_func_t _accept, void* const data);
     int (*const do_read)(struct epoll_obj* const _this, int const fd, char* const buf, const int _max_size);
     void (*const do_write)(struct epoll_obj* const _this, int fd, char* buf);
     void (*const add_event)(struct epoll_obj* const _this, int fd, int state);
@@ -64,11 +65,12 @@ struct epoll_obj{
     int epollfd;       // 文件描述符
     int fd_count;      // 文件描述符计数
     struct epoll_event events[EPOLLEVENTS];
+    void* const data;
 };
 
 extern struct epoll_obj epoll_obj_base;
-extern struct epoll_obj* epoll_listen_init(void);
-extern struct epoll_obj* epoll_server_init(void* const _epoll_buf);
+//extern struct epoll_obj* epoll_listen_init(void);
+//extern struct epoll_obj* epoll_server_init(void* const _epoll_buf, void* const data);
 
 #ifdef __cplusplus
 }

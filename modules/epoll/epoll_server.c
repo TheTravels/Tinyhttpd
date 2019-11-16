@@ -10,17 +10,7 @@
 * https://github.com/merafour
 ******************************************************************************/
 #include "epoll.h"
-#include "../agreement/obd_agree_fops.h"
-#include "../agreement/msg_print.h"
-
-//#define MAXSIZE 4096
-//#define LISTENQ 5
-
-struct epoll_thread_data{
-    int flag;
-    char _obd_obj_buf[sizeof(struct obd_agree_obj)];
-    struct obd_agree_obj* _obd_obj;
-};
+#include "epoll_server.h"
 
 //监听
 static void do_epoll_listen(struct epoll_obj* const _this, int listenfd)
@@ -120,12 +110,39 @@ static void do_epoll_server(struct epoll_obj* const _this, int listenfd)
     }
     //close(_this->epollfd);
 }
+static struct epoll_thread_data* get_epoll_data(struct epoll_obj* const _this, const int fd)
+{
+    int i;
+    struct epoll_thread_data* const _data_list = (struct epoll_thread_data*)_this->data;
+    struct epoll_thread_data* _data=NULL;
+    for(i=0; i<epoll_obj_data_size; i++)
+    {
+        _data = &_data_list[i];
+        if(fd==_data->fd)
+        {
+            return _data;
+        }
+    }
+    for(i=0; i<epoll_obj_data_size; i++)
+    {
+        _data = &_data_list[i];
+        if(0==_data->flag)
+        {
+            _data->fd = fd;
+            _data->flag = 1;
+            _data->_obd_obj = NULL;
+            return _data;
+        }
+    }
+    return NULL;
+}
 static void handle_events_server(struct epoll_obj* const _this, struct epoll_event* const events, const int num, const int listenfd, char* const buf, const int _max_size)
 {
     int i, fd;
-    char _obd_obj_buf[sizeof(struct obd_agree_obj)];
+    //char _obd_obj_buf[sizeof(struct obd_agree_obj)];
     //struct obd_agree_obj* const _obd_obj = obd_agree_obj_yunjing.fops->constructed(&obd_agree_obj_yunjing, _obd_obj_buf);
-    struct obd_agree_obj* const _obd_obj = obd_agree_obj_shanghai.fops->constructed(&obd_agree_obj_shanghai, _obd_obj_buf);
+    //struct obd_agree_obj* const _obd_obj = obd_agree_obj_shanghai.fops->constructed(&obd_agree_obj_shanghai, _obd_obj_buf);
+
     char __stream[1024*30] = "\0";
     struct msg_print_obj _print = {
         .fops = &_msg_print_fops,
@@ -133,6 +150,7 @@ static void handle_events_server(struct epoll_obj* const _this, struct epoll_eve
         .__n = sizeof(__stream),
     };
     struct obd_agree_ofp_data _ofp_data;
+    struct epoll_thread_data* _thread_data = NULL;
     uint8_t msg_buf[4096];
     for(i = 0; i<num; i++)
     {
@@ -146,27 +164,38 @@ static void handle_events_server(struct epoll_obj* const _this, struct epoll_eve
             int nread;
             int decode; // 解码数据
             //struct epoll_thread_data* const _thread_data = (struct epoll_thread_data*)events[i].data.ptr;
+            _thread_data = get_epoll_data(_this, fd);
             memset(buf, 0, _max_size);
             nread = _this->fops.do_read(_this, fd, buf, _max_size);
+            if(NULL==_thread_data) continue;
             if(nread>0)
             {
                 // handle
                 memset(&_ofp_data, 0, sizeof(_ofp_data));
                 _print.fops->init(&_print);
-                _print.fops->print(&_print, "协议类型：%s device->protocol:%d\n", _obd_obj->fops->agree_des, _obd_obj->fops->protocol); fflush(stdout);
-                decode = _obd_obj->fops->decode_server(_obd_obj, (const uint8_t *)buf, nread, msg_buf, sizeof(msg_buf), &_ofp_data, &_print);
-                //switch(device->protocol) // 判断协议类型
-                /*// 逐个协议遍历
-                msg_print(_print_buf, _print_bsize, "逐个协议遍历 device->protocol:%d\n", device->protocol); fflush(stdout);
-                decode = _obd_obj->fops->decode_server(_obd_obj, (const uint8_t *)data, numchars-len, msg_buf, sizeof(msg_buf), &_ofp_data, &_print);
-                if(0==decode) device->protocol = PRO_TYPE_SHH;
-                if(0!=decode)
+                if(NULL!=_thread_data->_obd_obj)
                 {
-                    msg_print(_print_buf, _print_bsize, "逐个协议遍历 device->protocol:%d\n", device->protocol); fflush(stdout);
-                    //decode = decode_server(&print, _agree_obd_yj, (const uint8_t *)data, numchars-len, msg_buf, sizeof(msg_buf), device, csend, _print_buf, _print_bsize);
-                    decode = _obd_obj->fops->decode_server(_obd_obj, (const uint8_t *)data, numchars-len, msg_buf, sizeof(msg_buf), &_ofp_data, &_print);
-                    if(0==decode) device->protocol = PRO_TYPE_YJ;
-                }*/
+                    struct obd_agree_obj* _obd_obj = _thread_data->_obd_obj;
+                    _print.fops->print(&_print, "协议类型：%s protocol:%d\n", _obd_obj->fops->agree_des, _obd_obj->fops->protocol); fflush(stdout);
+                    decode = _obd_obj->fops->decode_server(_obd_obj, (const uint8_t *)buf, nread, msg_buf, sizeof(msg_buf), &_ofp_data, &_print);
+                }
+                else // 判断协议类型
+                {
+                    // 逐个协议遍历
+                    struct obd_agree_obj* _obd_obj = NULL;
+                    _obd_obj = obd_agree_obj_shanghai.fops->constructed(&obd_agree_obj_shanghai, _thread_data->_obd_obj_buf);
+                    _print.fops->print(&_print, "逐个协议遍历 : %s protocol:%d\n", _obd_obj->fops->agree_des, _obd_obj->fops->protocol); fflush(stdout);
+                    decode = _obd_obj->fops->decode_server(_obd_obj, (const uint8_t *)buf, nread, msg_buf, sizeof(msg_buf), &_ofp_data, &_print);
+                    if(0==decode) _thread_data->_obd_obj = _obd_obj;
+                    if(0!=decode)
+                    {
+                        _obd_obj = obd_agree_obj_yunjing.fops->constructed(&obd_agree_obj_yunjing, _thread_data->_obd_obj_buf);
+                        _print.fops->print(&_print, "逐个协议遍历 : %s protocol:%d\n", _obd_obj->fops->agree_des, _obd_obj->fops->protocol); fflush(stdout);
+                        //decode = decode_server(&print, _agree_obd_yj, (const uint8_t *)data, numchars-len, msg_buf, sizeof(msg_buf), device, csend, _print_buf, _print_bsize);
+                        decode = _obd_obj->fops->decode_server(_obd_obj, (const uint8_t *)buf, nread, msg_buf, sizeof(msg_buf), &_ofp_data, &_print);
+                        if(0==decode) _thread_data->_obd_obj = _obd_obj;
+                    }
+                }
                 if(_ofp_data._tlen>10)
                 {
                     printf("@%s-%d Send to client: %3d:%s\n", __func__, __LINE__, _ofp_data._tlen, _ofp_data._tbuf);
@@ -190,13 +219,13 @@ static char epoll_obj_listen_buf[sizeof(struct epoll_obj)];
 
 struct epoll_obj* epoll_listen_init(void)
 {
-    epoll_obj_listen = epoll_obj_base.fops.constructed(&epoll_obj_base, epoll_obj_listen_buf, do_epoll_listen, handle_events_listen, handle_accept_listen);
+    epoll_obj_listen = epoll_obj_base.fops.constructed(&epoll_obj_base, epoll_obj_listen_buf, do_epoll_listen, handle_events_listen, handle_accept_listen, NULL);
     return epoll_obj_listen;
 }
-struct epoll_obj* epoll_server_init(void* const _epoll_buf)
+struct epoll_obj* epoll_server_init(void* const _epoll_buf, void* const data)
 {
     struct epoll_obj* _epoll=NULL;
-    _epoll = epoll_obj_base.fops.constructed(&epoll_obj_base, _epoll_buf, do_epoll_server, handle_events_server, NULL);
+    _epoll = epoll_obj_base.fops.constructed(&epoll_obj_base, _epoll_buf, do_epoll_server, handle_events_server, NULL, data);
     return _epoll;
 }
 
