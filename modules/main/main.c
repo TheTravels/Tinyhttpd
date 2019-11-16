@@ -41,6 +41,8 @@
 //#include "DateTime.h"
 #include "../obd/thread_vin.h"
 #include "accept_request.h"
+#include "../epoll/epoll.h"
+#include "thread_pool.h"
 
 //#define ISspace(x) isspace((int)(x))
 
@@ -50,6 +52,7 @@
 //#define STDERR  2
 
 extern int cmd_parameter(int argc, char *argv[]);
+extern void epoll_pthread_init(const int _thread_max);
 extern int save_log;
 extern int relay;
 
@@ -159,6 +162,7 @@ int main(int argc, char *argv[])
 	struct device_list* device;
 	char pwd[128] ;
 	struct passwd *npwd;
+    struct epoll_obj* _epoll_listen=NULL;
 	npwd = getpwuid(getuid());
     port = cmd_parameter(argc, argv);
     local_config_data_init();
@@ -190,7 +194,7 @@ int main(int argc, char *argv[])
 	//printf("test file\n");
 #endif
 	//init_signals();
-	signal(SIGSEGV, when_sigsegv);
+    //signal(SIGSEGV, when_sigsegv);
 	/*struct passwd *npwd;
 	npwd = getpwuid(getuid());
 	printf("当前登陆的用户名为：%s\n", npwd->pw_name);*/
@@ -217,7 +221,21 @@ int main(int argc, char *argv[])
 	get_fw();
 	pthread_create(&newthread , NULL, (void *)daemon_thread, NULL);
     //pthread_create(&vinthread , NULL, (void *)thread_get_vin, NULL);
-	pool_init (8); 
+    //pool_init (8);
+    epoll_pthread_init(8);
+    printf("[%s-%d] \n", __func__, __LINE__);
+    _epoll_listen = epoll_listen_init();
+    if(NULL==_epoll_listen)
+    {
+        printf("[%s-%d] listen fail!\n", __func__, __LINE__);
+        exit(0);
+    }
+    while(1)
+    {
+        _epoll_listen->do_epoll(_epoll_listen, server_sock);
+        //printf("[%s-%d] \n", __func__, __LINE__);
+        //sleep(10);
+    }
 	while (1)
 	{
 		//pthread_attr_t attr;
@@ -247,7 +265,7 @@ int main(int argc, char *argv[])
 		if (pthread_create(&newthread , &attr, (void *)accept_request, (void *)device) != 0)
 			perror("pthread_create");
 #else
-		pool_add_worker(accept_request, device);
+        pool_add_worker(accept_request, device);
 #endif
 #endif
 	}

@@ -22,10 +22,10 @@
 
 #define IPADDRESS "127.0.0.1"
 #define PORT 6666
-#define MAXSIZE 1024
-#define LISTENQ 5
-#define FDSIZE 1000
-#define EPOLLEVENTS 100
+//#define MAXSIZE 1024
+//#define LISTENQ 5
+//#define FDSIZE 1000
+//#define EPOLLEVENTS 100
 
 //函数声明
 static int socket_bind(const char* ip, int port);
@@ -81,14 +81,15 @@ static void epoll_do_epoll(struct epoll_obj* const _this, int listenfd)
 	memset(buf, 0, MAXSIZE);
     _this->epollfd = epoll_create(FDSIZE);
     _this->fops.add_event(_this, listenfd, EPOLLIN);
+    printf("[%s-%d] \n", __func__, __LINE__);
     while(1)
 	{
         ret = epoll_wait(_this->epollfd, _this->events, EPOLLEVENTS, -1);
-        _this->handle_events(_this, _this->events, ret, listenfd, buf);
+        _this->handle_events(_this, _this->events, ret, listenfd, buf, sizeof(buf));
 	}
     close(_this->epollfd);
 }
-static void epoll_handle_events(struct epoll_obj* const _this, struct epoll_event* events, int num, int listenfd, char* buf)
+static void epoll_handle_events(struct epoll_obj* const _this, struct epoll_event* const events, const int num, const int listenfd, char* const buf, const int _max_size)
 {
 	int i, fd;
 	for(i = 0; i<num; i++)
@@ -97,7 +98,7 @@ static void epoll_handle_events(struct epoll_obj* const _this, struct epoll_even
 		if((fd == listenfd) && (events[i].events & EPOLLIN))
             _this->handle_accept(_this, listenfd);
 		else if(events[i].events & EPOLLIN)
-            _this->fops.do_read(_this, fd, buf);
+            _this->fops.do_read(_this, fd, buf, _max_size);
 		else if(events[i].events & EPOLLOUT)
             _this->fops.do_write(_this, fd, buf);
 	}
@@ -112,15 +113,15 @@ static void epoll_handle_accept(struct epoll_obj* const _this, int listenfd)
 		perror("accept error:");
 	else
 	{
-		printf("accept a new client: %s:%d\n", inet_ntoa(cliaddr.sin_addr), cliaddr.sin_port);
+        printf("[%s-%d] accept a new client: %s:%d\n", __func__, __LINE__, inet_ntoa(cliaddr.sin_addr), cliaddr.sin_port);
         _this->fops.add_event(_this, clifd, EPOLLIN);  //  这里应该添加到处理线程
 	}
 }
 
-static void epoll_do_read(struct epoll_obj* const _this, int fd, char* buf)
+static int epoll_do_read(struct epoll_obj* const _this, int const fd, char* const buf, const int _max_size)
 {
 	int nread;
-	nread = read(fd, buf, MAXSIZE);
+    nread = read(fd, buf, _max_size);
 	if(nread == -1)
 	{
 		perror("read error:");
@@ -138,6 +139,7 @@ static void epoll_do_read(struct epoll_obj* const _this, int fd, char* buf)
 		printf("read message is : %s", buf);
         _this->fops.modify_event(_this, fd, EPOLLOUT);
 	}
+    return nread;
 }
 
 static void epoll_do_write(struct epoll_obj* const _this, int fd, char* buf)
@@ -161,6 +163,8 @@ static void epoll_add_event(struct epoll_obj* const _this, int fd, int state)
 	ev.events = state;
 	ev.data.fd = fd;
     epoll_ctl(_this->epollfd, EPOLL_CTL_ADD, fd, &ev);
+    _this->fd_count++;
+    printf("[%s-%d] \n", __func__, __LINE__);
 }
 
 static void epoll_delete_event(struct epoll_obj* const _this, int fd, int state)
@@ -170,6 +174,7 @@ static void epoll_delete_event(struct epoll_obj* const _this, int fd, int state)
 	ev.data.fd = fd;
     epoll_ctl(_this->epollfd, EPOLL_CTL_DEL, fd, &ev);
     _this->fd_count--;
+    printf("[%s-%d] \n", __func__, __LINE__);
 }
 
 static void epoll_modify_event(struct epoll_obj* const _this, int fd, int state)
@@ -178,7 +183,7 @@ static void epoll_modify_event(struct epoll_obj* const _this, int fd, int state)
 	ev.events = state;
 	ev.data.fd = fd;
     epoll_ctl(_this->epollfd, EPOLL_CTL_MOD, fd, &ev);
-    _this->fd_count++;
+    printf("[%s-%d] \n", __func__, __LINE__);
 }
 
 static struct epoll_obj* epoll_obj_list[epoll_obj_list_size];
@@ -186,11 +191,13 @@ static int add_epoll_obj(struct epoll_obj* const _this)
 {
     int index;
     struct epoll_obj* _obj=NULL;
+    printf("[%s-%d] \n", __func__, __LINE__);
     for(index=0; index<epoll_obj_list_size; index++)
     {
         _obj=epoll_obj_list[index];
         if(NULL == _obj)
         {
+            printf("[%s-%d] \n", __func__, __LINE__);
             epoll_obj_list[index] = _this;
             return 0;
         }
@@ -201,11 +208,13 @@ static int del_epoll_obj(struct epoll_obj* const _this)
 {
     int index;
     struct epoll_obj* _obj=NULL;
+    printf("[%s-%d] \n", __func__, __LINE__);
     for(index=0; index<epoll_obj_list_size; index++)
     {
         _obj=epoll_obj_list[index];
         if(_this == _obj)
         {
+            printf("[%s-%d] \n", __func__, __LINE__);
             epoll_obj_list[index] = NULL;
             return 0;
         }
