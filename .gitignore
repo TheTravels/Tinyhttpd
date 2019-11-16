@@ -126,7 +126,7 @@ release_static_mt/
 debug_static_mt/
 bin/
 bin64/
-lib/
+#lib/
 lib64/
 pocomsg.h
 */testsuite/bin/*

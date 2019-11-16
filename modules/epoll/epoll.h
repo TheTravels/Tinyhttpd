@@ -41,10 +41,7 @@ typedef void (*epoll_handle_events_func_t)(struct epoll_obj* const _this, struct
 typedef void (*epoll_handle_accept_func_t)(struct epoll_obj* const _this, int listenfd);
 
 #define epoll_obj_list_size   1024
-struct epoll_thread_data{
-    int flag;
-    void* data;
-};
+
 struct epoll_fops{
     // 构造函数
     struct epoll_obj* (*const constructed)(struct epoll_obj* const _this, void* const _obj_buf, const epoll_do_epoll_func_t _do_epoll, const epoll_handle_events_func_t _events, const epoll_handle_accept_func_t _accept);

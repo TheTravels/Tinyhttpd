@@ -16,6 +16,12 @@
 //#define MAXSIZE 4096
 //#define LISTENQ 5
 
+struct epoll_thread_data{
+    int flag;
+    char _obd_obj_buf[sizeof(struct obd_agree_obj)];
+    struct obd_agree_obj* _obd_obj;
+};
+
 //监听
 static void do_epoll_listen(struct epoll_obj* const _this, int listenfd)
 {
@@ -58,6 +64,7 @@ static void handle_accept_listen(struct epoll_obj* const _this, int listenfd)
 	socklen_t cliaddrlen;
     struct epoll_obj* _obj=NULL;
     struct epoll_obj* _obj_min=NULL;
+    int i;
     int fd_count;      // 文件描述符计数
 	clifd = accept(listenfd, (struct sockaddr*)&cliaddr, &cliaddrlen);
 	if(clifd == -1)
@@ -69,7 +76,7 @@ static void handle_accept_listen(struct epoll_obj* const _this, int listenfd)
         // 遍历,查找连接数最少的对象
         fd_count = 10000;
         _obj_min=NULL;
-        for(int i=0; i<epoll_obj_list_size; i++)
+        for(i=0; i<epoll_obj_list_size; i++)
         {
             _obj=_this->fops.get_epoll_obj(_this, i);
             if(NULL==_obj) continue;
@@ -138,6 +145,7 @@ static void handle_events_server(struct epoll_obj* const _this, struct epoll_eve
         {
             int nread;
             int decode; // 解码数据
+            //struct epoll_thread_data* const _thread_data = (struct epoll_thread_data*)events[i].data.ptr;
             memset(buf, 0, _max_size);
             nread = _this->fops.do_read(_this, fd, buf, _max_size);
             if(nread>0)
@@ -145,7 +153,7 @@ static void handle_events_server(struct epoll_obj* const _this, struct epoll_eve
                 // handle
                 memset(&_ofp_data, 0, sizeof(_ofp_data));
                 _print.fops->init(&_print);
-                _print.fops->print(&_print, "协议类型：上海OBD协议 device->protocol:%d\n", _obd_obj->fops->protocol); fflush(stdout);
+                _print.fops->print(&_print, "协议类型：%s device->protocol:%d\n", _obd_obj->fops->agree_des, _obd_obj->fops->protocol); fflush(stdout);
                 decode = _obd_obj->fops->decode_server(_obd_obj, (const uint8_t *)buf, nread, msg_buf, sizeof(msg_buf), &_ofp_data, &_print);
                 //switch(device->protocol) // 判断协议类型
                 /*// 逐个协议遍历
