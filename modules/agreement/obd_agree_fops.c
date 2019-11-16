@@ -93,6 +93,7 @@ static int fops_vin_list_load(const char *path)
 {
     uint16_t index;
     const struct vin_item* _list;
+    printf("[%s-%d] path:%s\n", __func__, __LINE__, path);
     memset(vin_item_list, 0, sizeof(vin_item_list));
     vin_item_list_index = 0;
     _vin_list_load(path, vin_item_list, vin_item_list_size);
@@ -105,7 +106,7 @@ static int fops_vin_list_load(const char *path)
     memset(&vin_item_request, 0, sizeof(vin_item_request));
     memcpy(vin_item_request[0].sn, "440303ZA0CK90N0224", 18);
     memcpy(vin_item_request[1].sn, "440303ZA0CK90N0210", 18);
-    //memcpy(vin_item_request[2].sn, "440303ZA0CK90N0220", 18);
+    memcpy(vin_item_request[2].sn, "440303ZA0CK90N0220", 18);
     //memcpy(vin_item_request[3].sn, "440303ZA0CK90N0230", 18);
     //memcpy(vin_item_request[4].sn, "440303ZA0CK90N0240", 18);
     //memcpy(vin_item_request[5].sn, "440303ZA0CK90N0250", 18);
@@ -168,11 +169,14 @@ static void fops_request_del(const char* const sn)
     uint16_t index;
     struct vin_item *_item;
     //pthread_mutex_lock (&vin_lock);
+    //printf("[%s-%d] sn:%s\n", __func__, __LINE__, sn);
+    if('\0'==sn[0]) return;
     for(index=0; index<vin_item_request_size; index++)
     {
         _item = &vin_item_request[index];
         if(0==strcmp(sn, _item->sn))
         {
+            //printf("[%s-%d] sn:%s\n", __func__, __LINE__, sn);
             memset(_item, 0, sizeof(struct vin_item));
         }
     }
@@ -190,7 +194,7 @@ static int fops_request_get(char _sn[])
         {
             memcpy(_sn, _item->sn, strlen(_item->sn));
             //pthread_mutex_unlock (&vin_lock);
-            //printf("vin_item_request_index_read..0: %d | %d \n", vin_item_request_index_read, index);
+            //printf("[%s-%d] vin_item_request_index_read..0: %d | %d \r\n", __func__, __LINE__, vin_item_request_index_read, index);
             vin_item_request_index_read = index;
             return 0;
         }
@@ -202,7 +206,7 @@ static int fops_request_get(char _sn[])
         {
             memcpy(_sn, _item->sn, strlen(_item->sn));
             //pthread_mutex_unlock (&vin_lock);
-            //printf("vin_item_request_index_read..1: %d | %d \n", vin_item_request_index_read, index);
+            //printf("[%s-%d] vin_item_request_index_read..1: %d | %d \r\n", __func__, __LINE__, vin_item_request_index_read, index);
             vin_item_request_index_read = index;
             return 0;
         }
@@ -472,7 +476,9 @@ int obd_fops_decode_client(struct obd_agree_obj* const _obd_fops, const uint8_t 
 //        pr_debug("\033[K");  //清除该行
 //    }
     len = _obd_fops->fops->decode(_obd_fops, pack, _psize, _msg_buf, _msize);
-    _print->fops->print(_print, "\n\ndecode_client len : %d \n", len); fflush(stdout);
+    _print->fops->print(_print, "\n\n[%s-%d] decode_client len : %d \n", __func__, __LINE__, len); //fflush(stdout);
+    //printf("[%s-%d] \n", __func__, __LINE__); fflush(stdout);
+    //printf("\n[%s-%d] \n", __func__, __LINE__); fflush(stdout);
     if(len<0) return ERR_CLIENT_PACKS;
     /*switch (_agree_ofp->protocol) // switch (_agree_ofp->protocol())
     {

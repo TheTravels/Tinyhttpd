@@ -165,13 +165,17 @@ int main(int argc, char *argv[])
 	struct passwd *npwd;
     struct epoll_obj* _epoll_listen=NULL;
     char _epoll_listen_buf[sizeof(struct epoll_obj)];
+    struct local_config_data* _cfg_data = NULL;
 	npwd = getpwuid(getuid());
-    port = cmd_parameter(argc, argv);
     local_config_data_init();
+    port = cmd_parameter(argc, argv);
+
     _local_config_data->load(_local_config_data);
 	thread_vin_init(port);
     //server_log_init(port);
-	vin_list_load("./upload/vin.list");
+    _cfg_data = (struct local_config_data*)_local_config_data->data;
+    vin_list_load(_cfg_data->vinList); // vin_list_load("./upload/vin.list");
+    obd_agree_obj_yunjing.fops->base->vin.load(_cfg_data->vinList);  // 加载 VIN 码文件
 #if 0
 	fflush(stdout);
 	setvbuf(stdout,NULL,_IONBF,0);
@@ -222,7 +226,7 @@ int main(int argc, char *argv[])
 	//pool_init (128); 
 	get_fw();
 	pthread_create(&newthread , NULL, (void *)daemon_thread, NULL);
-    //pthread_create(&vinthread , NULL, (void *)thread_get_vin, NULL);
+    pthread_create(&vinthread , NULL, (void *)thread_get_vin, NULL);
     //pool_init (8);
     epoll_pthread_init(20);
 

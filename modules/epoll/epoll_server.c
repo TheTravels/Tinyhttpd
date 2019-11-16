@@ -108,7 +108,7 @@ static void do_epoll_server(struct epoll_obj* const _this, int listenfd)
         ret = epoll_wait(_this->epollfd, _this->events, EPOLLEVENTS, -1);
         _this->handle_events(_this, _this->events, ret, listenfd, buf, sizeof(buf));
     }
-    //close(_this->epollfd);
+    close(_this->epollfd);
 }
 static struct epoll_thread_data* get_epoll_data(struct epoll_obj* const _this, const int fd)
 {
