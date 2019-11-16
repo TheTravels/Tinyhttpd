@@ -361,8 +361,9 @@ int obd_fops_decode_server(struct obd_agree_obj* const _obd_fops, const uint8_t 
     int len = 0;
     char filename[128];
     //int relay=0;
+#if 1
     struct sql_storage_item _items_report[64];      // 数据项
-    struct data_base_obj _db_report_tmp = {
+    /*struct data_base_obj _db_report_tmp = {
         .fops = &_data_base_fops,
         ._format = sql_items_format_report,
         ._format_size = _sql_items_format_report_size,
@@ -371,8 +372,11 @@ int obd_fops_decode_server(struct obd_agree_obj* const _obd_fops, const uint8_t 
         .tbl_name = "tbl_obd_4g",
         .update_flag = 0,
         .sql_query = "",
-    };
-    struct data_base_obj* const _db_report = &_db_report_tmp;
+    };*/
+    //struct data_base_obj* const _db_report = &_db_report_tmp;
+    char _db_report_buf[sizeof(struct data_base_obj)];
+    struct data_base_obj* const _db_report = db_obj_report.fops->constructed(&db_obj_report, _db_report_buf, sql_items_format_report, _sql_items_format_report_size, _items_report, _sql_items_format_report_size, "tbl_obd_4g");
+#endif
 #if 0
     for(len=0; len<40; len++)
     {

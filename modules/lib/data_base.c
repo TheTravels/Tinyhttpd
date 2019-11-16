@@ -243,13 +243,32 @@ static int data_base_fops_insert_item_int(struct data_base_obj *const _db, const
     }
     return -1;
 }
-
+const struct sql_storage_item* const _format;   // 数据格式
+const unsigned int _format_size;                // 数据格式大小
+struct sql_storage_item* const _items;          // 数据项
+const unsigned int _items_size;                 // 数据项大小
 // 构造函数
-static struct data_base_obj* data_base_obj_constructed(struct data_base_obj* const _this, void* const _obj_fops)
+static struct data_base_obj* data_base_obj_constructed(struct data_base_obj* const _this, void* const _obj_fops, const struct sql_storage_item* const _format, const unsigned int _format_size, struct sql_storage_item* const _items, const unsigned int _items_size, const char* const _tbl_name)
 {
     struct data_base_obj* const _obj = (struct data_base_obj* const)_obj_fops;
+    struct data_base_obj _fops = {
+        //.fops = &_data_base_fops,
+        .fops = _this->fops,
+        ._format = _format,
+        ._format_size = _format_size,
+        ._items = _items,
+        ._items_size = _items_size,
+        .tbl_name = _tbl_name,//"tbl_obd_4g",
+        .update_flag = 0,
+        .sql_query = "",
+    };
+    //char* const tbl_name = (char* )_fops.tbl_name;
+    //printf("@%s-%d \n", __func__, __LINE__);
+    //memcpy(tbl_name, _tbl_name, strlen(_tbl_name));
+    //printf("@%s-%d \n", __func__, __LINE__);
     if(NULL==_obj_fops) return NULL;
-    memcpy(_obj_fops, _this, sizeof(struct data_base_obj));
+    //printf("@%s-%d \n", __func__, __LINE__);
+    memcpy(_obj_fops, &_fops, sizeof(struct data_base_obj));
     return _obj;
 }
 

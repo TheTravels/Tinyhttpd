@@ -26,7 +26,7 @@ extern "C" {
     struct data_base_obj;
     struct data_base_fops{ // 操作函数集
         // 构造函数
-        struct data_base_obj* (*const constructed)(struct data_base_obj* const _this, void* const _obj_fops);
+        struct data_base_obj* (*const constructed)(struct data_base_obj* const _this, void* const _obj_fops, const struct sql_storage_item* const _format, const unsigned int _format_size, struct sql_storage_item* const _items, const unsigned int _items_size, const char* const _tbl_name);
         int (* const init)(struct data_base_obj *const _db);
         int (* const clear)(struct data_base_obj *const _db);
         int (* const close)(struct data_base_obj *const _db);
@@ -44,12 +44,13 @@ extern "C" {
         const struct data_base_fops* const fops;
         void *mysql;//MYSQL *mysql;
         //struct data_base_data data;
-        struct data_base_obj* const father; //  father ptr
+        //struct data_base_obj* const father; //  father ptr
         const struct sql_storage_item* const _format;   // 数据格式
         const unsigned int _format_size;                // 数据格式大小
         struct sql_storage_item* const _items;          // 数据项
         const unsigned int _items_size;                 // 数据项大小
         const char* const tbl_name;  // 表名
+        //const char tbl_name[64];
         int update_flag;    // 更新标志
         char sql_query[1024 * 10];                      // SQL语句
         struct db_sql_pool sql_pool[1];          // SQL语句
