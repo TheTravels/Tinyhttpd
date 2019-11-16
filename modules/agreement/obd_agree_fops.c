@@ -356,12 +356,13 @@ struct obd_agree_fops_base _obd_fops_base =
     }
 };
 
-int obd_fops_decode_server(struct obd_agree_obj* const _obd_fops, const uint8_t pack[], const uint16_t _psize, void* const _msg_buf, const uint16_t _msize, struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const __db_report, struct msg_print_obj* const _print)
+int obd_fops_decode_server(struct obd_agree_obj* const _obd_fops, const uint8_t pack[], const uint16_t _psize, void* const _msg_buf, const uint16_t _msize, \
+                           struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const _db_report, struct msg_print_obj* const _print)
 {
     int len = 0;
     char filename[128];
     //int relay=0;
-#if 1
+#if 0
     struct sql_storage_item _items_report[64];      // 数据项
     /*struct data_base_obj _db_report_tmp = {
         .fops = &_data_base_fops,
@@ -408,7 +409,7 @@ int obd_fops_decode_server(struct obd_agree_obj* const _obd_fops, const uint8_t 
             break;
     }*/
     //protocol_yunjing(print, &relay, _agree_ofp, (const struct general_pack_shanghai* const)_msg_buf, device, csend, _buf, _bsize);
-    printf("[@%s-%d] _print:%p fops:%p print:%p \n", __func__, __LINE__, _print, _print->fops, _print->fops->print);
+    //printf("[@%s-%d] _print:%p fops:%p print:%p \n", __func__, __LINE__, _print, _print->fops, _print->fops->print);
     _print->fops->print(_print, "协议:[%s]\t", _obd_fops->fops->agree_des);
     _obd_fops->fops->protocol_server(_obd_fops, _ofp_data, _db_report, _print);
     //printf("@%s-%d \n", __func__, __LINE__);
