@@ -364,6 +364,17 @@ void thread_request(void *arg)
         .__stream = __stream,
         .__n = sizeof(__stream),
     };
+    struct sql_storage_item _items_report[64];      // 数据项
+    struct data_base_obj _db_report = {
+        .fops = &_data_base_fops,
+        ._format = sql_items_format_report,
+        ._format_size = _sql_items_format_report_size,
+        ._items = _items_report,
+        ._items_size = _sql_items_format_report_size,
+        .tbl_name = "tbl_obd_4g",
+        .update_flag = 0,
+        .sql_query = "",
+    };
     struct obd_agree_ofp_data _ofp_data;
 
     tasks_max = 0;
@@ -583,25 +594,25 @@ void thread_request(void *arg)
                     break;
                 case PRO_TYPE_YJ:    // YunJing
                     msg_print(_print_buf, _print_bsize, "协议类型：云景OBD协议 device->protocol:%d\n", device->protocol); fflush(stdout);
-                    decode = _obd_obj->fops->decode_server(_obd_obj, (const uint8_t *)data, numchars-len, msg_buf, sizeof(msg_buf), &_ofp_data, &_print);
+                    decode = _obd_obj->fops->decode_server(_obd_obj, (const uint8_t *)data, numchars-len, msg_buf, sizeof(msg_buf), &_ofp_data, &_db_report, &_print);
                     //ret = conn->_obd_obj->fops->decode_server(conn->_obd_obj, (uint8_t*)msg.c_str(), (uint16_t)msg.size(), msg_buf, sizeof(msg_buf), &_ofp_data, &_print);
                     if(0==decode) device->protocol = PRO_TYPE_YJ;
                     break;
                 case PRO_TYPE_SHH:    // ShangHai
                     msg_print(_print_buf, _print_bsize, "协议类型：上海OBD协议 device->protocol:%d\n", device->protocol); fflush(stdout);
-                    decode = _obd_obj->fops->decode_server(_obd_obj, (const uint8_t *)data, numchars-len, msg_buf, sizeof(msg_buf), &_ofp_data, &_print);
+                    decode = _obd_obj->fops->decode_server(_obd_obj, (const uint8_t *)data, numchars-len, msg_buf, sizeof(msg_buf), &_ofp_data, &_db_report, &_print);
                     if(0==decode) device->protocol = PRO_TYPE_SHH;
                     break;
                 default:
                     // 逐个协议遍历
                     msg_print(_print_buf, _print_bsize, "逐个协议遍历 device->protocol:%d\n", device->protocol); fflush(stdout);
-                    decode = _obd_obj->fops->decode_server(_obd_obj, (const uint8_t *)data, numchars-len, msg_buf, sizeof(msg_buf), &_ofp_data, &_print);
+                    decode = _obd_obj->fops->decode_server(_obd_obj, (const uint8_t *)data, numchars-len, msg_buf, sizeof(msg_buf), &_ofp_data, &_db_report, &_print);
                     if(0==decode) device->protocol = PRO_TYPE_SHH;
                     if(0!=decode)
                     {
                         msg_print(_print_buf, _print_bsize, "逐个协议遍历 device->protocol:%d\n", device->protocol); fflush(stdout);
                         //decode = decode_server(&print, _agree_obd_yj, (const uint8_t *)data, numchars-len, msg_buf, sizeof(msg_buf), device, csend, _print_buf, _print_bsize);
-                        decode = _obd_obj->fops->decode_server(_obd_obj, (const uint8_t *)data, numchars-len, msg_buf, sizeof(msg_buf), &_ofp_data, &_print);
+                        decode = _obd_obj->fops->decode_server(_obd_obj, (const uint8_t *)data, numchars-len, msg_buf, sizeof(msg_buf), &_ofp_data, &_db_report, &_print);
                         if(0==decode) device->protocol = PRO_TYPE_YJ;
                     }
                     break;

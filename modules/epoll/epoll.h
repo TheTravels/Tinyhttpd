@@ -40,7 +40,9 @@ typedef void (*epoll_do_epoll_func_t)(struct epoll_obj* const _this, int listenf
 typedef void (*epoll_handle_events_func_t)(struct epoll_obj* const _this, struct epoll_event* const events, const int num, const int listenfd, char* const buf, const int _max_size);
 typedef void (*epoll_handle_accept_func_t)(struct epoll_obj* const _this, int listenfd);
 
-#define epoll_obj_list_size   1024
+// epoll 个数
+#define epoll_obj_list_size   128
+// epoll 中数据即连接个数，每个连接对应一个数据
 #define epoll_obj_data_size   1024
 
 struct epoll_fops{

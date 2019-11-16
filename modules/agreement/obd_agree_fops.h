@@ -35,8 +35,7 @@ struct obd_agree_ofp_data{
     char _tbuf[2048];
     //const unsigned int _tsize;
     int _tlen;
-    //char _print_buf[1024*30];  //
-    //const unsigned int _bsize;
+    //struct data_base_obj* const _db_report;
 };
 
 struct obd_agree_obj;
@@ -154,7 +153,7 @@ struct obd_agree_fops
     struct /*Father Interface*/
     {
         // server
-        int (*const decode_server)(struct obd_agree_obj* const _obd_fops, const uint8_t pack[], const uint16_t _psize, void* const _msg_buf, const uint16_t _msize, struct obd_agree_ofp_data* const _ofp_data, struct msg_print_obj* const _print);
+        int (*const decode_server)(struct obd_agree_obj* const _obd_fops, const uint8_t pack[], const uint16_t _psize, void* const _msg_buf, const uint16_t _msize, struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const _db_report, struct msg_print_obj* const _print);
         // client
         int (*const decode_client)(struct obd_agree_obj* const _obd_fops, const uint8_t pack[], const uint16_t _psize, void* const _msg_buf, const uint16_t _msize, struct obd_agree_ofp_data* const _ofp_data, struct msg_print_obj* const _print);
     };
@@ -208,7 +207,7 @@ struct obd_agree_obj
 };
 
 extern struct obd_agree_obj* obd_agree_fops_constructed(struct obd_agree_obj* const _obd_fops, void* const _obj_fops);
-extern int obd_fops_decode_server(struct obd_agree_obj* const _obd_fops, const uint8_t pack[], const uint16_t _psize, void * const _msg_buf, const uint16_t _msize, struct obd_agree_ofp_data* const _ofp_data, struct msg_print_obj* const _print);
+extern int obd_fops_decode_server(struct obd_agree_obj* const _obd_fops, const uint8_t pack[], const uint16_t _psize, void* const _msg_buf, const uint16_t _msize, struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const _db_report, struct msg_print_obj* const _print);
 extern int obj_obd_agree_shanghai_server(struct obd_agree_obj* const _obd_fops, struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const _db_report, struct msg_print_obj* const _print);
 extern int obd_fops_decode_client(struct obd_agree_obj* const _obd_fops, const uint8_t pack[], const uint16_t _psize, void* const _msg_buf, const uint16_t _msize, struct obd_agree_ofp_data* const _ofp_data, struct msg_print_obj* const _print);
 extern int obd_protocol_client_shanghai(struct obd_agree_obj* const _obd_fops, struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const _db_report, struct msg_print_obj* const _print);

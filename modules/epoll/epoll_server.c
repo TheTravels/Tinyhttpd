@@ -149,9 +149,25 @@ static void handle_events_server(struct epoll_obj* const _this, struct epoll_eve
         .__stream = __stream,
         .__n = sizeof(__stream),
     };
-    struct obd_agree_ofp_data _ofp_data;
+    struct sql_storage_item _items_report[64];      // 数据项
+    struct data_base_obj _db_report = {
+        .fops = &_data_base_fops,
+        ._format = sql_items_format_report,
+        ._format_size = _sql_items_format_report_size,
+        ._items = _items_report,
+        ._items_size = _sql_items_format_report_size,
+        .tbl_name = "tbl_obd_4g",
+        .update_flag = 0,
+        .sql_query = "",
+    };
+    struct obd_agree_ofp_data _ofp_data = {
+        ._tbuf = {0},
+        ._tlen = 0,
+        //._db_report = &_db_report,
+    };
     struct epoll_thread_data* _thread_data = NULL;
     uint8_t msg_buf[4096];
+    //_db_report.fops->init(&_db_report);
     for(i = 0; i<num; i++)
     {
         fd = events[i].data.fd;
@@ -171,13 +187,13 @@ static void handle_events_server(struct epoll_obj* const _this, struct epoll_eve
             if(nread>0)
             {
                 // handle
-                memset(&_ofp_data, 0, sizeof(_ofp_data));
+                memset(&_ofp_data._tbuf, 0, sizeof(_ofp_data._tbuf));
                 _print.fops->init(&_print);
                 if(NULL!=_thread_data->_obd_obj)
                 {
                     struct obd_agree_obj* _obd_obj = _thread_data->_obd_obj;
                     _print.fops->print(&_print, "协议类型：%s protocol:%d\n", _obd_obj->fops->agree_des, _obd_obj->fops->protocol); fflush(stdout);
-                    decode = _obd_obj->fops->decode_server(_obd_obj, (const uint8_t *)buf, nread, msg_buf, sizeof(msg_buf), &_ofp_data, &_print);
+                    decode = _obd_obj->fops->decode_server(_obd_obj, (const uint8_t *)buf, nread, msg_buf, sizeof(msg_buf), &_ofp_data, &_db_report, &_print);
                 }
                 else // 判断协议类型
                 {
@@ -185,14 +201,14 @@ static void handle_events_server(struct epoll_obj* const _this, struct epoll_eve
                     struct obd_agree_obj* _obd_obj = NULL;
                     _obd_obj = obd_agree_obj_shanghai.fops->constructed(&obd_agree_obj_shanghai, _thread_data->_obd_obj_buf);
                     _print.fops->print(&_print, "逐个协议遍历 : %s protocol:%d\n", _obd_obj->fops->agree_des, _obd_obj->fops->protocol); fflush(stdout);
-                    decode = _obd_obj->fops->decode_server(_obd_obj, (const uint8_t *)buf, nread, msg_buf, sizeof(msg_buf), &_ofp_data, &_print);
+                    decode = _obd_obj->fops->decode_server(_obd_obj, (const uint8_t *)buf, nread, msg_buf, sizeof(msg_buf), &_ofp_data, &_db_report, &_print);
                     if(0==decode) _thread_data->_obd_obj = _obd_obj;
                     if(0!=decode)
                     {
                         _obd_obj = obd_agree_obj_yunjing.fops->constructed(&obd_agree_obj_yunjing, _thread_data->_obd_obj_buf);
                         _print.fops->print(&_print, "逐个协议遍历 : %s protocol:%d\n", _obd_obj->fops->agree_des, _obd_obj->fops->protocol); fflush(stdout);
                         //decode = decode_server(&print, _agree_obd_yj, (const uint8_t *)data, numchars-len, msg_buf, sizeof(msg_buf), device, csend, _print_buf, _print_bsize);
-                        decode = _obd_obj->fops->decode_server(_obd_obj, (const uint8_t *)buf, nread, msg_buf, sizeof(msg_buf), &_ofp_data, &_print);
+                        decode = _obd_obj->fops->decode_server(_obd_obj, (const uint8_t *)buf, nread, msg_buf, sizeof(msg_buf), &_ofp_data, &_db_report, &_print);
                         if(0==decode) _thread_data->_obd_obj = _obd_obj;
                     }
                 }
@@ -209,6 +225,8 @@ static void handle_events_server(struct epoll_obj* const _this, struct epoll_eve
             _this->fops.do_write(_this, fd, buf, strlen(buf));
         }
     }
+    //_db_report.fops->insert_sql(&_db_report);
+    //_db_report.fops->close(&_db_report);
 }
 
 //监听

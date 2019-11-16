@@ -356,13 +356,13 @@ struct obd_agree_fops_base _obd_fops_base =
     }
 };
 
-int obd_fops_decode_server(struct obd_agree_obj* const _obd_fops, const uint8_t pack[], const uint16_t _psize, void* const _msg_buf, const uint16_t _msize, struct obd_agree_ofp_data* const _ofp_data, struct msg_print_obj* const _print)
+int obd_fops_decode_server(struct obd_agree_obj* const _obd_fops, const uint8_t pack[], const uint16_t _psize, void* const _msg_buf, const uint16_t _msize, struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const __db_report, struct msg_print_obj* const _print)
 {
     int len = 0;
     char filename[128];
-    int relay=0;
+    //int relay=0;
     struct sql_storage_item _items_report[64];      // 数据项
-    struct data_base_obj _db_report = {
+    struct data_base_obj _db_report_tmp = {
         .fops = &_data_base_fops,
         ._format = sql_items_format_report,
         ._format_size = _sql_items_format_report_size,
@@ -372,6 +372,7 @@ int obd_fops_decode_server(struct obd_agree_obj* const _obd_fops, const uint8_t 
         .update_flag = 0,
         .sql_query = "",
     };
+    struct data_base_obj* const _db_report = &_db_report_tmp;
 #if 0
     for(len=0; len<40; len++)
     {
@@ -386,7 +387,7 @@ int obd_fops_decode_server(struct obd_agree_obj* const _obd_fops, const uint8_t 
     _print->fops->print(_print, "decode pack len : %d \n", len); //fflush(stdout);
     if(len<0) return -1;
     //device->type = _obd_fops->fops->protocol;
-    _db_report.fops->init(&_db_report); // MySqlInit();
+    _db_report->fops->init(_db_report); // MySqlInit();
     /*switch (_obd_fops->fops->protocol) // switch (_agree_ofp->protocol())
     {
         case PRO_TYPE_CCU:    // CCU
@@ -405,12 +406,12 @@ int obd_fops_decode_server(struct obd_agree_obj* const _obd_fops, const uint8_t 
     //protocol_yunjing(print, &relay, _agree_ofp, (const struct general_pack_shanghai* const)_msg_buf, device, csend, _buf, _bsize);
     printf("[@%s-%d] _print:%p fops:%p print:%p \n", __func__, __LINE__, _print, _print->fops, _print->fops->print);
     _print->fops->print(_print, "协议:[%s]\t", _obd_fops->fops->agree_des);
-    _obd_fops->fops->protocol_server(_obd_fops, _ofp_data, &_db_report, _print);
+    _obd_fops->fops->protocol_server(_obd_fops, _ofp_data, _db_report, _print);
     //printf("@%s-%d \n", __func__, __LINE__);
     //insert_sql();
-    /*ret = */_db_report.fops->insert_sql(&_db_report/*, _conn_ofp*/);
-    _db_report.fops->clear(&_db_report);
-    _db_report.fops->close(&_db_report); // MySqlClose();
+    /*ret = */_db_report->fops->insert_sql(_db_report/*, _conn_ofp*/);
+    _db_report->fops->clear(_db_report);
+    _db_report->fops->close(_db_report); // MySqlClose();
     // 消息转发
     //printf("relay_fd:%d relay flag : %d \n", device->relay_fd, relay); fflush(stdout);
     //if((device->relay_fd>=0) && (1==relay)) relay_msg(device->relay_fd, pack, len);

@@ -44,14 +44,6 @@ int data_base_mysqlcfg(const char _host[], const char _user[], const char _passw
 }
 
 /**************************************** struct data_base_fops *****************************************/
-// 构造函数
-static struct data_base_obj* data_base_obj_constructed(struct data_base_obj* const _this, void* const _obj_fops)
-{
-    struct data_base_obj* const _obj = (struct data_base_obj* const)_obj_fops;
-    if(NULL==_obj_fops) return NULL;
-    memcpy(_obj_fops, _this, sizeof(struct data_base_obj));
-    return _obj;
-}
 static int data_base_fops_clear(struct data_base_obj *const _db)
 {
     memset(_db->sql_query, 0, sizeof(_db->sql_query));
@@ -64,6 +56,8 @@ static int data_base_fops_init(struct data_base_obj *const _db)
 {
     MYSQL* _mysql = mysql_init(NULL);
     data_base_fops_clear(_db);
+    memset(_db->sql_pool, 0, sizeof(_db->sql_pool));
+    _db->sql_pool_size = 0;
     if(NULL==_mysql)
     {
         fprintf(stderr,"mysql init failed\n");
@@ -87,7 +81,7 @@ static int data_base_fops_create_sql(struct data_base_obj *const _db)
 {
     char sql_field[1024 * 5];   // 字段
     char sql_value[1024 * 5];   // 值
-    //static char sql_query[1024 * 10];   // SQL语句
+    //char sql_query[1024 * 10];   // SQL语句
     unsigned int index = 0;
     char* _field = NULL;
     char* _value = NULL;
@@ -95,6 +89,7 @@ static int data_base_fops_create_sql(struct data_base_obj *const _db)
     if (0 == _db->update_flag) return 0;
     memset(sql_field, 0, sizeof (sql_field));
     memset(sql_value, 0, sizeof (sql_value));
+    memset(_db->sql_query, 0, sizeof(_db->sql_query));
     //memset(sql_query, 0, sizeof (sql_query));
     memset(_db->sql_query, 0, sizeof(_db->sql_query));
     for (index = 0; index < _db->_items_size - 1; index++)
@@ -115,8 +110,13 @@ static int data_base_fops_create_sql(struct data_base_obj *const _db)
     //sprintf(sql_query, "INSERT INTO tbl_obd_4g(%s) VALUES(%s)", sql_field, sql_value);
     sprintf(_db->sql_query, "INSERT INTO %s(%s) VALUES(%s)", _db->tbl_name, sql_field, sql_value);
     //printf("sql_query:%s \n", sql_query); fflush(stdout);
+#if 0
+    memcpy(_db->sql_pool[_db->sql_pool_size].sql, _db->sql_query, strlen(_db->sql_query));
+    _db->sql_pool_size++;
+#endif
     return 0;
 }
+#if 1
 static int data_base_fops_insert_sql(struct data_base_obj *const _db)
 {
     MYSQL* const conn = _db->mysql;//(MYSQL*)_conn;
@@ -135,6 +135,26 @@ static int data_base_fops_insert_sql(struct data_base_obj *const _db)
     }
     return -1;
 }
+#else
+static int data_base_fops_insert_sql(struct data_base_obj *const _db)
+{
+    MYSQL* const conn = _db->mysql;
+    int ret = 0;
+    int i;
+    if(NULL==conn) return -1;
+    for(i=0; i<_db->sql_pool_size; i++)
+    {
+        ret = mysql_query(conn, _db->sql_pool[i].sql);
+        if (0!=ret)
+        {
+            printf("Connect Erro:%d %s\n", mysql_errno(conn), mysql_error(conn));
+            return -1;
+        }
+        //printf("Inserted %lu rows\n",(unsigned long)mysql_affected_rows(conn_ptr));
+    }
+    return 0;
+}
+#endif
 static int data_base_fops_insert_item_format(struct data_base_obj *const _db, const char* const field, ...)
 {
     int index = 0;
@@ -222,6 +242,15 @@ static int data_base_fops_insert_item_int(struct data_base_obj *const _db, const
         }
     }
     return -1;
+}
+
+// 构造函数
+static struct data_base_obj* data_base_obj_constructed(struct data_base_obj* const _this, void* const _obj_fops)
+{
+    struct data_base_obj* const _obj = (struct data_base_obj* const)_obj_fops;
+    if(NULL==_obj_fops) return NULL;
+    memcpy(_obj_fops, _this, sizeof(struct data_base_obj));
+    return _obj;
 }
 
 /**************************************** struct data_base_fops data define *****************************************/
