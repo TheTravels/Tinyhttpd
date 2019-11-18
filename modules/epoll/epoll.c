@@ -56,7 +56,7 @@ int epoll_main(int argc, char* argv[])
     (void)argv;
     struct epoll_obj* _epoll_obj=NULL;
     char _epoll_obj_buf[sizeof(struct epoll_obj)];
-    _epoll_obj = epoll_obj_base.fops.constructed(&epoll_obj_base, _epoll_obj_buf, NULL, NULL, NULL, NULL);
+    _epoll_obj = epoll_obj_base.fops.constructed(&epoll_obj_base, _epoll_obj_buf, NULL, NULL, NULL, NULL, NULL);
 	int listenfd;
 	listenfd = socket_bind(IPADDRESS, PORT);   //绑定socket
 	listen(listenfd, LISTENQ);       //监听
@@ -141,12 +141,14 @@ static int epoll_do_read(struct epoll_obj* const _this, int const fd, char* cons
 		perror("read error:");
 		close(fd);
         _this->fops.delete_event(_this, fd, EPOLLIN);
+        _this->close(_this, fd);
 	}
 	else if(nread == 0)
 	{
         fprintf(stderr, "client close.\n");
 		close(fd);
         _this->fops.delete_event(_this, fd, EPOLLIN);
+        _this->close(_this, fd);
 	}
 	else
 	{
@@ -166,6 +168,7 @@ static void epoll_do_write(struct epoll_obj* const _this, int fd, char* buf, con
 		perror("write error:");
 		close(fd);
         _this->fops.delete_event(_this, fd, EPOLLIN);
+        _this->close(_this, fd);
 	}
 	else
         _this->fops.modify_event(_this, fd, EPOLLIN);
@@ -199,6 +202,13 @@ static void epoll_modify_event(struct epoll_obj* const _this, int fd, int state)
 	ev.data.fd = fd;
     epoll_ctl(_this->epollfd, EPOLL_CTL_MOD, fd, &ev);
     pr_debug("[%s-%d] \n", __func__, __LINE__);
+}
+
+static void epoll_close(struct epoll_obj* const _this, const int fd)
+{
+    (void)_this;
+    (void)fd;
+    ;
 }
 
 static struct epoll_obj* epoll_obj_list[epoll_obj_list_size];
@@ -245,13 +255,14 @@ static struct epoll_obj* get_epoll_obj(struct epoll_obj* const _this, const int 
 
 // 构造函数
 //static struct config_load_obj* __this_constructed(struct config_load_obj* const _load_obj, void* const _obj_buf, const config_load_func_t _load_func, const char _cfg_path[], char* const _stream, const size_t _n, void* const _data)
-static struct epoll_obj* __this_constructed(struct epoll_obj* const _this, void* const _obj_buf, const epoll_do_epoll_func_t _do_epoll, const epoll_handle_events_func_t _events, const epoll_handle_accept_func_t _accept, void* const data)
+static struct epoll_obj* __this_constructed(struct epoll_obj* const _this, void* const _obj_buf, const epoll_do_epoll_func_t _do_epoll, const epoll_handle_events_func_t _events, const epoll_handle_accept_func_t _accept, const epoll_close_func_t _close, void* const data)
 {
     struct epoll_obj _fops = {
         .fops = _this->fops,
         .do_epoll = _do_epoll,
         .handle_events = _events,
         .handle_accept = _accept,
+        .close = _close,
         .epollfd = 0,
         .fd_count = 0,
         .data = data,
@@ -262,7 +273,7 @@ static struct epoll_obj* __this_constructed(struct epoll_obj* const _this, void*
     memcpy(_obj_buf, &_fops, sizeof(_fops));
     return _obj;
 }
-static struct epoll_obj* this_constructed(struct epoll_obj* const _this, void* const _obj_buf, const epoll_do_epoll_func_t _do_epoll, const epoll_handle_events_func_t _events, const epoll_handle_accept_func_t _accept, void* const data)
+static struct epoll_obj* this_constructed(struct epoll_obj* const _this, void* const _obj_buf, const epoll_do_epoll_func_t _do_epoll, const epoll_handle_events_func_t _events, const epoll_handle_accept_func_t _accept, const epoll_close_func_t _close, void* const data)
 {
     epoll_do_epoll_func_t do_epoll = _do_epoll;
     if(NULL == do_epoll) do_epoll = _this->do_epoll;
@@ -270,7 +281,7 @@ static struct epoll_obj* this_constructed(struct epoll_obj* const _this, void* c
     if(NULL == events) events = _this->handle_events;
     epoll_handle_accept_func_t accept = _accept;
     if(NULL == accept) accept = _this->handle_accept;
-    return __this_constructed(_this, _obj_buf, do_epoll, events, accept, data);
+    return __this_constructed(_this, _obj_buf, do_epoll, events, accept, _close, data);
 }
 //监听
 struct epoll_obj epoll_obj_base = {
@@ -288,6 +299,7 @@ struct epoll_obj epoll_obj_base = {
     .do_epoll = epoll_do_epoll,
     .handle_events = epoll_handle_events,
     .handle_accept = epoll_handle_accept,
+    .close = epoll_close,
     .epollfd = 0,
     .fd_count = 0,
     .events = {0},

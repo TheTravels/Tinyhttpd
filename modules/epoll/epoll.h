@@ -39,6 +39,7 @@ struct epoll_obj;
 typedef void (*epoll_do_epoll_func_t)(struct epoll_obj* const _this, int listenfd);
 typedef void (*epoll_handle_events_func_t)(struct epoll_obj* const _this, struct epoll_event* const events, const int num, const int listenfd, char* const buf, const int _max_size);
 typedef void (*epoll_handle_accept_func_t)(struct epoll_obj* const _this, int listenfd);
+typedef void (*const epoll_close_func_t)(struct epoll_obj* const _this, const int fd);
 
 // epoll 个数
 #define epoll_obj_list_size   128
@@ -47,7 +48,7 @@ typedef void (*epoll_handle_accept_func_t)(struct epoll_obj* const _this, int li
 
 struct epoll_fops{
     // 构造函数
-    struct epoll_obj* (*const constructed)(struct epoll_obj* const _this, void* const _obj_buf, const epoll_do_epoll_func_t _do_epoll, const epoll_handle_events_func_t _events, const epoll_handle_accept_func_t _accept, void* const data);
+    struct epoll_obj* (*const constructed)(struct epoll_obj* const _this, void* const _obj_buf, const epoll_do_epoll_func_t _do_epoll, const epoll_handle_events_func_t _events, const epoll_handle_accept_func_t _accept, const epoll_close_func_t _close, void* const data);
     int (*const do_read)(struct epoll_obj* const _this, int const fd, char* const buf, const int _max_size);
     void (*const do_write)(struct epoll_obj* const _this, int fd, char* buf, const int _size);
     void (*const add_event)(struct epoll_obj* const _this, int fd, int state);
@@ -64,6 +65,7 @@ struct epoll_obj{
     void (*const do_epoll)(struct epoll_obj* const _this, int listenfd);
     void (*const handle_events)(struct epoll_obj* const _this, struct epoll_event* const events, const int num, const int listenfd, char* const buf, const int _max_size);
     void (*const handle_accept)(struct epoll_obj* const _this, int listenfd);
+    void (*const close)(struct epoll_obj* const _this, const int fd);
     int epollfd;       // 文件描述符
     int fd_count;      // 文件描述符计数
     struct epoll_event events[EPOLLEVENTS];

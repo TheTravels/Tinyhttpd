@@ -136,6 +136,11 @@ static struct epoll_thread_data* get_epoll_data(struct epoll_obj* const _this, c
     }
     return NULL;
 }
+static void epoll_close_server(struct epoll_obj* const _this, const int fd)
+{
+    struct epoll_thread_data* const _thread_data = get_epoll_data(_this, fd);
+    memset(_thread_data, 0, sizeof(struct epoll_thread_data));
+}
 static void handle_events_server(struct epoll_obj* const _this, struct epoll_event* const events, const int num, const int listenfd, char* const buf, const int _max_size)
 {
     int i, fd;
@@ -231,13 +236,13 @@ static void handle_events_server(struct epoll_obj* const _this, struct epoll_eve
 struct epoll_obj* epoll_listen_init(void* const _epoll_buf)
 {
     struct epoll_obj* _epoll=NULL;
-    _epoll = epoll_obj_base.fops.constructed(&epoll_obj_base, _epoll_buf, do_epoll_listen, handle_events_listen, handle_accept_listen, NULL);
+    _epoll = epoll_obj_base.fops.constructed(&epoll_obj_base, _epoll_buf, do_epoll_listen, handle_events_listen, handle_accept_listen, NULL, NULL);
     return _epoll;
 }
 struct epoll_obj* epoll_server_init(void* const _epoll_buf, void* const data)
 {
     struct epoll_obj* _epoll=NULL;
-    _epoll = epoll_obj_base.fops.constructed(&epoll_obj_base, _epoll_buf, do_epoll_server, handle_events_server, NULL, data);
+    _epoll = epoll_obj_base.fops.constructed(&epoll_obj_base, _epoll_buf, do_epoll_server, handle_events_server, NULL, epoll_close_server, data);
     return _epoll;
 }
 
