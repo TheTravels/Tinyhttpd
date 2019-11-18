@@ -3,6 +3,7 @@ LIBS = -lpthread #-lsocket
 
 CC       := gcc
 CFLAGS   := -g -rdynamic -lmysqlclient -DNDEBUG -W -Wall -lpthread -DGCC_BUILD=1 
+CFLAGS   += -L/usr/local/mysql/lib/
 CFLAGS   += -DBUILD_THREAD_VIN=1 
 #CFLAGS   += -DBUILD_SERVER_YN=1 
 
@@ -53,7 +54,7 @@ all: $(BUILD_DIR) $(OBJS) httpd #client list #encode
 	@mkdir -p daemon
 	@mkdir -p ./upload/cfg
 	@mkdir -p ./upload/bin
-	@cp modules/config/ServerConfig.cfg ./
+#	@cp modules/config/ServerConfig.cfg ./
 
 SCP_FILE_LIST = user.txt README.md Makefile accept_request.h 
 SCP_DIR_LIST = mk modules upload RSA
@@ -121,7 +122,7 @@ define install_program
 #	@cd $(IPATH) && echo $(shell pwd)
 #	@cd $(IPATH) && ./httpd -c 
 #	@cd $(IPATH) && ./httpd -L 
-	@cp ./upload/OBD.cfg $(1)/upload/OBD.cfg
+	@cp ./upload/OBDII.cfg $(1)/upload/OBDII.cfg
 	cp -a ./upload $(1)/
 #	@cp ./upload/Device.list $(1)/upload/Device.list
 
