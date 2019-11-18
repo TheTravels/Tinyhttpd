@@ -61,7 +61,7 @@ SCP_DIR_LIST = mk modules upload RSA
 SCP_TARGET = Tinyhttpd
 #TMP_DIR = ../Tmp$(SCP_TARGET)/$(SCP_TARGET)
 SCP_DIR = ../scp/$(SCP_TARGET)
-SCP_HOST_ZDEP = 39.108.51.99,22
+SCP_HOST_ZDEP = 39.108.51.99
 SCP_PORT_ZDEP = 22
 
 include mk/scp.mk
@@ -104,20 +104,28 @@ define add_dir_build
 endef
 
 install: all
-	@echo install path: $(IPATH)
+	$(call install_program,$(IPATH))
+install_bin: all
+	$(call install_program,/home/bin)
+define install_program
+    @echo "file my name is $(0)"
+    @echo "install path  => $(1)"
+	@echo install path: $(1)
 #	@echo $(IPATH)
-	@mkdir -p $(IPATH)
-	@mkdir -p $(IPATH)/log
-	@mkdir -p $(IPATH)/daemon
-	@mkdir -p $(IPATH)/upload/cfg
-	@mkdir -p $(IPATH)/upload/bin
-	@cp ./build/httpd $(IPATH)/httpd
+	@mkdir -p $(1)
+	@mkdir -p $(1)/log
+	@mkdir -p $(1)/daemon
+	@mkdir -p $(1)/upload/cfg
+	@mkdir -p $(1)/upload/bin
+	@cp ./build/httpd $(1)/httpd
 #	@cd $(IPATH) && echo $(shell pwd)
 #	@cd $(IPATH) && ./httpd -c 
 #	@cd $(IPATH) && ./httpd -L 
-	@cp ./upload/OBD.cfg $(IPATH)/upload/OBD.cfg
-	cp -a ./upload $(IPATH)
-#	@cp ./upload/Device.list $(IPATH)/upload/Device.list
+	@cp ./upload/OBD.cfg $(1)/upload/OBD.cfg
+	cp -a ./upload $(1)/
+#	@cp ./upload/Device.list $(1)/upload/Device.list
+
+endef
 
 $(BUILD_DIR):
 	@mkdir -p $(BUILD_DIR)
