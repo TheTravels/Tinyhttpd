@@ -25,6 +25,7 @@
 #include "../agreement/obd_agree_fops.h"
 #include "../agreement/obd_agree_yunjing.h"
 #include "msg_relay.h"
+#include "../config/config_data.h"
 
 
 #ifndef BUILD_THREAD_VIN
@@ -150,13 +151,14 @@ extern int read_threads(int sock, char *buf, int size, int *status);
 #if (0==BUILD_SERVER_YN)
 static const char vin_host[] = "183.237.191.186";
 #else
-static const char vin_host[] = "192.168.0.80";
+//static const char vin_host[] = "192.168.0.80";
 #endif
-static const int vin_port = 6100;
+//static const int vin_port = 6100;
 // 获取 VIN码线程
 void thread_get_vin(void *arg)
 {
     (void)arg;
+    struct local_config_data* _cfg_data = (struct local_config_data*)_local_config_data->data;
     int socket=0;
     int i=0;
     char wsn[32];
@@ -196,15 +198,15 @@ void thread_get_vin(void *arg)
     //if(_get_flag)
     {
 connect:
-        _print_obj->fops->print(_print_obj, "VIN码连接建立中 host:%s port:%d\n", vin_host, vin_port);
+        _print_obj->fops->print(_print_obj, "VIN码连接建立中 host:%s port:%d\n", _cfg_data->_vin_cfg.host, _cfg_data->_vin_cfg.port);
         for(i=0; i<1000; i++)
         {
             _print_obj->fops->print(_print_obj, "VIN码线程第 %ld 次建立连接 ...\n", i);
-            socket = relay_init(vin_host, vin_port);
+            socket = relay_init(_cfg_data->_vin_cfg.host, _cfg_data->_vin_cfg.port);
             if(socket>=0) break;
             usleep(1000*100);   // 100ms delay
         }
-        _print_obj->fops->print(_print_obj, "VIN码连接建立结束 host:%s port:%d fd:%d\n\n", vin_host, vin_port, socket);
+        _print_obj->fops->print(_print_obj, "VIN码连接建立结束 host:%s port:%d fd:%d\n\n", _cfg_data->_vin_cfg.host, _cfg_data->_vin_cfg.port, socket);
     }
     time(&tnow);
     _print_obj->fops->print(_print_obj, "VIN码线程启动[%ds] TCP: %d\n\n", tnow-timep, socket);

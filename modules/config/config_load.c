@@ -304,7 +304,7 @@ static int __config_load(struct config_load_obj* const _load_obj)
     fd = fopen(path, "r");  //
     if(NULL==fd)
     {
-        printf("fopen fail!\n"); fflush(stdout);
+        printf("[%s-%d]fopen %s fail! error [%s]\n", __func__, __LINE__, path, strerror(errno)); fflush(stdout);
         return -1;
     }
     fseek(fd, 0, SEEK_END);

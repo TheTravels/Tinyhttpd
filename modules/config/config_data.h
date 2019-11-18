@@ -65,7 +65,7 @@ struct local_config_data{
     uint16_t		   nCfgPthreadCounts_;
 };
 
-extern void local_config_data_init(void);
+extern void local_config_data_init(const char _cfg_dir[]);
 extern struct config_load_obj* _local_config_data;
 
 #ifdef __cplusplus

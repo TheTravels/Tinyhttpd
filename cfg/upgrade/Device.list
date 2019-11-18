@@ -1,0 +1,54 @@
+{
+	"cJSON Version":	"1.7.12",
+	"Push":	"0",
+	"Push.Des":	{
+		"0":	"服务器不推送更新",
+		"1":	"服务器主动推送更新"
+	},
+	"Compel":	["0", "OBDII-4G", "OBDII-4G.bin", "OBDII-4G.cfg"],
+	"Compel.Des":	{
+		"0":	"强制更新开启",
+		"1":	"强制更新关闭"
+	},
+	"The Hit List":	["102906420248", "102906420198", "102906420258", "102906420148", "102906420288"],
+	"Model.Des":	["SerialNumber", "Model", "Firmware", "Config"],
+	"Model":	{
+		"model_0":	["000000000000", "Model1", "Firmware1.bin", "Config1.cfg"],
+		"model_1":	["000000000000", "Model2", "Firmware2.bin", "Config1.cfg"],
+		"model_3":	["000000000000", "OBDII-5G", "OBDII-4G.bin", "OBDII-4G.cfg"]
+	},
+	"Up.Des":	["SerialNumber", "Model", "Firmware", "Config"],
+	"Update":	{
+		"up_0":	["102903420018", "OBDII-4G", "fw_102903420018_OBDII-4G.bin", "OBDII-4G.cfg"],
+		"up_1":	["102906420248", "OBDII-4G", "fw_102906420248_OBDII-4G.bin", "OBDII-4G.cfg"],
+		"up_2":	["102906420198", "OBDII-4G", "fw_102906420198_OBDII-4G.bin", "OBDII-4G.cfg"],
+		"up_3":	["102906420258", "OBDII-4G", "fw_102906420258_OBDII-4G.bin", "OBDII-4G.cfg"],
+		"up_4":	["102906420148", "OBDII-4G", "fw_102906420148_OBDII-4G.bin", "OBDII-4G.cfg"],
+		"up_5":	["102906420288", "OBDII-4G", "fw_102906420288_OBDII-4G.bin", "OBDII-4G.cfg"],
+		"up_6":	["102906420208", "OBDII-4G", "fw_102906420208_OBDII-4G.bin", "OBDII-4G.cfg"],
+		"up_7":	["102906420298", "OBDII-4G", "fw_102906420298_OBDII-4G.bin", "OBDII-4G.cfg"],
+		"up_8":	["102906420218", "OBDII-4G", "fw_102906420218_OBDII-4G.bin", "OBDII-4G.cfg"],
+		"up_9":	["102906420238", "OBDII-4G", "fw_102906420238_OBDII-4G.bin", "OBDII-4G.cfg"],
+		"up_10":	["102906420268", "OBDII-4G", "fw_102906420268_OBDII-4G.bin", "OBDII-4G.cfg"],
+		"up_11":	["102906420028", "OBDII-4G", "fw_102906420028_OBDII-4G.bin", "OBDII-4G.cfg"],
+		"up_12":	["102906420278", "OBDII-4G", "fw_102906420278_OBDII-4G.bin", "OBDII-4G.cfg"],
+		"up_13":	["102906420168", "OBDII-4G", "fw_102906420168_OBDII-4G.bin", "OBDII-4G.cfg"],
+		"up_14":	["102906420188", "OBDII-4G", "fw_102906420188_OBDII-4G.bin", "OBDII-4G.cfg"],
+		"up_15":	["102906420138", "OBDII-4G", "fw_102906420138_OBDII-4G.bin", "OBDII-4G.cfg"],
+		"up_16":	["102906420078", "OBDII-4G", "fw_102906420078_OBDII-4G.bin", "OBDII-4G.cfg"],
+		"up_17":	["102906420058", "OBDII-4G", "fw_102906420058_OBDII-4G.bin", "OBDII-4G.cfg"],
+		"up_18":	["102906420228", "OBDII-4G", "fw_102906420228_OBDII-4G.bin", "OBDII-4G.cfg"],
+		"up_H1":	["102905420108", "OBDII-4G", "fw_102905420108_OBDII-4G.bin", "OBDII-4G.cfg"],
+		"up_H2":	["102901426678", "OBDII-4G", "fw_102901426678_OBDII-4G.bin", "OBDII-4G.cfg"],
+		"up_H3":	["ZA0CK20N0000", "OBDII-4G", "fw_ZA0CK20N0001_OBDII-4G.bin", "OBDII-4G.cfg"],
+		"up_H3":	["102908421008", "OBDII-4G", "fw_102908421008_OBDII-4G.bin", "OBDII-4G.cfg"],
+		"up_19":	["102905620128", "OBDII-4G", "fw_102905620128_OBDII-4G.bin", "OBDII-4G.cfg"]
+	},
+	"Dev.Des":	["SerialNumber", "Model", "Firmware", "Config"],
+	"DeviceList":	{
+		"dev_1":	["102905420118", "OBDII-4G", "OBDII-4G.bin", "OBDII-4G.cfg"],
+		"dev_2":	["102905420128", "OBDII-4G", "OBDII-4G.bin", "OBDII-4G.cfg"],
+		"dev_3":	["102905420138", "OBDII-4G", "OBDII-4G.bin", "OBDII-4G.cfg"],
+		"dev_4":	["102905420148", "OBDII-4G", "OBDII-4G.bin", "OBDII-4G.cfg"]
+	}
+}

@@ -167,9 +167,13 @@ int main(int argc, char *argv[])
     char _epoll_listen_buf[sizeof(struct epoll_obj)];
     struct local_config_data* _cfg_data = NULL;
 	npwd = getpwuid(getuid());
-    local_config_data_init();
+    memset(pwd, 0, sizeof(pwd));
+    getcwd(pwd, sizeof(pwd));
+    //printf("当前登陆的用户名为：%s\n", npwd->pw_name);
+    printf("启动目录:%s\n", pwd);
+    //printf("[%s-%d] _cfg_path:%s\n", __func__, __LINE__, _local_config_data->_cfg_path);
+    local_config_data_init(pwd);
     port = cmd_parameter(argc, argv);
-
     _local_config_data->load(_local_config_data);
 	thread_vin_init(port);
     //server_log_init(port);
