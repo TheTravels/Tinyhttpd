@@ -251,6 +251,7 @@ connect:
             }
             //_size = net->recv(net, cache, cache_size, _recv_timeout); // socket_read(cache, cache_size, 4000);
             //ret = decode_client(_agree_obd_yj, (const uint8_t*)cache, _size, _msg_buf, _msize, _vin, _vsize, &tlen);
+            //_print_obj->fops->print(_print_obj, "[%s-%d] cache[%d]:%s\n", __func__, __LINE__, cache_size, cache); fflush(stdout);
             ret = _obd_obj->fops->decode_client(_obd_obj, (uint8_t*)cache, (uint16_t)_size, _msg_buf, _msize, &_ofp_data, _print_obj);
             //if(tlen>0) net->send(net, _buf, tlen);// csend(0, _buf, tlen);
             //if(STATUS_CLIENT_DONE==ret) // if((ERR_CLIENT_DOWN==ret) || (STATUS_CLIENT_DONE==ret))
@@ -259,7 +260,7 @@ connect:
                 _print_obj->fops->print(_print_obj, "[%s-%d] STATUS_VIN OK[%s]:[%s %s]\n", __func__, __LINE__, _obd_obj->sn, wsn, _ofp_data._tbuf); //fflush(stdout);
                 //vin_list_insert(wsn, _vin);
                 //thread_vin_request_del(wsn);
-                printf("[%s-%d] _obd_obj->sn:%s\n", __func__, __LINE__, _obd_obj->sn); fflush(stdout);
+                //printf("[%s-%d] _obd_obj->sn:%s\n", __func__, __LINE__, _obd_obj->sn); fflush(stdout);
                 _obd_obj->fops->base->vin.insert(_obd_obj->sn, _ofp_data._tbuf);
                 _obd_obj->fops->base->vin.req_del(_obd_obj->sn);
                 _obd_obj->fops->base->vin.req_del(wsn);
