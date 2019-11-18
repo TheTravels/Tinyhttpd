@@ -37,7 +37,7 @@
 #include <stdio.h>
 #include "storage_pack.h"
 
-static struct vin_item vin_item_list[1024];
+static struct vin_item vin_item_list[10240];
 static const uint16_t vin_item_list_size = sizeof(vin_item_list)/sizeof(vin_item_list[0]);
 static uint16_t vin_item_list_index = 0;
 static struct vin_item vin_item_request[1024];

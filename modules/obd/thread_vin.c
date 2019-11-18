@@ -251,7 +251,7 @@ connect:
             }
             //_size = net->recv(net, cache, cache_size, _recv_timeout); // socket_read(cache, cache_size, 4000);
             //ret = decode_client(_agree_obd_yj, (const uint8_t*)cache, _size, _msg_buf, _msize, _vin, _vsize, &tlen);
-            //_print_obj->fops->print(_print_obj, "[%s-%d] cache[%d]:%s\n", __func__, __LINE__, cache_size, cache); fflush(stdout);
+            _print_obj->fops->print(_print_obj, "[%s-%d] cache[%d]:%s\n", __func__, __LINE__, _size, cache); fflush(stdout);
             ret = _obd_obj->fops->decode_client(_obd_obj, (uint8_t*)cache, (uint16_t)_size, _msg_buf, _msize, &_ofp_data, _print_obj);
             //if(tlen>0) net->send(net, _buf, tlen);// csend(0, _buf, tlen);
             //if(STATUS_CLIENT_DONE==ret) // if((ERR_CLIENT_DOWN==ret) || (STATUS_CLIENT_DONE==ret))
@@ -273,10 +273,10 @@ connect:
 #if (0==BUILD_THREAD_VIN)
             break;
 #endif
-            sleep(1);
+            //sleep(1);
         }
-        //usleep(1000*200);   // 200ms delay
-        sleep(1);
+        usleep(1000*200);   // 200ms delay
+        //sleep(1);
         time(&tnow);
         if(tnow>=(timep+60))
         {
