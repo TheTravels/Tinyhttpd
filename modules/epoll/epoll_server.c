@@ -212,13 +212,15 @@ static void handle_events_server(struct epoll_obj* const _this, struct epoll_eve
                 {
                     // 逐个协议遍历
                     //struct obd_agree_obj* _obd_obj = NULL;
-                    _obd_obj = obd_agree_obj_shanghai.fops->constructed(&obd_agree_obj_shanghai, _thread_data->_obd_obj_buf);
+                    //_obd_obj = obd_agree_obj_shanghai.fops->constructed(&obd_agree_obj_shanghai, _thread_data->_obd_obj_buf);
+                    _obd_obj = obd_agree_obj_yunjing.fops->constructed(&obd_agree_obj_yunjing, _thread_data->_obd_obj_buf);
                     _print.fops->print(&_print, "逐个协议遍历 : %s protocol:%d\n", _obd_obj->fops->agree_des, _obd_obj->fops->protocol); fflush(stdout);
                     decode = _obd_obj->fops->decode_server(_obd_obj, (const uint8_t *)buf, nread, msg_buf, sizeof(msg_buf), &_ofp_data, _db_report, &_print);
                     if(0==decode) _thread_data->_obd_obj = _obd_obj;
                     if(0!=decode)
                     {
-                        _obd_obj = obd_agree_obj_yunjing.fops->constructed(&obd_agree_obj_yunjing, _thread_data->_obd_obj_buf);
+                        //_obd_obj = obd_agree_obj_yunjing.fops->constructed(&obd_agree_obj_yunjing, _thread_data->_obd_obj_buf);
+                        _obd_obj = obd_agree_obj_shanghai.fops->constructed(&obd_agree_obj_shanghai, _thread_data->_obd_obj_buf);
                         _print.fops->print(&_print, "逐个协议遍历 : %s protocol:%d\n", _obd_obj->fops->agree_des, _obd_obj->fops->protocol); fflush(stdout);
                         //decode = decode_server(&print, _agree_obd_yj, (const uint8_t *)data, numchars-len, msg_buf, sizeof(msg_buf), device, csend, _print_buf, _print_bsize);
                         decode = _obd_obj->fops->decode_server(_obd_obj, (const uint8_t *)buf, nread, msg_buf, sizeof(msg_buf), &_ofp_data, _db_report, &_print);
