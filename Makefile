@@ -57,7 +57,7 @@ all: $(BUILD_DIR) $(OBJS) httpd #client list #encode
 #	@cp modules/config/ServerConfig.cfg ./
 	@cp ./cfg/ServerConfig.cfg ./
 
-SCP_FILE_LIST = user.txt README.md Makefile accept_request.h 
+SCP_FILE_LIST = user.txt README.md Makefile accept_request.h
 SCP_DIR_LIST = mk modules upload RSA cfg
 
 SCP_TARGET = Tinyhttpd

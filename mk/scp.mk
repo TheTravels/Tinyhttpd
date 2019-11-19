@@ -14,7 +14,7 @@ scp_all: scp_zdep scp_YJ
 #scp_zdep: clean                                                                                                                                                                                                                                                               
 scp_zdep:
 	@echo scp zdep
-	$(call scp_func,$(SCP_HOST_ZDEP),$(SCP_PORT_ZDEP),merafour,ServerConfig_zdep.cfg,$(SCP_TARGET),$(SCP_DIR),$(SCP_FILE_LIST),$(SCP_DIR_LIST))
+	$(call scp_func,$(SCP_HOST_ZDEP),$(SCP_PORT_ZDEP),merafour,ServerConfig_zdep3.cfg,$(SCP_TARGET),$(SCP_DIR),$(SCP_FILE_LIST),$(SCP_DIR_LIST))
 .PHONY : scp_zdep
 #scp_YJ: clean
 scp_YJ: 
@@ -82,8 +82,8 @@ define scp_func
     mkdir -p $(SCP_DIR)
     cp -a ./cfg/upgrade $(6)/upload
     cp ./cfg/$(4) $(6)/ServerConfig.cfg
-    @$(foreach file,$(7),$(call cp_file,$(file),$(6)))
     @$(foreach file,$(8),$(call cp_dir,$(file),$(6)))
+    @$(foreach file,$(7),$(call cp_file,$(file),$(6)))
     scp -P $(2) -r $(6) $(3)@$(1):/home/$(3)/git
 
 endef
