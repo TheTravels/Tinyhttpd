@@ -75,7 +75,7 @@ static int data_load_func(struct config_load_obj* const _load_obj)
     char server[32] = "Server1";
     struct local_config_data* const _data = (struct local_config_data*)_load_obj->data;
     const int _list_size = sizeof(_data->local_list)/sizeof(_data->local_list[0]);
-    printf("[%s-%d] _cfg_path:%s\n", __func__, __LINE__, _load_obj->_cfg_path);  fflush(stdout);
+    printf("[%s-%d] _cfg_path: %s\n", __func__, __LINE__, _load_obj->_cfg_path);  fflush(stdout);
     ret = _load_obj->fops.load(_load_obj);
     //printf("[%s-%d] cfg:%s\n", __func__, __LINE__, (char*)_load_obj->_stream);  fflush(stdout);
     //printf("[%s-%d] load:%d %d\n", __func__, __LINE__, ret, _load_obj->_len);  fflush(stdout);
@@ -131,12 +131,12 @@ static char load_data[1024*1024]; // 1M, 本地配文件最大为 1MB
 static char _config_data_buf[sizeof(struct config_load_obj)];
 static struct local_config_data __data;
 struct config_load_obj* _local_config_data=NULL;
-void local_config_data_init(const char _cfg_dir[])
+void local_config_data_init(const char _cfg_path[])
 {
-    char cfg_path[256];
-    memset(cfg_path, 0, sizeof(cfg_path));
-    snprintf(cfg_path, sizeof(cfg_path)-1, "%s/ServerConfig.cfg", _cfg_dir);
+    //char cfg_path[256];
+    //memset(cfg_path, 0, sizeof(cfg_path));
+    //snprintf(cfg_path, sizeof(cfg_path)-1, "%s/ServerConfig.cfg", _cfg_dir);
     //printf("[%s-%d] \n", __func__, __LINE__);  fflush(stdout);
     //_local_config_data = config_load_dft.fops.constructed(&config_load_dft, _config_data_buf, data_load_func, "./ServerConfig.cfg", load_data, sizeof(load_data), &__data);
-    _local_config_data = config_load_dft.fops.constructed(&config_load_dft, _config_data_buf, data_load_func, cfg_path, load_data, sizeof(load_data), &__data);
+    _local_config_data = config_load_dft.fops.constructed(&config_load_dft, _config_data_buf, data_load_func, _cfg_path, load_data, sizeof(load_data), &__data);
 }

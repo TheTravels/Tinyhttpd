@@ -24,7 +24,7 @@
 #include <string.h>
 //#include "../obd/thread_vin.h"
 #include "../obd/json_list.h"
-//#include "modules/config/config_data.h"
+#include "modules/config/config_data.h"
 
 void init_daemon(void)
 {
@@ -105,7 +105,7 @@ reboot:
 static void usage(void)
 {
 	//fprintf(stderr,"usage:./main [-d --daemon] [-p --port] [-s --sslport] [-l --log] [-v --version] [-h --help]\n\n");
-	fprintf(stderr,"usage:./build/httpd [-c --config] [-d --daemon] [-D --Dir] [-p --port] [-N --NULL] [-f --fliter] [-S --SN] [-l --log] [-L --list] [-v --version] [-h --help]\n\n");
+    fprintf(stderr, "usage:./build/httpd [-c --config] [-d --daemon] [-D --Dir] [-p --port] [-N --NULL] [-f --file] [-S --SN] [-l --log] [-L --list] [-v --version] [-h --help]\n\n");
 	fprintf(stderr,"usage:./build/httpd -h\n");
 	fprintf(stderr,"usage:./build/httpd -p 9910 -f VINABCDEF1234567 -l \n");
 	fprintf(stderr,"usage:./build/httpd -v\n");
@@ -115,7 +115,8 @@ static void usage(void)
 	fprintf(stderr,"  --Dir 指定工作目录, 默认为当前目录\n");
 	fprintf(stderr,"  --port 服务器端口\n");
 	fprintf(stderr,"  --NULL 运行过程中无终端输出\n");
-	fprintf(stderr,"  --fliter 通过 VIN过滤信息\n");
+    //fprintf(stderr,"  --fliter 通过 VIN过滤信息\n");
+    fprintf(stderr, "  --file 指定配置文件\n");
 	fprintf(stderr,"  --SN 通过 序列号过滤信息\n");
 	fprintf(stderr,"  --log 保存原始数据\n");
 	fprintf(stderr,"  --list 生成设备列表文件模板\n");
@@ -148,6 +149,8 @@ int cmd_parameter(int argc, char *argv[])
     //char _daemon_path[128] = "~/tools/Tinyhttpd";
     char _daemon_path[128] = "./";
     //char _daemon_path[128] = "/home/public/server";
+    const char config_path_def[]="ServerConfig.cfg";
+    char config_path[256]="\0";
 
 	int opt;
 	struct option longopts[]={
@@ -161,7 +164,7 @@ int cmd_parameter(int argc, char *argv[])
 		{"sslport",1,NULL,'s'},
 		{"extent",0,NULL,'e'},  /* extent function -> https */
 #endif
-		{"filter",1,NULL,'f'},
+        {"file",1,NULL,'f'},
 		{"SN",    1,NULL,'S'},
 		{"log",0,NULL,'l'},
 		{"help",0,NULL,'h'},
@@ -171,6 +174,7 @@ int cmd_parameter(int argc, char *argv[])
 	npwd = getpwuid(getuid());
 	//printf("当前登陆的用户名为：%s\n", npwd->pw_name);
 	memset(_daemon_path, 0, sizeof(_daemon_path));
+    memset(config_path, 0, sizeof(config_path));
 	snprintf(_daemon_path, sizeof(_daemon_path)-1, "/home/%s/tools/Tinyhttpd", npwd->pw_name);
 	while((opt=getopt_long(argc,argv,":cdD:Np:f:S:lLhv",longopts,NULL))!=-1)
 	{
@@ -212,9 +216,14 @@ int cmd_parameter(int argc, char *argv[])
 			case 'f':
 				//strncpy(log,optarg,63);
 				//*logp=log;
-				printf("filter VIN : %s \n", optarg); fflush(stdout);
+                //printf("filter VIN : %s \n", optarg); fflush(stdout);
                 //set_filter_vin(optarg);
-                usage();
+                //usage();
+                if (strlen(optarg) < sizeof(config_path))
+                {
+                    memset(config_path, 0, sizeof(config_path));
+                    memcpy(config_path, optarg, strlen(optarg));
+                }
 				break;
 			case 'S':
 				printf("filter SN : %s \n", optarg); fflush(stdout);
@@ -256,12 +265,24 @@ int cmd_parameter(int argc, char *argv[])
 		printf("\n");
         usage();
 	}
+    if('\0'!=config_path[0])
+    {
+        printf("Config File Path: %s \n", config_path);
+        local_config_data_init(config_path);
+        _local_config_data->load(_local_config_data);
+    }
     if(1==daemon)
     {
         init_daemon();
         reset();
     }
 	chdir(_daemon_path);
+    if('\0'==config_path[0])
+    {
+        printf("Config File Path: %s/%s \n", _daemon_path, config_path_def);
+        local_config_data_init("./ServerConfig.cfg");
+        _local_config_data->load(_local_config_data);
+    }
 	if(1==null)
 	{
 		int i = 0;
