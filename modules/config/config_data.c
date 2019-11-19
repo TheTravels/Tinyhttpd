@@ -16,6 +16,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <ctype.h>
+#include <unistd.h>
 #include "config_data.h"
 #include "../lib/data_base.h"
 
@@ -83,9 +84,11 @@ static int data_load_func(struct config_load_obj* const _load_obj)
     {
         _data->nCfgPthreadCounts_ = 0xffff & _load_obj->fops.get_int(_load_obj, "LocalCFG", "ThreadCounts", 0);
         //printf("@%s-%d\n", __func__, __LINE__);
-        _data->nCpuPhtreadCounts_ = 2;//sysconf(_SC_NPROCESSORS_ONLN);
+        //_data->nCpuPhtreadCounts_ = 2;//sysconf(_SC_NPROCESSORS_ONLN);
+        _data->nCpuPhtreadCounts_ = sysconf(_SC_NPROCESSORS_ONLN);
         if(0 == _data->nCfgPthreadCounts_) _data->nCfgPthreadCounts_ = _data->nCpuPhtreadCounts_ * 2;
         if(_data->nCfgPthreadCounts_<4) _data->nCfgPthreadCounts_ = 4;
+        printf("nCfgPthreadCounts_:%d\n", _data->nCfgPthreadCounts_); fflush(stdout);
 
         load_host_cfg(_load_obj, "LocalCFG", &_data->local_listen);
         printf("LocalConfig host:%s, port:%d\n", _data->local_listen.host, _data->local_listen.port); fflush(stdout);

@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
 	pthread_create(&newthread , NULL, (void *)daemon_thread, NULL);
     if(1==_cfg_data->_vin_cfg._turn_on) pthread_create(&vinthread , NULL, (void *)thread_get_vin, NULL);
     //pool_init (8);
-    epoll_pthread_init(2);
+    epoll_pthread_init(_cfg_data->nCfgPthreadCounts_);
 
     printf("[%s-%d] \n", __func__, __LINE__);
     _epoll_listen = epoll_listen_init(_epoll_listen_buf);

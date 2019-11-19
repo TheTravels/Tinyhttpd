@@ -32,6 +32,7 @@ void epoll_pthread_init(const int _thread_max)
     int _pthread_id_size = sizeof(_pthread_id)/sizeof(_pthread_id[0]);
     int _max = _thread_max;
     if(_max>_pthread_id_size) _max = _pthread_id_size;
+    if(_max<2) _max = 2;
     for(i=0; i<_max; i++)
     {
         arg = (void *)i;

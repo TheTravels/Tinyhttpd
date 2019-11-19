@@ -279,7 +279,7 @@ int cmd_parameter(int argc, char *argv[])
 	chdir(_daemon_path);
     if('\0'==config_path[0])
     {
-        printf("Config File Path: %s/%s \n", _daemon_path, config_path_def);
+        printf("Config File Path[default]: %s/%s \n", _daemon_path, config_path_def);
         local_config_data_init("./ServerConfig.cfg");
         _local_config_data->load(_local_config_data);
     }
