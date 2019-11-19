@@ -157,7 +157,7 @@ struct file_serach {
   //int _flag;
 };
 
-char* serach_gets(char* const str, const int n, struct file_serach* const stream)
+static char* serach_gets(char* const str, const int n, struct file_serach* const stream)
 {
     int _end;
     int count=0;
@@ -167,17 +167,41 @@ char* serach_gets(char* const str, const int n, struct file_serach* const stream
     memset(str, 0, (size_t)n);
     for(count=0; count<n; count++)
     {
-        if(stream->pos>=stream->_stext) break;
-        if(stream->pos>=_end) break;
+        if(stream->pos>=stream->_stext) return  NULL;
+        if(stream->pos>=_end) return  NULL;
         _byte = _text[stream->pos++];
+        str[count] = _byte;
         if('\n'==_byte) break;
         if('\0'==_byte) break;
-        str[count] = _byte;
     }
-    str[count] = '\0';
-    if(0==count) return  NULL;
+    //str[count] = '\0';
+    /*if(0==count)
+    {
+        printf("[%s-%d] stream->pos:%d stream->_stext:%d _end:%d _byte:0x%X\n", __func__, __LINE__, stream->pos, stream->_stext, _end, _byte);
+        return  NULL;
+    }*/
     return  str;
 }
+
+/*static int is_empty_line(const char* const _line, const int _len_max)
+{
+    int i;
+    char ch;
+    int empty=1;
+    empty=1;
+    for(i=0; i<_len_max; i++)
+    {
+        ch = _line[i];
+        if(' ' == ch) continue; // space
+        if((ch>='0') && (ch<='9')) {empty=0; break;}
+        if((ch>='a') && (ch<='z')) {empty=0; break;}
+        if((ch>='A') && (ch<='Z')) {empty=0; break;}
+        if('[' == ch) {empty=0; break;}
+        empty=1; break;
+    }
+    //printf("[%s-%d] empty[%c]:%d _line:%s\n", __func__, __LINE__, ch, empty, _line);
+    return empty; // empty
+}*/
 
 static int __get_field_value(const char * const AppName, const char* const KeyName, char* const KeyVal, const char _text[], const int _stext)
 {
@@ -195,6 +219,7 @@ static int __get_field_value(const char * const AppName, const char* const KeyNa
 
     //_serach = 0;
     //while(_serach<_stext)
+    //printf("[%s-%d] fp.pos:%d fp._stext:%d\n", __func__, __LINE__, fp.pos, fp._stext);
     while( (fp.pos<fp._stext) && serach_gets( buf_i, KEYVALLEN, &fp )!=NULL )
     {
         // 读取一行
@@ -214,6 +239,7 @@ static int __get_field_value(const char * const AppName, const char* const KeyNa
         buf = NULL;
         buf = buf_o;
 
+        //printf("[%s-%d] appname:%s fp.pos:%d found:%d buf:%s\n", __func__, __LINE__, appname, fp.pos, found, buf);
         if( found == 0 )
         {
             if( buf[0] != '[' )
@@ -232,6 +258,8 @@ static int __get_field_value(const char * const AppName, const char* const KeyNa
             {
                 continue;
             }
+            // add
+            //else if(0!=is_empty_line(buf, KEYVALLEN)) continue;
             else if ( buf[0] == '[' )
             {
                 break;
@@ -269,6 +297,7 @@ static int __get_field_value(const char * const AppName, const char* const KeyNa
             }
         }
     }
+    //printf("[%s-%d] \n", __func__, __LINE__);
     if( found == 2 ) return(0);
     else return(-1);
 }
@@ -342,6 +371,7 @@ static int config_load(struct config_load_obj* const _load_obj)  // 加载配置
 static int get_field_value(struct config_load_obj* const _load_obj, const char * const section, const char* const _key, const char* const dft, char* const _value)
 {
     int dft_size = strlen(dft);
+    //printf("[%s-%d] \n", __func__, __LINE__);
     int ret = __get_field_value(section, _key, _value, _load_obj->_stream, _load_obj->_len);
     if(0!=ret)
     {

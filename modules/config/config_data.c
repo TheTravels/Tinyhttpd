@@ -27,6 +27,7 @@ static int load_mysql_cfg(struct config_load_obj* const _load_obj, const char *c
     _load_obj->fops.get_field_value(_load_obj, section, "User", "root", _cfg->user);
     _load_obj->fops.get_field_value(_load_obj, section, "Passwd", "123456", _cfg->passwd);
     _load_obj->fops.get_field_value(_load_obj, section, "db", "obd", _cfg->db);
+    printf("MySQL Config[%s] Host:%s, Port:%d, User:%s, Passwd:%s, db:%s\n", section, _cfg->host, _cfg->port, _cfg->user, _cfg->passwd, _cfg->db); fflush(stdout);
     if(0!=_cfg->port) return 0;
     return -1;
 }
@@ -76,6 +77,7 @@ static int data_load_func(struct config_load_obj* const _load_obj)
     const int _list_size = sizeof(_data->local_list)/sizeof(_data->local_list[0]);
     printf("[%s-%d] _cfg_path:%s\n", __func__, __LINE__, _load_obj->_cfg_path);  fflush(stdout);
     ret = _load_obj->fops.load(_load_obj);
+    //printf("[%s-%d] cfg:%s\n", __func__, __LINE__, (char*)_load_obj->_stream);  fflush(stdout);
     //printf("[%s-%d] load:%d %d\n", __func__, __LINE__, ret, _load_obj->_len);  fflush(stdout);
     if(0==ret) // load data
     {
@@ -118,6 +120,10 @@ static int data_load_func(struct config_load_obj* const _load_obj)
 
         _load_obj->fops.get_field_value(_load_obj, "LocalCFG", "vinList", "./upload/vin.list", _data->vinList);
         printf("vinList file:%s\n", _data->vinList); fflush(stdout);
+
+        //printf("[%s-%d] \n", __func__, __LINE__);
+        //result = load_mysql_cfg(_load_obj, "MySQLDefault", &_data->_mysql_cfg);
+        //printf("MySQL Config Host:%s, Port:%d, User:%s, Passwd:%s, db:%s\n", _data->_mysql_cfg.host, _data->_mysql_cfg.port, _data->_mysql_cfg.user, _data->_mysql_cfg.passwd, _data->_mysql_cfg.db); fflush(stdout);
     }
     return ret;
 }
