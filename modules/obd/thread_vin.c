@@ -149,7 +149,7 @@ extern void csend(const int sockfd, const void *buf, const uint16_t len);
 extern int read_threads(int sock, char *buf, int size, int *status);
 //static const char vin_host[] = "yjobdc.cloudscape.net.cn";
 #if (0==BUILD_SERVER_YN)
-static const char vin_host[] = "183.237.191.186";
+//static const char vin_host[] = "183.237.191.186";
 #else
 //static const char vin_host[] = "192.168.0.80";
 #endif

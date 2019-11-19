@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
 	thread_vin_init(port);
     //server_log_init(port);
     _cfg_data = (struct local_config_data*)_local_config_data->data;
-    vin_list_load(_cfg_data->vinList); // vin_list_load("./upload/vin.list");
+    //vin_list_load(_cfg_data->vinList); // vin_list_load("./upload/vin.list");
     obd_agree_obj_yunjing.fops->base->vin.load(_cfg_data->vinList);  // 加载 VIN 码文件
 #if 0
 	fflush(stdout);
