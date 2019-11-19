@@ -293,7 +293,7 @@ static int handle_report_real(int* const print, struct obd_agree_obj* const _obd
                         device->fw_flag = 0x9911;
                         sql_insert_fw_update(obd->VIN, ".bin", "Old_FW", obd->CVN, &obd->SVIN[6], match_fw(obd->CVN)); // 旧固件标记
                     }
-                    if((0!=match_fw(obd->CVN)) && (device->fw_update>(100/10)))  // 每一百秒推送一次更新
+                    if((0!=match_fw((char*)obd->CVN)) && (device->fw_update>(100/10)))  // 每一百秒推送一次更新
                     {
                         // 推送更新,发送推送更新指令
                         struct upload* _load = NULL;
@@ -546,7 +546,7 @@ static int upload_query(int* const print, const char* const vin, struct obd_agre
     //upload_flag=1;  // 强制更新
     memset(Des, 0, sizeof(Des));
     snprintf(Des, sizeof (Des)-1, "update file[%s] serial number[%02d]: %s Model:%s checksum:0x%04X decode->checksum:0x%04X", filename, decode->data_len, decode->data, decode->Model, checksum, decode->checksum);
-    sql_insert_fw_update(vin, suffix, Des, filename, decode->data, decode->checksum);
+    sql_insert_fw_update(vin, suffix, Des, filename, (char*)decode->data, decode->checksum);
     if((upload_flag) && (checksum != decode->checksum))  // need update
     {
         decode->pack_total = _size;
@@ -687,7 +687,7 @@ static int handle_request_userdef(int* const print, struct obd_agree_obj* const 
                     decode.data_len = 0;
                     decode.checksum = 0;
                     printf("SN:%s\n", decode.data);
-                    if(0==create_vin_search(vin_path, decode.data, vin))
+                    if(0==create_vin_search(vin_path, (char*)decode.data, vin))
                     {
                         printf("数据获取成功\n");
                         decode.data_len = strlen(vin);
@@ -708,7 +708,7 @@ static int handle_request_userdef(int* const print, struct obd_agree_obj* const 
             case UPLOAD_QUERY_CFG:    // 查询
                 LogPrint(*print, "userdef Config [cfg]\n"); fflush(stdout);
                 printf("userdef Config [cfg]\n"); fflush(stdout);
-                rlen = upload_query(print, _pack->VIN, _obd_fops,  &decode, ".cfg", device, _rbuf, _rsize);
+                rlen = upload_query(print, (char*)_pack->VIN, _obd_fops,  &decode, ".cfg", device, _rbuf, _rsize);
                 break;
             case UPLOAD_DOWNLOAD:   // 下载
                 LogPrint(*print, "userdef DownLoad\n"); fflush(stdout);
@@ -774,7 +774,7 @@ static int protocol_shanghai(int* const print, int* relay, struct obd_agree_obj*
         LogPrint(*print, "校验码: %02X \n", pack->BCC);
         fflush(stdout);
     }
-    if(17==strlen(pack->VIN))
+    if(17==strlen((char*)pack->VIN))
     {
         memset(device->VIN, 0, sizeof (device->VIN));
         memcpy(device->VIN, pack->VIN, sizeof (pack->VIN));

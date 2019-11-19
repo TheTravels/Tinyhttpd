@@ -122,9 +122,12 @@ static int __read_key_value(const char * const AppName, const char* const KeyNam
 				sscanf( buf, "%[^=|^ |^\t]", keyname );
 				if( strcmp(keyname, KeyName) == 0 ){
 					sscanf( ++c, "%[^\n]", KeyVal );
-					char *KeyVal_o = (char *)malloc(strlen(KeyVal) + 1);
+                    //char *KeyVal_o = (char *)malloc(strlen(KeyVal) + 1);
+                    int _size = strlen(KeyVal) + 1;
+                    char *KeyVal_o = (char *)malloc(_size);
 					if(KeyVal_o != NULL){
-						memset(KeyVal_o, 0, sizeof(KeyVal_o));
+                        //memset(KeyVal_o, 0, sizeof(KeyVal_o));
+                        memset(KeyVal_o, 0, _size);
 						a_trim(KeyVal_o, KeyVal);
 						if(KeyVal_o && strlen(KeyVal_o) > 0)
 							strcpy(KeyVal, KeyVal_o);
@@ -243,10 +246,13 @@ static int __get_field_value(const char * const AppName, const char* const KeyNa
                 if( strcmp(keyname, KeyName) == 0 )
                 {
                     sscanf( ++c, "%[^\n]", KeyVal );
-                    char *KeyVal_o = (char *)malloc(strlen(KeyVal) + 1);
+                    //char *KeyVal_o = (char *)malloc(strlen(KeyVal) + 1);
+                    int _size = strlen(KeyVal) + 1;
+                    char *KeyVal_o = (char *)malloc(_size);
                     if(KeyVal_o != NULL)
                     {
-                        memset(KeyVal_o, 0, sizeof(KeyVal_o));
+                        //memset(KeyVal_o, 0, sizeof(KeyVal_o));
+                        memset(KeyVal_o, 0, _size);
                         a_trim(KeyVal_o, KeyVal);
                         if(KeyVal_o && strlen(KeyVal_o) > 0)
                             strcpy(KeyVal, KeyVal_o);
@@ -411,7 +417,7 @@ static double read_double(const char * const section, const char* const _key, co
     memset(_value, 0, sizeof(_value));
     memset(_dft, 0, sizeof(_dft));
     snprintf(_dft, sizeof(_dft)-1, "%8f", dft);
-    int ret = get_field_value(section, _key, _dft, _value, _path);
+    int ret = read_key_value(section, _key, _dft, _value, _path);
     if(0==ret)
     {
         // char to int

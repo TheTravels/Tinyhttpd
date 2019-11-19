@@ -154,13 +154,13 @@ int main(int argc, char *argv[])
 	int server_sock = -1;
 	//u_short port = 4000;
     u_short port = 9910;
-	int client_sock = -1;
-	struct sockaddr_in client_name;
-	socklen_t  client_name_len = sizeof(client_name);
+    //int client_sock = -1;
+    //struct sockaddr_in client_name;
+    //socklen_t  client_name_len = sizeof(client_name);
 	pthread_t newthread;
 	pthread_t vinthread;
     //char daemon=0;
-	struct device_list* device;
+    //struct device_list* device;
 	char pwd[128] ;
 	struct passwd *npwd;
     struct epoll_obj* _epoll_listen=NULL;
@@ -249,6 +249,7 @@ int main(int argc, char *argv[])
         //printf("[%s-%d] \n", __func__, __LINE__);
         //sleep(10);
     }
+#if 0
 	while (1)
 	{
 		//pthread_attr_t attr;
@@ -282,8 +283,8 @@ int main(int argc, char *argv[])
 #endif
 #endif
 	}
-
-	close(server_sock);
+#endif
+    //close(server_sock);
 
 	return(0);
 }

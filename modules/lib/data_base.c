@@ -15,7 +15,7 @@
 #define BUILD_SERVER_YN   0
 #endif
 
-static int sql_flag = 0;
+//static int sql_flag = 0;
 
 /*static const struct sql_storage_item sql_report_items_format[] = {
 	// "vin, prot, mil, status, ready, svin, cin, iupr, fault_total, fault,",
@@ -157,7 +157,7 @@ static int data_base_fops_insert_sql(struct data_base_obj *const _db)
 #endif
 static int data_base_fops_insert_item_format(struct data_base_obj *const _db, const char* const field, ...)
 {
-    int index = 0;
+    unsigned int index = 0;
     struct sql_storage_item* item = NULL;
     for (index = 0; index < _db->_items_size; index++)
     {
@@ -186,7 +186,7 @@ static int data_base_fops_insert_item_format(struct data_base_obj *const _db, co
 }
 static int data_base_fops_insert_item(struct data_base_obj *const _db, const char* const field, const double _value)
 {
-    int index = 0;
+    unsigned int index = 0;
     struct sql_storage_item* item = NULL;
     for (index = 0; index < _db->_items_size; index++)
     {
@@ -202,7 +202,7 @@ static int data_base_fops_insert_item(struct data_base_obj *const _db, const cha
 }
 static int data_base_fops_insert_item_string(struct data_base_obj *const _db, const char* const field, const char* const _value)
 {
-    int index = 0;
+    unsigned int index = 0;
     struct sql_storage_item* item = NULL;
     for (index = 0; index < _db->_items_size; index++)
     {
@@ -212,7 +212,7 @@ static int data_base_fops_insert_item_string(struct data_base_obj *const _db, co
 #if 0
             sprintf(item->value, "\"%s\"", string_value);
 #else
-            int i=0;
+            unsigned int i=0;
             item->value[0] = '"';
             for(i=0; i<strlen(_value); i++)
             {
@@ -229,7 +229,7 @@ static int data_base_fops_insert_item_string(struct data_base_obj *const _db, co
 }
 static int data_base_fops_insert_item_int(struct data_base_obj *const _db, const char* const field, const int _value)
 {
-    int index = 0;
+    unsigned int index = 0;
     struct sql_storage_item* item = NULL;
     for (index = 0; index < _db->_items_size; index++)
     {

@@ -86,7 +86,7 @@ static enum cmd_unit_yunjing get_cmd(const enum general_pack_type _pack_type)
 static uint8_t SN[32];
 #ifdef DECODE_SERVER
 // 解码
-static int decode_msg_login(struct yunjing_login *msg, const uint8_t data[], const uint16_t _size)
+static int decode_msg_login(struct yunjing_login *const msg, const uint8_t data[], const uint16_t _size)
 {
     //pthread_mutex_init();
     uint16_t index=0;
@@ -112,7 +112,7 @@ static int decode_msg_login(struct yunjing_login *msg, const uint8_t data[], con
     pr_debug("SN:%s \n", msg->sn);
     return index;
 }
-static int decode_msg_logout(struct yunjing_logout *msg, const uint8_t data[], const uint16_t _size)
+static int decode_msg_logout(struct yunjing_logout *const msg, const uint8_t data[], const uint16_t _size)
 {
     uint16_t index=0;
     uint16_t data_len = 0;
@@ -457,7 +457,7 @@ static int decode_pack_general(struct obd_agree_obj* const _obd_fops, const uint
 //#ifdef DECODE_SERVER
         case CMD_LOGIN_YJ:          // 车辆登入  上行
             pr_debug("decode_pack_general CMD_LOGIN_YJ \n"); fflush(stdout);
-            msg_len = decode_msg_login((struct shanghai_login *)msg_buf, pdata, data_len);
+            msg_len = decode_msg_login((struct yunjing_login *)msg_buf, pdata, data_len);
             break;
         case CMD_REPORT_REAL_YJ:    // 实时信息上报  上行
             pr_debug("decode_pack_general CMD_REPORT_REAL_YJ \n"); fflush(stdout);
@@ -472,7 +472,7 @@ static int decode_pack_general(struct obd_agree_obj* const _obd_fops, const uint
             break;
         case CMD_LOGOUT_YJ:         // 车辆登出  上行
             pr_debug("decode_pack_general CMD_LOGOUT_YJ \n"); fflush(stdout);
-            msg_len = decode_msg_logout((struct shanghai_logout *)msg_buf, pdata, data_len);
+            msg_len = decode_msg_logout((struct yunjing_logout *)msg_buf, pdata, data_len);
             break;
         case CMD_UTC_YJ:            // 终端校时  上行
             pr_debug("decode_pack_general CMD_UTC_YJ \n"); fflush(stdout);
@@ -513,6 +513,7 @@ static int decode_pack_general(struct obd_agree_obj* const _obd_fops, const uint
 //    int (*const check_pack)(struct obd_agree_obj* const _obd_fops, const void* const _data, const uint16_t _dsize);
 static int check_pack_general(struct obd_agree_obj* const _obd_fops, const void* const _data, const uint16_t _dsize)
 {
+    (void)_obd_fops;
     uint8_t bcc=0;
     uint16_t index=0;
     struct general_pack_shanghai _general_pack;
@@ -832,6 +833,7 @@ static int handle_decode(struct obd_agree_obj* const _obd_fops, const uint8_t _p
 
 static int encode_msg_login(struct obd_agree_obj* const _obd_fops, const struct yunjing_login *const msg, uint8_t buf[], const uint16_t _size)
 {
+    (void)_obd_fops;
     uint16_t index=0;
     uint16_t data_len=0;
     data_len = sizeof (msg->UTC)-1 + sizeof (msg->count) + sizeof (msg->sn)-1;
@@ -849,6 +851,7 @@ static int encode_msg_login(struct obd_agree_obj* const _obd_fops, const struct 
 }
 static int encode_msg_logout(struct obd_agree_obj* const _obd_fops, const struct yunjing_logout *const msg, uint8_t buf[], const uint16_t _size)
 {
+    (void)_obd_fops;
     uint16_t index=0;
     uint16_t data_len=0;
     data_len = sizeof (msg->UTC)-1 + sizeof (msg->count) + sizeof (msg->sn)-1;
@@ -869,6 +872,7 @@ static int encode_msg_logout(struct obd_agree_obj* const _obd_fops, const struct
 // A4.5.2  实时信息上报
 static int encode_msg_report_real(struct obd_agree_obj* const _obd_fops, const struct shanghai_report_real *const msg, uint8_t buf[], const uint16_t _size)
 {
+    (void)_obd_fops;
     uint16_t index=0;
     uint16_t data_len=0;
     uint8_t i=0;
@@ -1020,6 +1024,7 @@ static int encode_msg_report_later(struct obd_agree_obj* const _obd_fops, const 
 // 自定义数据
 static int encode_msg_userdef(struct obd_agree_obj* const _obd_fops, const struct shanghai_userdef *const msg, uint8_t buf[], const uint16_t _size)
 {
+    (void)_obd_fops;
     if(msg->_dsize>_size) return ERR_ENCODE_PACKL;
     memcpy(buf, msg->data, msg->_dsize);
     return msg->_dsize;
@@ -1228,6 +1233,7 @@ static int handle_encode(struct obd_agree_obj* const _obd_fops, const void* cons
 #endif
 static int userdef_encode_yj(struct obd_agree_obj* const _obd_fops, const struct yunjing_userdef *const _udef, void* const _buffer, const uint16_t _size)
 {
+    (void)_obd_fops;
     uint16_t index;
     const struct userdef_yj_qure* const _qure = (const struct userdef_yj_qure*)_udef->msg;
     const struct userdef_yj_qure_ack* const _qure_ack = (const struct userdef_yj_qure_ack*)_udef->msg;
@@ -1331,6 +1337,7 @@ static int userdef_encode_yj(struct obd_agree_obj* const _obd_fops, const struct
 
 static int userdef_decode_yj(struct obd_agree_obj* const _obd_fops, struct yunjing_userdef *const _udef, const void* const _data, const uint16_t _size)
 {
+    (void)_obd_fops;
     uint16_t index;
     struct userdef_yj_qure* const _qure = (struct userdef_yj_qure*)_udef->msg;
     struct userdef_yj_qure_ack* const _qure_ack = (struct userdef_yj_qure_ack*)_udef->msg;

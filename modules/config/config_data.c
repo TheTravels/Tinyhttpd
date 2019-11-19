@@ -101,7 +101,7 @@ static int data_load_func(struct config_load_obj* const _load_obj)
             //GetPrivateProfileStringEx(server, "Host", "0.0.0.0", local_list[i].host);
             //local_list[i].port = 0xffff & GetPrivateProfileIntEx(server, "Port", def_port);
             load_host_cfg(_load_obj, server, &_data->local_list[i]);
-            if(_data->local_list[i].port > 0) printf("server%d host:%s, port:%d\n", i, _data->local_list[i].host, _data->local_list[i].port); fflush(stdout);
+            if(_data->local_list[i].port > 0) {printf("server%d host:%s, port:%d\n", i, _data->local_list[i].host, _data->local_list[i].port); fflush(stdout);}
             //LOG_INFO << "server, listenning on " << local_list[i].host << ":" << local_list[i].port;
         }
         // mysql

@@ -615,7 +615,7 @@ static int rsa_fops_decrypt(struct encrypt_obj* const _fops, const void *const i
 struct encrypt_fops rsa_fops = {
     .init = rsa_fops_init,
     .encrypt = rsa_fops_encrypt,
-    .encrypt = rsa_fops_encrypt,
+    .decrypt = rsa_fops_decrypt,
 };
 
 struct encrypt_obj rsa_obj = {

@@ -61,7 +61,7 @@ static void trunking_call(void* client, const struct device_list* const device, 
 //    trunking_utc(time(NULL), utc, sizeof(utc));
     struct trunking_data *trunk = (struct trunking_data*) client;
     //printf("trunking_call Time[0x%08X] [ %d | %d ]: %s \n", device, trunk->read, device->write, utc);
-    printf("trunking_call [0x%08X] [ %d | %d ] VIN:%s SN:%s \n", device, trunk->read, trunk->exit, device->VIN, device->sn);
+    printf("trunking_call [0x%08X] [ %d | %d ] VIN:%s SN:%s \n", (unsigned int)(long)device, trunk->read, trunk->exit, device->VIN, device->sn);
     //if(trunk->read==device->write) return;
     //trunk->read = device->write;
     trunk->read++;
@@ -114,7 +114,7 @@ int trunking(const int client)
     char buf[128];
     int recv_status=1;
     //const char download[]="Download";
-    struct trunking_data trumk={client, 0};
+    struct trunking_data trumk={client, 0, 0};
     trunk_flag = 1;
 
     //while(trunk_flag)

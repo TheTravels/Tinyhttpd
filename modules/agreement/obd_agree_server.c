@@ -1032,7 +1032,7 @@ static void upload_download_yunjing(struct obd_agree_obj* const _agree_ofp, stru
     char suffix[4] = "bin";
     uint8_t buffer[sizeof(struct yunjing_userdef)];
     char* fw;
-    uint32_t checksum=0;
+    //uint32_t checksum=0;
     long _size=0;
     const size_t _filename_len = strlen(_filename);
     //struct userdef_yj_ack_download* const _ack_download = (struct userdef_yj_ack_download*)_udef->msg;
@@ -1071,7 +1071,7 @@ static void upload_download_yunjing(struct obd_agree_obj* const _agree_ofp, stru
         //return;
         goto err;
     }
-    checksum = fast_crc16(0, (unsigned char *)fw, _size);
+    //checksum = fast_crc16(0, (unsigned char *)fw, _size);
     // download时 decode.checksum存储请求下载的数据长度
     if((_total<_seek) || (_size<(long)_seek) || (NULL==fw))
     {
@@ -1219,7 +1219,7 @@ static int handle_request_userdef_yunjing(struct obd_agree_obj* const _agree_ofp
             case USERDEF_YJ_QUERY_CFG:   // 查询配置文件更新
                 _print->fops->print(_print, "查询 CFG\n");
                 _userdef.type_msg = USERDEF_YJ_ACK_CFG;
-                upload_query_yunjing(_pack->VIN, _agree_ofp, &_userdef, _qure->sn, _qure->checksum, ".cfg", _ofp_data, _print);
+                upload_query_yunjing((char*)_pack->VIN, _agree_ofp, &_userdef, _qure->sn, _qure->checksum, ".cfg", _ofp_data, _print);
                 break;
             case USERDEF_YJ_ACK_CFG:     // 响应
                 _print->fops->print(_print, "ACK_CFG\n");
@@ -1227,7 +1227,7 @@ static int handle_request_userdef_yunjing(struct obd_agree_obj* const _agree_ofp
             case USERDEF_YJ_QUERY_FW:    // 查询固件更新
                 _print->fops->print(_print, "查询 FW\n");
                 _userdef.type_msg = USERDEF_YJ_ACK_FW;
-                upload_query_yunjing(_pack->VIN, _agree_ofp, &_userdef, _qure->sn, _qure->checksum, ".bin", _ofp_data, _print);
+                upload_query_yunjing((char*)_pack->VIN, _agree_ofp, &_userdef, _qure->sn, _qure->checksum, ".bin", _ofp_data, _print);
                 break;
             case USERDEF_YJ_ACK_FW:      // 响应
                 _print->fops->print(_print, "ACK_FW\n");
@@ -1235,7 +1235,7 @@ static int handle_request_userdef_yunjing(struct obd_agree_obj* const _agree_ofp
             case USERDEF_YJ_QUERY_FWB:    // 查询固件更新,获取固件块信息
                 _print->fops->print(_print, "块查询\n");
                 _userdef.type_msg = USERDEF_YJ_ACK_FWB;
-                upload_query_block_yunjing(_pack->VIN, _agree_ofp, &_userdef, _qure->sn, _qure->checksum, ".bin", _ofp_data, _print);
+                upload_query_block_yunjing((char*)_pack->VIN, _agree_ofp, &_userdef, _qure->sn, _qure->checksum, ".bin", _ofp_data, _print);
                 break;
             case USERDEF_YJ_ACK_FWB:      // 响应
                 _print->fops->print(_print, "ACK_FWB\n");
@@ -1366,7 +1366,7 @@ int obj_obd_agree_yunjing_server(struct obd_agree_obj* const _obd_fops, struct o
     _print->fops->print(_print, "加密:[%-16s] ", ssl_type[pack->ssl&0x3]);
     _print->fops->print(_print, "数据长度:[%-4d] ", pack->data_len);
     _print->fops->print(_print, "BCC:[%02X] ", pack->BCC);
-    if(17==strlen(pack->VIN))
+    if(17==strlen((char*)pack->VIN))
     {
         memset(_obd_fops->VIN, 0, sizeof (_obd_fops->VIN));
         memcpy(_obd_fops->VIN, pack->VIN, sizeof (pack->VIN));

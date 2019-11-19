@@ -17,6 +17,8 @@
 #include <syslog.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
@@ -92,7 +94,8 @@ reboot:
         printf("child killed\n");
         //printf("father \n");
         printf("father pid:%d | %d\n", getpid(), pid);
-        wait(NULL); //等待回收子进程的资源
+        //wait(NULL); //等待回收子进程的资源
+        waitpid(pid, NULL, 0); //等待回收子进程的资源
         //raise(SIGKILL); //杀死自己的信号,函数raise 给自己发送信号
         goto reboot;
     }

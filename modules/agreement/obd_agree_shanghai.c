@@ -226,6 +226,7 @@ static void init(struct obd_agree_obj* const _obd_fops, const uint16_t count, co
  */
 static int check_pack_general(struct obd_agree_obj* const _obd_fops, const void* const _data, const uint16_t _dsize)
 {
+    (void)_obd_fops;
     uint8_t bcc=0;
     uint16_t index=0;
     struct general_pack_shanghai _general_pack;
@@ -334,11 +335,13 @@ static int handle_decode(struct obd_agree_obj* const _obd_fops, const uint8_t _p
 // 自定义编码
 static int userdef_encode(struct obd_agree_obj* const _obd_fops, const void * const __udef, void * const _buffer, const uint16_t _size)
 {
+    (void)_obd_fops;
     return upload_encode((const struct upload *)__udef, _buffer, _size);
 }
 // 自定义解码
 static int userdef_decode(struct obd_agree_obj* const _obd_fops, void * const __udef, const void * const _data, const uint16_t _size)
 {
+    (void)_obd_fops;
     return upload_decode((struct upload *)__udef, _data, _size);
 }
 // 更新推送

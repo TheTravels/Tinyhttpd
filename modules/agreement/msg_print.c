@@ -75,6 +75,7 @@ static int msg_fflush(struct msg_print_obj* const _fops)
 
 static void utc2filename(struct msg_print_obj* const _fops, const uint32_t times, void* const buf, const size_t _size)
 {
+    (void)_fops;
     DateTime      utctime   = {.year = 1970, .month = 1, .day = 1, .hour = 0, .minute = 0, .second = 0};
     DateTime      localtime = {.year = 1970, .month = 1, .day = 1, .hour = 8, .minute = 0, .second = 0};
     if(times > INT32_MAX)
@@ -93,6 +94,7 @@ static void utc2filename(struct msg_print_obj* const _fops, const uint32_t times
 }
 static void date2filename(struct msg_print_obj* const _fops, const uint32_t times, void* const buf, const size_t _size, const char* prefix)
 {
+    (void)_fops;
     DateTime      utctime   = {.year = 1970, .month = 1, .day = 1, .hour = 0, .minute = 0, .second = 0};
     DateTime      localtime = {.year = 1970, .month = 1, .day = 1, .hour = 8, .minute = 0, .second = 0};
     if(times > INT32_MAX)
@@ -111,6 +113,7 @@ static void date2filename(struct msg_print_obj* const _fops, const uint32_t time
 }
 static void utc_format(struct msg_print_obj* const _fops, const uint32_t times, uint8_t buf[], const size_t _size)
 {
+    (void)_fops;
     (void)_size;
     DateTime      utctime   = {.year = 1970, .month = 1, .day = 1, .hour = 0, .minute = 0, .second = 0};
     DateTime      localtime = {.year = 1970, .month = 1, .day = 1, .hour = 8, .minute = 0, .second = 0};
