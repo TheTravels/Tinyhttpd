@@ -9,6 +9,19 @@
 #SCP_TARGET = Tinyhttpd
 #TMP_DIR = ../Tmp$(SCP_TARGET)/$(SCP_TARGET)
 
+scp_all: scp_zdep scp_YJ                                                                                                                                                                                                                                                       
+.PHONY : scp_all                                                                                                                                                                                                                                                               
+#scp_zdep: clean                                                                                                                                                                                                                                                               
+scp_zdep:
+	@echo scp zdep
+	$(call scp_func,$(SCP_HOST_ZDEP),$(SCP_PORT_ZDEP),merafour,ServerConfig_zdep.cfg,$(SCP_TARGET),$(SCP_DIR),$(SCP_FILE_LIST),$(SCP_DIR_LIST))
+.PHONY : scp_zdep
+#scp_YJ: clean
+scp_YJ: 
+	@echo scp YJ
+	$(call scp_func,yjobdc.cloudscape.net.cn,6232,obd,ServerConfig_YJ.cfg,$(SCP_TARGET),$(SCP_DIR),$(SCP_FILE_LIST),$(SCP_DIR_LIST))
+.PHONY : scp_YJ
+
 #scp_all: scp_zdep scp_YJ                                                                                                                                                                                                                                                       
 #.PHONY : scp_all                                                                                                                                                                                                                                                               
 #scp_zdep: clean                                                                                                                                                                                                                                                               
