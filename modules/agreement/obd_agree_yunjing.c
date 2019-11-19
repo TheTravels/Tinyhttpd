@@ -985,6 +985,24 @@ static int encode_msg_report_real(struct obd_agree_obj* const _obd_fops, const s
                 index += bigw_16bit(&buf[index], att->exit_gas_temp);   // 15  DPF 排气温度  WORD  ℃ 数据长度：2btyes 精度：0.03125 ℃ per bit 偏移量：-273 数据范围：-273~1734.96875℃ “0xFF,0xFF”表示无效
                 // ;
                 break;
+            case MSG_SMOKE: // 0x81  包含烟雾的数据流信息(自定义)
+                {
+                    if((index+sizeof (struct yunjing_smoke))>_size) return ERR_ENCODE_PACKL;
+                    pr_debug("MSG_SMOKE : %d \n", index); fflush(stdout);
+                    //att = (const struct shanghai_data_att *)container_of(nmsg, struct shanghai_data_att, head);
+                    struct yunjing_smoke* const smoke = container_of(nmsg, struct yunjing_smoke, head);
+                    buf[index++] = nmsg->type_msg;
+                    index += bigw_16bit(&buf[index], smoke->temperature);   // 0  烟雾排温, 数据长度：2 btyes, 精度：1℃ /bit,
+                    index += bigw_16bit(&buf[index], smoke->fault);         // 2  OBD（烟雾故障码）,数据长度：2 btyes 精度：1/bit偏移量：0数据范围：“0xFF，0xFF”表示无效
+                    index += bigw_16bit(&buf[index], smoke->kpa);           // 4  背压, 数据长度：2 btyes, 精度：1 kpa/bit,
+                    index += bigw_16bit(&buf[index], smoke->m_l);           // 6  光吸收系数,数据长度：2 btyes,精度：0.01 m-l/bit
+                    index += bigw_16bit(&buf[index], smoke->opacity);       // 8  不透光度,数据长度：2 btyes,精度：0.1%/bit
+                    index += bigw_16bit(&buf[index], smoke->mg_per_m3);     // 10 颗粒物浓度,数据长度：2 btyes,精度：0.1mg/m3 /bit
+                    index += bigw_16bit(&buf[index], smoke->light_alarm);   // 12 光吸收系数超标报警,数据长度：2 btyes,精度：1
+                    index += bigw_16bit(&buf[index], smoke->pressure_alarm);// 14 背压报警,数据长度：2 btyes,精度：1
+                    index += bigw_16bit(&buf[index], smoke->ppm);           // 16 N0x 值,数据长度：2 btyes,精度：1ppm
+                }
+                break;
             // 0x03-0x7F  预留
             // 0x81~0xFE  用户自定义
             default:

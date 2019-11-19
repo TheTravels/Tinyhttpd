@@ -325,7 +325,7 @@ static int handle_report_real(struct obd_agree_obj* const _agree_ofp, const stru
                     _print->fops->print(_print, "SCR 上游 NOx : \t\t0x%04X \t\t[%4d \t%5.4f ppm] (传感器输出值:-200~3212.75ppm)\n", stream->ppm_up&0xFFFF, stream->ppm_up, FloatConvert(stream->ppm_up, -200, 0.05));
                     _print->fops->print(_print, "SCR 下游 NOx : \t\t0x%04X \t\t[%4d \t%5.4f ppm] (传感器输出值:-200~3212.75ppm)\n", stream->ppm_down&0xFFFF, stream->ppm_down, FloatConvert(stream->ppm_down, -200, 0.05));
                     _print->fops->print(_print, "反应剂余量: \t\t0x%02X \t\t[%4d \t%5.4f %%] (0~100%%)\n", stream->urea_level&0xFF, stream->urea_level, FloatConvert(stream->urea_level, 0, 0.4));
-                    _print->fops->print(_print, "进气量 : \t\t0x%04X \t\t[%4d \t%5.4f ppm] (0~3212.75ppm)\n", stream->kgh&0xFFFF, stream->kgh, FloatConvert(stream->kgh, 0, 0.05));
+                    _print->fops->print(_print, "进气量 : \t\t0x%04X \t\t[%4d \t%5.4f ppm] (0~3212.75 kgh)\n", stream->kgh&0xFFFF, stream->kgh, FloatConvert(stream->kgh, 0, 0.05));
                     _print->fops->print(_print, "SCR 入口温度: \t\t0x%04X \t\t[%4d \t%5.4f ℃] (后处理上游排气温度:-273~1734.96875℃)\n", stream->SCR_in&0xFFFF, stream->SCR_in, FloatConvert(stream->SCR_in, -273, 0.03125));
                     _print->fops->print(_print, "SCR 出口温度: \t\t0x%04X \t\t[%4d \t%5.4f ℃] (后处理下游排气温度:-273~1734.96875℃)\n", stream->SCR_out&0xFFFF, stream->SCR_out, FloatConvert(stream->SCR_out, -273, 0.03125));
                     _print->fops->print(_print, "DPF 压差: \t\t0x%04X \t\t[%4d \t%5.4f kPa] (（或 DPF排气背压）0~6425.5 kPa)\n", stream->DPF&0xFFFF, stream->DPF, FloatConvert(stream->DPF, 0, 0.1));
@@ -378,6 +378,20 @@ static int handle_report_real(struct obd_agree_obj* const _agree_ofp, const stru
                     _db_report->fops->insert_item(_db_report, "urea_total", DIntConvert(att->mlh_urea_total, 0, 1.0));
                     _db_report->fops->insert_item(_db_report, "gas_temp", FloatConvert(att->exit_gas_temp, -273, 0.03125));
                     _db_report->fops->insert_item_int(_db_report, "version", _agree_ofp->fw_crc);
+                }
+                break;
+            case MSG_SMOKE: // 0x81  包含烟雾的数据流信息(自定义)
+                {
+                    struct yunjing_smoke* const smoke = container_of(nmsg, struct yunjing_smoke, head);
+                    _print->fops->print(_print, "烟雾排温, 数据长度：2 btyes, 精度：1℃ /bit : %d\n", smoke->temperature);
+                    _print->fops->print(_print, "OBD（烟雾故障码）,数据长度：2 btyes 精度：1/bit : %d\n", smoke->fault);
+                    _print->fops->print(_print, "背压, 数据长度：2 btyes, 精度：1 kpa/bit : %d\n", smoke->kpa);
+                    _print->fops->print(_print, "光吸收系数,数据长度：2 btyes,精度：0.01 m-l/bit : %d\n", smoke->m_l);
+                    _print->fops->print(_print, "不透光度,数据长度：2 btyes,精度：0.1%/bit : %d\n", smoke->opacity);
+                    _print->fops->print(_print, "颗粒物浓度,数据长度：2 btyes,精度：0.1mg/m3 /bit : %d\n", smoke->mg_per_m3);
+                    _print->fops->print(_print, "光吸收系数超标报警,数据长度：2 btyes,精度：1 : %d\n", smoke->light_alarm);
+                    _print->fops->print(_print, "背压报警,数据长度：2 btyes,精度：1 : %d\n", smoke->pressure_alarm);
+                    _print->fops->print(_print, "N0x 值,数据长度：2 btyes,精度：1ppm : %d\n", smoke->ppm);
                 }
                 break;
             // 0x03-0x7F  预留
