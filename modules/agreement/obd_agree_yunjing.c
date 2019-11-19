@@ -147,9 +147,9 @@ static int decode_msg_report_real(void* msg_buf, const uint16_t _msize, const ui
     uint8_t* ptr = (uint8_t*)msg_buf;
     struct report_head* nmsg=NULL;  // next msg
     struct report_head* fault=NULL;
-    struct shanghai_data_obd *obd=NULL;
-    struct shanghai_data_stream *stream=NULL;
-    struct shanghai_data_att *att=NULL;
+    //struct shanghai_data_obd *obd=NULL;
+    //struct shanghai_data_stream *stream=NULL;
+    //struct shanghai_data_att *att=NULL;
     uint8_t fault_count=0;
     // one, 数据头
     data_len = sizeof (msg->UTC)-1 + sizeof (msg->count);
@@ -176,154 +176,198 @@ static int decode_msg_report_real(void* msg_buf, const uint16_t _msize, const ui
             // 1） OBD 信息数据格式和定义见表 A.6 所示。
             case MSG_OBD:       // 0x01  OBD 信息
                 pr_debug("\nMSG_OBD : %d \n", index); fflush(stdout);
-                obd = (struct shanghai_data_obd *) ptr;
-                //pr_debug("obd addr: 0X%08X \n", obd);
-                //save_obd = obd;
-                //pr_debug("MSG_OBD ...1 \n"); fflush(stdout);
-                ptr += sizeof (struct shanghai_data_obd);   // 移动缓冲区指针
-                //pr_debug("MSG_OBD ...2 \n"); fflush(stdout);
-                obd->head.type_msg = data[index++];
-                obd->protocol = data[index++];                                     // OBD 诊断协议  1  BYTE 有效范围 0~2，“0”代表 IOS15765，“1”代表IOS27145，“2”代表 SAEJ1939，“0xFE”表示无效。
-                //pr_debug("MSG_OBD ...3 \n"); fflush(stdout);
-                obd->MIL = data[index++];                                          // MIL 状态  1  BYTE 有效范围 0~1，“0”代表未点亮，“1”代表点亮。“0xFE”表示无效。
-                obd->status = merge_16bit(data[index], data[index+1]); index += 2; // 诊断支持状态  2  WORD
-                obd->ready = merge_16bit(data[index], data[index+1]); index += 2;  // 诊断就绪状态  2  WORD
-                // 车辆识别码（VIN） 17  STRING
-                memcpy(obd->VIN, &data[index], sizeof (obd->VIN)-1);
-                BUILD_BUG_ON(sizeof (obd->VIN)-1 != 17);
-                index += 17;
-                // 软件标定识别号 18  STRING 软件标定识别号由生产企业自定义，字母或数字组成，不足后面补字符“0”。
-                memcpy(obd->SVIN, &data[index], sizeof (obd->SVIN)-1);
-                BUILD_BUG_ON(sizeof (obd->SVIN)-1 != 18);
-                index += 18;
-                // 标定验证码（CVN） 18  STRING 标定验证码由生产企业自定义，字母或数字组成，不足后面补字符“0”。
-                memcpy(obd->CVN, &data[index], sizeof (obd->CVN)-1);
-                BUILD_BUG_ON(sizeof (obd->CVN)-1 != 18);
-                index += 18;
-                // IUPR 值  36  DSTRING  定义参考 SAE J 1979-DA 表 G11.
-                //memcpy(obd->IUPR, &data[index], sizeof (obd->IUPR)-1);
-                for(i=0; i<18; i++)
                 {
-                    obd->IUPR[i] = merge_16bit(data[index], data[index+1]); index += 2;
-                }
-                BUILD_BUG_ON(sizeof (obd->IUPR) != 36);
-                //index += 36;
-//                pr_debug("MSG_OBD VIN: %s \n", obd->VIN);
-//                pr_debug("MSG_OBD SVIN: %s \n", obd->SVIN);
-//                pr_debug("MSG_OBD CVN: %s \n", obd->CVN);
-                obd->fault_total = data[index++];                                   // 故障码总数  1  BYTE  有效值范围：0~253，“0xFE”表示无效。
-                // 故障码信息列表 ∑每个故障码信息长度 N*BYTE（4） 每个故障码为四字节，可按故障实际顺序进行排序。
-                fault = &(obd->fault_list);
-                fault->next = NULL;
-                fault_count=0;
-                //pr_debug("MSG_OBD ... index:%d fault_total:%d \n", index, obd->fault_total); fflush(stdout);
-                //while(fault_count<obd->fault_total)
-                for(fault_count=0; fault_count<obd->fault_total; fault_count++)
-                {
-                    //printf("decode_msg_report_real[%d]: %d \n", obd->fault_total, fault_count); fflush(stdout);
-                    fault->data = merge_32bit(data[index], data[index+1], data[index+2], data[index+3]);  // 故障码, BYTE（4）
-                    index += 4;
-#if 0
-                    fault_count++;
-                    if(fault_count<obd->fault_total)
+                    struct shanghai_data_obd* const obd = (struct shanghai_data_obd *) ptr;
+                    //pr_debug("obd addr: 0X%08X \n", obd);
+                    //save_obd = obd;
+                    //pr_debug("MSG_OBD ...1 \n"); fflush(stdout);
+                    ptr += sizeof (struct shanghai_data_obd);   // 移动缓冲区指针
+                    //pr_debug("MSG_OBD ...2 \n"); fflush(stdout);
+                    obd->head.type_msg = data[index++];
+                    obd->protocol = data[index++];                                     // OBD 诊断协议  1  BYTE 有效范围 0~2，“0”代表 IOS15765，“1”代表IOS27145，“2”代表 SAEJ1939，“0xFE”表示无效。
+                    //pr_debug("MSG_OBD ...3 \n"); fflush(stdout);
+                    obd->MIL = data[index++];                                          // MIL 状态  1  BYTE 有效范围 0~1，“0”代表未点亮，“1”代表点亮。“0xFE”表示无效。
+                    obd->status = merge_16bit(data[index], data[index+1]); index += 2; // 诊断支持状态  2  WORD
+                    obd->ready = merge_16bit(data[index], data[index+1]); index += 2;  // 诊断就绪状态  2  WORD
+                    // 车辆识别码（VIN） 17  STRING
+                    memcpy(obd->VIN, &data[index], sizeof (obd->VIN)-1);
+                    BUILD_BUG_ON(sizeof (obd->VIN)-1 != 17);
+                    index += 17;
+                    // 软件标定识别号 18  STRING 软件标定识别号由生产企业自定义，字母或数字组成，不足后面补字符“0”。
+                    memcpy(obd->SVIN, &data[index], sizeof (obd->SVIN)-1);
+                    BUILD_BUG_ON(sizeof (obd->SVIN)-1 != 18);
+                    index += 18;
+                    // 标定验证码（CVN） 18  STRING 标定验证码由生产企业自定义，字母或数字组成，不足后面补字符“0”。
+                    memcpy(obd->CVN, &data[index], sizeof (obd->CVN)-1);
+                    BUILD_BUG_ON(sizeof (obd->CVN)-1 != 18);
+                    index += 18;
+                    // IUPR 值  36  DSTRING  定义参考 SAE J 1979-DA 表 G11.
+                    //memcpy(obd->IUPR, &data[index], sizeof (obd->IUPR)-1);
+                    for(i=0; i<18; i++)
                     {
+                        obd->IUPR[i] = merge_16bit(data[index], data[index+1]); index += 2;
+                    }
+                    BUILD_BUG_ON(sizeof (obd->IUPR) != 36);
+                    //index += 36;
+    //                pr_debug("MSG_OBD VIN: %s \n", obd->VIN);
+    //                pr_debug("MSG_OBD SVIN: %s \n", obd->SVIN);
+    //                pr_debug("MSG_OBD CVN: %s \n", obd->CVN);
+                    obd->fault_total = data[index++];                                   // 故障码总数  1  BYTE  有效值范围：0~253，“0xFE”表示无效。
+                    // 故障码信息列表 ∑每个故障码信息长度 N*BYTE（4） 每个故障码为四字节，可按故障实际顺序进行排序。
+                    fault = &(obd->fault_list);
+                    fault->next = NULL;
+                    fault_count=0;
+                    //pr_debug("MSG_OBD ... index:%d fault_total:%d \n", index, obd->fault_total); fflush(stdout);
+                    //while(fault_count<obd->fault_total)
+                    for(fault_count=0; fault_count<obd->fault_total; fault_count++)
+                    {
+                        //printf("decode_msg_report_real[%d]: %d \n", obd->fault_total, fault_count); fflush(stdout);
+                        fault->data = merge_32bit(data[index], data[index+1], data[index+2], data[index+3]);  // 故障码, BYTE（4）
+                        index += 4;
+    #if 0
+                        fault_count++;
+                        if(fault_count<obd->fault_total)
+                        {
+                            fault->next = (struct report_head* )ptr;
+                            ptr += sizeof (struct report_head);   // 移动缓冲区指针
+                        }
+                        else
+                        {
+                            break;
+                        }
+    #else
                         fault->next = (struct report_head* )ptr;
                         ptr += sizeof (struct report_head);   // 移动缓冲区指针
+    #endif
+                        fault = fault->next;  // 下一个数据
+                        fault->next = NULL;
+                    }
+                    //pr_debug("MSG_OBD ...break index:%d \n", index); fflush(stdout);
+                    if(NULL==msg->msg)
+                    {
+                        nmsg=&obd->head;
+                        msg->msg = nmsg;
                     }
                     else
                     {
-                        break;
+                        nmsg->next=&obd->head;
+                        nmsg = nmsg->next;   // 下一个数据
                     }
-#else
-                    fault->next = (struct report_head* )ptr;
-                    ptr += sizeof (struct report_head);   // 移动缓冲区指针
-#endif
-                    fault = fault->next;  // 下一个数据
-                    fault->next = NULL;
+                    nmsg->next = NULL;
                 }
-                //pr_debug("MSG_OBD ...break index:%d \n", index); fflush(stdout);
-                if(NULL==msg->msg)
-                {
-                    nmsg=&obd->head;
-                    msg->msg = nmsg;
-                }
-                else
-                {
-                    nmsg->next=&obd->head;
-                    nmsg = nmsg->next;   // 下一个数据
-                }
-                nmsg->next = NULL;
                 break;
             // 2）数据流信息数据格式和定义见表 A.7 所示，补充数据流信息数据格式和定义见表 A.8 所示。
             case MSG_STREAM:     // 0x02  数据流信息
                 pr_debug("\nMSG_STREAM : %d \n", index); fflush(stdout);
-                stream = (struct shanghai_data_stream *) ptr;
-                //pr_debug("stream addr: 0X%08X \n", stream);
-                ptr += sizeof (struct shanghai_data_stream);                             // 移动缓冲区指针
-                stream->head.type_msg = data[index++];
-                stream->speed = merge_16bit(data[index], data[index+1]); index += 2;     // 0  车速  WORD  km/h 数据长度：2btyes 精度：1/256km/h/ bit 偏移量：0 数据范围：0~250.996km/h “0xFF,0xFF”表示无效
-                stream->kPa = data[index++];                                             // 2  大气压力  BYTE  kPa 数据长度：1btyes 精度：0.5/bit 偏移量：0 数据范围：0~125kPa “0xFF”表示无效
-                stream->Nm = data[index++];                                              // 3  发动机净输出扭矩（实际扭矩百分比）  BYTE  %  数据长度：1btyes精度：1%/bit 偏移量：-125 数据范围：-125~125% “0xFF”表示无效
-                stream->Nmf = data[index++];                                             // 4 摩擦扭矩（摩擦扭矩百分比） BYTE  % 数据长度：1btyes 精度：1%/bit 偏移量：-125 数据范围：-1250~125% “0xFF”表示无效
-                stream->rpm = merge_16bit(data[index], data[index+1]); index += 2;       // 5  发动机转速  WORD  rpm 数据长度：2btyes 精度：0.125rpm/bit 偏移量：0 数据范围：0~8031.875rpm “0xFF,0xFF”表示无效
-                stream->Lh = merge_16bit(data[index], data[index+1]); index += 2;        // 7  发动机燃料流量  WORD  L/h 数据长度：2btyes 精度：0.05L/h 偏移量：0 数据范围：0~3212.75L/h “0xFF,0xFF”表示无效
-                stream->ppm_up = merge_16bit(data[index], data[index+1]); index += 2;    // 9 SCR 上游 NOx 传感器输出值（后处理上游氮氧浓度） WORD  ppm 数据长度：2btyes 精度：0.05ppm/bit 偏移量：-200 数据范围：-200~3212.75ppm “0xFF,0xFF”表示无效
-                stream->ppm_down = merge_16bit(data[index], data[index+1]); index += 2;  // 11 SCR 下游 NOx 传感器输出值（后处理下游氮氧浓度） WORD  ppm 数据长度：2btyes 精度：0.05ppm/bit 偏移量：-200 数据范围：-200~3212.75ppm  “0xFF,0xFF”表示无效
-                stream->urea_level = data[index++];                                      // 13 反应剂余量 （尿素箱液位） BYTE  % 数据长度：1btyes 精度：0.4%/bit 偏移量：0 数据范围：0~100% “0xFF”表示无效
-                stream->kgh = merge_16bit(data[index], data[index+1]); index += 2;       // 14  进气量  WORD  kg/h 数据长度：2btyes 精度：0.05kg/h per bit 偏移量：0 数据范围：0~3212.75ppm “0xFF,0xFF”表示无效
-                stream->SCR_in = merge_16bit(data[index], data[index+1]); index += 2;    // 16 SCR 入口温度（后处理上游排气温度） WORD  ℃ 数据长度：2btyes 精度：0.03125 ℃ per bit 偏移量：-273 数据范围：-273~1734.96875℃ “0xFF,0xFF”表示无效
-                stream->SCR_out = merge_16bit(data[index], data[index+1]); index += 2;   // 18 SCR 出口温度（后处理下游排气温度） WORD  ℃ 数据长度：2btyes 精度：0.03125 ℃ per bit 偏移量：-273 数据范围：-273~1734.96875℃ “0xFF,0xFF”表示无效
-                stream->DPF = merge_16bit(data[index], data[index+1]); index += 2;       // 20 DPF 压差（或 DPF排气背压） WORD  kPa 数据长度：2btyes 精度：0.1 kPa per bit 偏移量：0 数据范围：0~6425.5 kPa “0xFF,0xFF”表示无效
-                stream->coolant_temp = data[index++];                                    // 22  发动机冷却液温度  BYTE  ℃ 数据长度：1btyes 精度：1 ℃/bit 偏移量：-40 数据范围：-40~210℃ “0xFF”表示无效
-                stream->tank_level = data[index++];                                      // 23  油箱液位  BYTE  % 数据长度：1btyes 精度：0.4% /bit 偏移量：0 数据范围：0~100% “0xFF”表示无效
-                stream->gps_status = data[index++];                                      // 24  定位状态  BYTE    数据长度：1btyes
-                stream->longitude = merge_32bit(data[index], data[index+1], data[index+2], data[index+3]);       // 25  经度  DWORD   数据长度：4btyes 精度：0.000001° per bit 偏移量：0 数据范围：0~180.000000° “0xFF,0xFF,0xFF,0xFF”表示无效
-                index += 4;
-                stream->latitude = merge_32bit(data[index], data[index+1], data[index+2], data[index+3]);        // 29  纬度  DWORD   数据长度：4btyes 精度：0.000001 度  per bit 偏移量：0 数据范围：0~180.000000° “0xFF,0xFF,0xFF,0xFF”表示无效
-                index += 4;
-                stream->mileages_total = merge_32bit(data[index], data[index+1], data[index+2], data[index+3]);  // 33 累计里程 （总行驶里程） DWORD  km 数据长度：4btyes 精度：0.1km per bit 偏移量：0 “0xFF,0xFF,0xFF,0xFF”表示无效
-                index += 4;
-                if(NULL==msg->msg)
                 {
-                    nmsg=&stream->head;
-                    msg->msg = nmsg;
+                    struct shanghai_data_stream* const stream = (struct shanghai_data_stream *) ptr;
+                    //pr_debug("stream addr: 0X%08X \n", stream);
+                    ptr += sizeof (struct shanghai_data_stream);                             // 移动缓冲区指针
+                    stream->head.type_msg = data[index++];
+                    stream->speed = merge_16bit(data[index], data[index+1]); index += 2;     // 0  车速  WORD  km/h 数据长度：2btyes 精度：1/256km/h/ bit 偏移量：0 数据范围：0~250.996km/h “0xFF,0xFF”表示无效
+                    stream->kPa = data[index++];                                             // 2  大气压力  BYTE  kPa 数据长度：1btyes 精度：0.5/bit 偏移量：0 数据范围：0~125kPa “0xFF”表示无效
+                    stream->Nm = data[index++];                                              // 3  发动机净输出扭矩（实际扭矩百分比）  BYTE  %  数据长度：1btyes精度：1%/bit 偏移量：-125 数据范围：-125~125% “0xFF”表示无效
+                    stream->Nmf = data[index++];                                             // 4 摩擦扭矩（摩擦扭矩百分比） BYTE  % 数据长度：1btyes 精度：1%/bit 偏移量：-125 数据范围：-1250~125% “0xFF”表示无效
+                    stream->rpm = merge_16bit(data[index], data[index+1]); index += 2;       // 5  发动机转速  WORD  rpm 数据长度：2btyes 精度：0.125rpm/bit 偏移量：0 数据范围：0~8031.875rpm “0xFF,0xFF”表示无效
+                    stream->Lh = merge_16bit(data[index], data[index+1]); index += 2;        // 7  发动机燃料流量  WORD  L/h 数据长度：2btyes 精度：0.05L/h 偏移量：0 数据范围：0~3212.75L/h “0xFF,0xFF”表示无效
+                    stream->ppm_up = merge_16bit(data[index], data[index+1]); index += 2;    // 9 SCR 上游 NOx 传感器输出值（后处理上游氮氧浓度） WORD  ppm 数据长度：2btyes 精度：0.05ppm/bit 偏移量：-200 数据范围：-200~3212.75ppm “0xFF,0xFF”表示无效
+                    stream->ppm_down = merge_16bit(data[index], data[index+1]); index += 2;  // 11 SCR 下游 NOx 传感器输出值（后处理下游氮氧浓度） WORD  ppm 数据长度：2btyes 精度：0.05ppm/bit 偏移量：-200 数据范围：-200~3212.75ppm  “0xFF,0xFF”表示无效
+                    stream->urea_level = data[index++];                                      // 13 反应剂余量 （尿素箱液位） BYTE  % 数据长度：1btyes 精度：0.4%/bit 偏移量：0 数据范围：0~100% “0xFF”表示无效
+                    stream->kgh = merge_16bit(data[index], data[index+1]); index += 2;       // 14  进气量  WORD  kg/h 数据长度：2btyes 精度：0.05kg/h per bit 偏移量：0 数据范围：0~3212.75ppm “0xFF,0xFF”表示无效
+                    stream->SCR_in = merge_16bit(data[index], data[index+1]); index += 2;    // 16 SCR 入口温度（后处理上游排气温度） WORD  ℃ 数据长度：2btyes 精度：0.03125 ℃ per bit 偏移量：-273 数据范围：-273~1734.96875℃ “0xFF,0xFF”表示无效
+                    stream->SCR_out = merge_16bit(data[index], data[index+1]); index += 2;   // 18 SCR 出口温度（后处理下游排气温度） WORD  ℃ 数据长度：2btyes 精度：0.03125 ℃ per bit 偏移量：-273 数据范围：-273~1734.96875℃ “0xFF,0xFF”表示无效
+                    stream->DPF = merge_16bit(data[index], data[index+1]); index += 2;       // 20 DPF 压差（或 DPF排气背压） WORD  kPa 数据长度：2btyes 精度：0.1 kPa per bit 偏移量：0 数据范围：0~6425.5 kPa “0xFF,0xFF”表示无效
+                    stream->coolant_temp = data[index++];                                    // 22  发动机冷却液温度  BYTE  ℃ 数据长度：1btyes 精度：1 ℃/bit 偏移量：-40 数据范围：-40~210℃ “0xFF”表示无效
+                    stream->tank_level = data[index++];                                      // 23  油箱液位  BYTE  % 数据长度：1btyes 精度：0.4% /bit 偏移量：0 数据范围：0~100% “0xFF”表示无效
+                    stream->gps_status = data[index++];                                      // 24  定位状态  BYTE    数据长度：1btyes
+                    stream->longitude = merge_32bit(data[index], data[index+1], data[index+2], data[index+3]);       // 25  经度  DWORD   数据长度：4btyes 精度：0.000001° per bit 偏移量：0 数据范围：0~180.000000° “0xFF,0xFF,0xFF,0xFF”表示无效
+                    index += 4;
+                    stream->latitude = merge_32bit(data[index], data[index+1], data[index+2], data[index+3]);        // 29  纬度  DWORD   数据长度：4btyes 精度：0.000001 度  per bit 偏移量：0 数据范围：0~180.000000° “0xFF,0xFF,0xFF,0xFF”表示无效
+                    index += 4;
+                    stream->mileages_total = merge_32bit(data[index], data[index+1], data[index+2], data[index+3]);  // 33 累计里程 （总行驶里程） DWORD  km 数据长度：4btyes 精度：0.1km per bit 偏移量：0 “0xFF,0xFF,0xFF,0xFF”表示无效
+                    index += 4;
+                    if(NULL==msg->msg)
+                    {
+                        nmsg=&stream->head;
+                        msg->msg = nmsg;
+                    }
+                    else
+                    {
+                        nmsg->next=&stream->head;
+                        nmsg = nmsg->next;   // 下一个数据
+                    }
+                    nmsg->next = NULL;
                 }
-                else
-                {
-                    nmsg->next=&stream->head;
-                    nmsg = nmsg->next;   // 下一个数据
-                }
-                nmsg->next = NULL;
                 //pr_debug("MSG_STREAM ...break index:%d \n", index); fflush(stdout);
                 break;
             case MSG_STREAM_ATT: // 0x80  补充数据流
                 pr_debug("\nMSG_STREAM_ATT : %d \n", index); fflush(stdout);
-                att = (struct shanghai_data_att *)ptr;
-                //pr_debug("att addr: 0X%08X \n", att);
-                ptr += sizeof (struct shanghai_data_att);                     // 移动缓冲区指针
-                att->head.type_msg = data[index++];
-                att->Nm_mode = data[index++];                                 // 0  发动机扭矩模式  BYTE    0：超速失效 1：转速控制 2：扭矩控制 3：转速/扭矩控制 9：正常
-                att->accelerator = data[index++];                             // 1  油门踏板  BYTE  % 数据长度：1btyes 精度：0.4%/bit 偏移量：0 数据范围：0~100% “0xFF”表示无效
-                att->oil_consume = merge_32bit(data[index], data[index+1], data[index+2], data[index+3]);     // 2 累计油耗 （总油耗） DWORD  L 数据长度：4btyes 精度：0.5L per bit 偏移量：0 数据范围：0~2 105 540 607.5L “0xFF,0xFF,0xFF,0xFF”表示无效
-                index += 4;
-                att->urea_tank_temp = data[index++];                          // 6  尿素箱温度  BYTE  ℃ 数据长度：1btyes 精度：1 ℃/bit 偏移量：-40 数据范围：-40~210℃ “0xFF”表示无效
-                att->mlh_urea_actual = merge_32bit(data[index], data[index+1], data[index+2], data[index+3]); // 7  实际尿素喷射量  DWORD  ml/h 数据长度：4btyes 精度：0.01 ml/h per bit 偏移量：0 数据范围：0 “0xFF,0xFF,0xFF,0xFF”表示无效
-                index += 4;
-                att->mlh_urea_total = merge_32bit(data[index], data[index+1], data[index+2], data[index+3]); // 11 累计尿素消耗 （总尿素消耗） DWORD  g 数据长度：4btyes 精度：1 g per bit 偏移量：0 数据范围：0  “0xFF,0xFF,0xFF,0xFF”表示无效
-                index += 4;
-                att->exit_gas_temp = merge_16bit(data[index], data[index+1]); // 15  DPF 排气温度  WORD  ℃ 数据长度：2btyes 精度：0.03125 ℃ per bit 偏移量：-273 数据范围：-273~1734.96875℃ “0xFF,0xFF”表示无效
-                index += 2;
-                if(NULL==msg->msg)
                 {
-                    nmsg=&att->head;
-                    msg->msg = nmsg;
+                    struct shanghai_data_att* const att = (struct shanghai_data_att *)ptr;
+                    //pr_debug("att addr: 0X%08X \n", att);
+                    ptr += sizeof (struct shanghai_data_att);                     // 移动缓冲区指针
+                    att->head.type_msg = data[index++];
+                    att->Nm_mode = data[index++];                                 // 0  发动机扭矩模式  BYTE    0：超速失效 1：转速控制 2：扭矩控制 3：转速/扭矩控制 9：正常
+                    att->accelerator = data[index++];                             // 1  油门踏板  BYTE  % 数据长度：1btyes 精度：0.4%/bit 偏移量：0 数据范围：0~100% “0xFF”表示无效
+                    att->oil_consume = merge_32bit(data[index], data[index+1], data[index+2], data[index+3]);     // 2 累计油耗 （总油耗） DWORD  L 数据长度：4btyes 精度：0.5L per bit 偏移量：0 数据范围：0~2 105 540 607.5L “0xFF,0xFF,0xFF,0xFF”表示无效
+                    index += 4;
+                    att->urea_tank_temp = data[index++];                          // 6  尿素箱温度  BYTE  ℃ 数据长度：1btyes 精度：1 ℃/bit 偏移量：-40 数据范围：-40~210℃ “0xFF”表示无效
+                    att->mlh_urea_actual = merge_32bit(data[index], data[index+1], data[index+2], data[index+3]); // 7  实际尿素喷射量  DWORD  ml/h 数据长度：4btyes 精度：0.01 ml/h per bit 偏移量：0 数据范围：0 “0xFF,0xFF,0xFF,0xFF”表示无效
+                    index += 4;
+                    att->mlh_urea_total = merge_32bit(data[index], data[index+1], data[index+2], data[index+3]); // 11 累计尿素消耗 （总尿素消耗） DWORD  g 数据长度：4btyes 精度：1 g per bit 偏移量：0 数据范围：0  “0xFF,0xFF,0xFF,0xFF”表示无效
+                    index += 4;
+                    att->exit_gas_temp = merge_16bit(data[index], data[index+1]); // 15  DPF 排气温度  WORD  ℃ 数据长度：2btyes 精度：0.03125 ℃ per bit 偏移量：-273 数据范围：-273~1734.96875℃ “0xFF,0xFF”表示无效
+                    index += 2;
+                    if(NULL==msg->msg)
+                    {
+                        nmsg=&att->head;
+                        msg->msg = nmsg;
+                    }
+                    else
+                    {
+                        nmsg->next=&att->head;
+                        nmsg = nmsg->next;   // 下一个数据
+                    }
+                    nmsg->next = NULL;
                 }
-                else
+                break;
+            case MSG_SMOKE: // 0x81  包含烟雾的数据流信息(自定义)
+                pr_debug("\nMSG_STREAM_ATT : %d \n", index); fflush(stdout);
                 {
-                    nmsg->next=&att->head;
-                    nmsg = nmsg->next;   // 下一个数据
+                    struct yunjing_smoke* const smoke = (struct yunjing_smoke *)ptr;
+                    //pr_debug("att addr: 0X%08X \n", att);
+                    ptr += sizeof (struct shanghai_data_att);                       // 移动缓冲区指针
+                    smoke->head.type_msg = data[index++];
+                    smoke->temperature = merge_16bit(data[index], data[index+1]);   // 0  烟雾排温, 数据长度：2 btyes, 精度：1℃ /bit,
+                    index += 2;
+                    smoke->fault = merge_16bit(data[index], data[index+1]);         // 2  OBD（烟雾故障码）,数据长度：2 btyes 精度：1/bit偏移量：0数据范围：“0xFF，0xFF”表示无效
+                    index += 2;
+                    smoke->kpa = merge_16bit(data[index], data[index+1]);           // 4  背压, 数据长度：2 btyes, 精度：1 kpa/bit,
+                    index += 2;
+                    smoke->m_l = merge_16bit(data[index], data[index+1]);           // 6  光吸收系数,数据长度：2 btyes,精度：0.01 m-l/bit
+                    index += 2;
+                    smoke->opacity = merge_16bit(data[index], data[index+1]);       // 8  不透光度,数据长度：2 btyes,精度：0.1%/bit
+                    index += 2;
+                    smoke->mg_per_m3 = merge_16bit(data[index], data[index+1]);     // 10 颗粒物浓度,数据长度：2 btyes,精度：0.1mg/m3 /bit
+                    index += 2;
+                    smoke->light_alarm = merge_16bit(data[index], data[index+1]);   // 12 光吸收系数超标报警,数据长度：2 btyes,精度：1
+                    index += 2;
+                    smoke->pressure_alarm = merge_16bit(data[index], data[index+1]); // 14 背压报警,数据长度：2 btyes,精度：1
+                    index += 2;
+                    smoke->ppm = merge_16bit(data[index], data[index+1]);            // 16 N0x 值,数据长度：2 btyes,精度：1ppm
+                    index += 2;
+                    if(NULL==msg->msg)
+                    {
+                        nmsg=&smoke->head;
+                        msg->msg = nmsg;
+                    }
+                    else
+                    {
+                        nmsg->next=&smoke->head;
+                        nmsg = nmsg->next;   // 下一个数据
+                    }
+                    nmsg->next = NULL;
                 }
-                nmsg->next = NULL;
                 break;
             // 0x03-0x7F  预留
             // 0x81~0xFE  用户自定义
@@ -433,6 +477,14 @@ static int decode_pack_general(struct obd_agree_obj* const _obd_fops, const uint
         case CMD_UTC_YJ:            // 终端校时  上行
             pr_debug("decode_pack_general CMD_UTC_YJ \n"); fflush(stdout);
             msg_len = 0;
+            break;
+        case CMD_UDE_REAL_YJ:    // 0x82 包含烟雾实时信息上报
+            pr_debug("decode_pack_general CMD_UDE_REAL_YJ \n"); fflush(stdout);
+            msg_len = decode_msg_report_real(msg_buf, _msize, pdata, data_len);
+            break;
+        case CMD_UDE_LATER_YJ:   // 0x83 包含烟雾补发信息上报
+            pr_debug("decode_pack_general CMD_UDE_LATER_YJ \n"); fflush(stdout);
+            msg_len = decode_msg_report_real(msg_buf, _msize, pdata, data_len);
             break;
 //#endif
         case CMD_USERDEF_YJ:      // 用户自定义
@@ -999,6 +1051,12 @@ static int encode_pack_general(const enum general_pack_type _pack_type, struct o
             break;
         case CMD_USERDEF_YJ:      // 用户自定义
             data_len = encode_msg_userdef(_obd_fops, (const struct shanghai_userdef *)msg, &buf[index], _size-index-1);
+            break;
+        case CMD_UDE_REAL_YJ:    // 0x82 包含烟雾实时信息上报
+            data_len = encode_msg_report_real(_obd_fops, (const struct shanghai_report_real *)msg, &buf[index], _size-index-1);
+            break;
+        case CMD_UDE_LATER_YJ:   // 0x83 包含烟雾补发信息上报
+            data_len = encode_msg_report_later(_obd_fops, (const struct shanghai_report_real *)msg, &buf[index], _size-index-1);
             break;
         default:
             data_len = 0;

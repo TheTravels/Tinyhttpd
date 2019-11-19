@@ -36,6 +36,8 @@ enum cmd_unit_yunjing{
      // 云景修改了内容重新定义命令号
      //CMD_LOGIN_YJ      = 0x01+0x85,  // 0x01  车辆登入  上行, 云景修改了内容重新定义命令号
      //CMD_LOGOUT_YJ     = 0x04+0x85,  // 0x04  车辆登出  上行, 云景修改了内容重新定义命令号
+    CMD_UDE_REAL_YJ      = 0x82,       // 0x82 包含烟雾实时信息上报
+    CMD_UDE_LATER_YJ     = 0x83,       // 0x83 包含烟雾补发信息上报
 };
 
  struct yunjing_login{
@@ -48,6 +50,19 @@ enum cmd_unit_yunjing{
      uint16_t count;         // 6  登入流水号  WORD 车载终端每登入一次，登入流水号自动加 1，从 1开始循环累加，最大值为 65531，循环周期为天。
      uint8_t sn[18+1];       // 8  设备序列号由 6 位固定编码和 12 位厂家自定义序号(不重复)共 18 位组成。详情看附件设备序列号要求
  };
+
+ struct yunjing_smoke{
+     struct report_head head; // 下一项数据指针
+     uint16_t temperature;   // 0  烟雾排温, 数据长度：2 btyes, 精度：1℃ /bit, 偏移量：0, 数据范围：“0xFF，0xFF”表示无效
+     uint16_t fault;         // 2  OBD（烟雾故障码）,数据长度：2 btyes 精度：1/bit偏移量：0数据范围：“0xFF，0xFF”表示无效
+     uint16_t kpa;           // 4  背压, 数据长度：2 btyes, 精度：1 kpa/bit,
+     uint16_t m_l;           // 6  光吸收系数,数据长度：2 btyes,精度：0.01 m-l/bit
+     uint16_t opacity;       // 8  不透光度,数据长度：2 btyes,精度：0.1%/bit
+     uint16_t mg_per_m3;     // 10 颗粒物浓度,数据长度：2 btyes,精度：0.1mg/m3 /bit
+     uint16_t light_alarm;   // 12 光吸收系数超标报警,数据长度：2 btyes,精度：1
+     uint16_t pressure_alarm;// 14 背压报警,数据长度：2 btyes,精度：1
+     uint16_t ppm;           // 16 N0x 值,数据长度：2 btyes,精度：1ppm
+};
 
  // 0x81~0xFE  用户自定义
  enum yunjing_userdef_cmd{

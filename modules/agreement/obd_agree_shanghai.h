@@ -65,6 +65,7 @@ extern "C" {
      // 0x03-0x7F  预留
      MSG_STREAM_ATT = 0x80,   // 0x80  补充数据流
      // 0x81~0xFE  用户自定义
+     MSG_SMOKE      = 0x81,   // 0x81  包含烟雾的数据流信息(自定义)
  };
 // // 单向链表，用于存放信息
 // struct report_head{
