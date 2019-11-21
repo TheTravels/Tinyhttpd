@@ -7,7 +7,7 @@ CFG_SRC  := json_list.c thread_list.c msg_relay.c trunking.c service.c thread_vi
 
 #RSA_DIR  := RSA
 #RSA_SRC   = bignum.c prime.c rsa.c
-TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/RSA/,$(basename bignum.c prime.c rsa.c)))
+TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/modules/RSA/,$(basename bignum.c prime.c rsa.c)))
 # modules
 TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/modules/UTC/,$(basename DateTime.c)))
 TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/modules/cJSON/,$(basename cJSON.c mem_malloc.c)))
@@ -27,7 +27,7 @@ TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/$(OBD_DIR)/,$(basename $
 
 #INC      += -I $(ROOT)/OBD_Report
 #INC      += -I $(ROOT)/OBD_Report/Encrypt
-INC      += -I $(ROOT)/RSA
+INC      += -I $(ROOT)/modules/RSA
 #INC      += -I $(ROOT)/UTC/GpsUtcAndLocalTime/GpsUtcAndLocalTime
 #INC      += -I $(ROOT)/OBD_Report/mysql
 #INC      += -I $(ROOT)/OBD_Report/mysql/include

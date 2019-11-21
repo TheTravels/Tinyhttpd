@@ -187,7 +187,7 @@ int get_wait_thread_num(void)
 //static void* __thread_routine (void *arg)
 static void __thread_routine (CThread_pool *const pool)
 {  
-	printf ("starting thread 0x%x\n", pthread_self ());  
+    printf ("starting thread 0x%x\n", (unsigned int)pthread_self ());
 	while (1)  
 	{  
 		pthread_mutex_lock (&(pool->queue_lock));  
@@ -196,7 +196,7 @@ static void __thread_routine (CThread_pool *const pool)
 		while (pool->cur_queue_size == 0 && !pool->shutdown)  
 		{  
             if(pool->run_thread_num>0) pool->run_thread_num--;
-			printf ("thread 0x%x is waiting\n", pthread_self ());  
+            printf ("thread 0x%x is waiting\n", (unsigned int)pthread_self ());
 			pthread_cond_wait (&(pool->queue_ready), &(pool->queue_lock));  
 		}  
 
@@ -205,11 +205,11 @@ static void __thread_routine (CThread_pool *const pool)
 		{  
 			/*遇到break,continue,return等跳转语句，千万不要忘记先解锁*/  
 			pthread_mutex_unlock (&(pool->queue_lock));  
-			printf ("thread 0x%x will exit\n", pthread_self ());  
+            printf ("thread 0x%x will exit\n", (unsigned int)pthread_self ());
 			pthread_exit (NULL);  
 		}  
 
-		printf ("thread 0x%x is starting to work\n", pthread_self ());  
+        printf ("thread 0x%x is starting to work\n", (unsigned int)pthread_self ());
 
 		/*assert是调试的好帮手*/  
 		assert (pool->cur_queue_size != 0);  

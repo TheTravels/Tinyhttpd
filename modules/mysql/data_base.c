@@ -3,7 +3,7 @@
  * 数据库接口
  */
 
-#include "../mysql/data_base.h"
+#include "data_base.h"
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>

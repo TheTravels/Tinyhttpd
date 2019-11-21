@@ -20,7 +20,7 @@
 #include "json_list.h"
 //#include "thread_list.h"
 #include "thread_vin.h"
-#include "agreement/agreement.h"
+#include "../agreement/agreement.h"
 #include "../agreement/obd_agree_shanghai.h"
 #include "../agreement/obd_agree_fops.h"
 #include "../agreement/obd_agree_yunjing.h"
