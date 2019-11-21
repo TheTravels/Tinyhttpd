@@ -102,17 +102,17 @@ define install_program
     @echo "install path  => $(1)"
 	@echo install path: $(1)
 #	@echo $(IPATH)
-	@mkdir -p $(1)
-	@mkdir -p $(1)/log
-	@mkdir -p $(1)/daemon
-	@mkdir -p $(1)/upload/cfg
-	@mkdir -p $(1)/upload/bin
-	@cp ./build/httpd $(1)/httpd
+#	@mkdir -p $(1)
+#	@mkdir -p $(1)/log
+#	@mkdir -p $(1)/daemon
+#	@mkdir -p $(1)/upload/cfg
+#	@mkdir -p $(1)/upload/bin
+	@cp ./build/httpd $(1)/httpd_epoll
 #	@cd $(IPATH) && echo $(shell pwd)
 #	@cd $(IPATH) && ./httpd -c 
 #	@cd $(IPATH) && ./httpd -L 
 	@cp ./upload/OBDII.cfg $(1)/upload/OBDII.cfg
-	cp -a ./upload $(1)/
+#	cp -a ./upload $(1)/
 #	@cp ./upload/Device.list $(1)/upload/Device.list
 
 endef

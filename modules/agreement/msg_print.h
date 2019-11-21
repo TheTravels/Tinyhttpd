@@ -28,8 +28,6 @@ struct msg_print_fops
 struct msg_print_obj
 {
     const struct msg_print_fops* const fops; // 操作函数集合
-    //char _tbuf[2048];
-    //int _tlen;
     //char __stream[1024*30];  //
     char PathPrefix[64];
     char* const __stream;  //
