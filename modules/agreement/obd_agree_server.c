@@ -1341,7 +1341,7 @@ int obj_obd_agree_shanghai_server(struct obd_agree_obj* const _obd_fops, struct 
             _obd_fops->_relay = 0;
             break;
         default:
-            _print->fops->print(_print, "default\n"); // fflush(stdout);
+            _print->fops->print(_print, "default[0x%02X]\n", pack->cmd); // fflush(stdout);
             _obd_fops->_relay = 0;
             break;
     }
@@ -1399,8 +1399,18 @@ int obj_obd_agree_yunjing_server(struct obd_agree_obj* const _obd_fops, struct o
             handle_request_userdef_yunjing(_obd_fops, pack, _ofp_data, _print);
             _obd_fops->_relay = 0;
             break;
+        case CMD_UDE_REAL_YJ:          // 包含烟雾实时信息上报
+            _print->fops->print(_print, "包含烟雾实时信息上报\n"); // fflush(stdout);
+            handle_report_real(_obd_fops, pack, _ofp_data, _print, _db_report);
+            _obd_fops->_relay = 0;
+            break;
+        case CMD_UDE_LATER_YJ:      // 包含烟雾补发信息上报
+            _print->fops->print(_print, "包含烟雾补发信息上报"); // fflush(stdout);
+            handle_report_real(_obd_fops, pack, _ofp_data, _print, _db_report);
+            _obd_fops->_relay = 0;
+            break;
         default:
-            _print->fops->print(_print, "default\n"); // fflush(stdout);
+            _print->fops->print(_print, "default[0x%02X]\n", pack->cmd); // fflush(stdout);
             _obd_fops->_relay = 0;
             break;
     }
