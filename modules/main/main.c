@@ -65,7 +65,7 @@ extern int relay;
  * Parameters: pointer to variable containing the port to connect on
  * Returns: the socket */
 /**********************************************************************/
-int startup(u_short *port)
+static int startup(u_short *port)
 {
 	int httpd = 0;
 	int on = 1;

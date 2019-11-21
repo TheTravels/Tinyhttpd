@@ -35,6 +35,7 @@
      PRO_TYPE_SHH  = 0x02,  // 上海.博泰
      PRO_TYPE_XML  = 0x03,  // XML
      PRO_TYPE_YJ   = 0x04,  // 云景
+     PRO_TYPE_VIEW = 0x05,  // VIEW
      PRO_TYPE_NULL,
  };
  // 结构定义

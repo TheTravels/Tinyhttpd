@@ -32,7 +32,7 @@
 #include <getopt.h>
 #include "accept_request.h"
 
-#include "agreement/agreement.h"
+#include "../agreement/agreement.h"
 #include "json_list.h"
 #include "thread_list.h"
 #include "trunking.h"

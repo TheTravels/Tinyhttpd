@@ -12,7 +12,7 @@ TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/modules/RSA/,$(basename 
 TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/modules/UTC/,$(basename DateTime.c)))
 TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/modules/cJSON/,$(basename cJSON.c mem_malloc.c)))
 TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/modules/config/,$(basename config_load.c config_data.c)))
-TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/modules/epoll/,$(basename epoll.c epoll_server.c)))
+TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/modules/epoll/,$(basename epoll.c epoll_server.c epoll_client.c)))
 TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/modules/json/,$(basename configure.c  vin_list.c)))
 TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/modules/obd/,$(basename $(CFG_SRC))))
 

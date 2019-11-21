@@ -39,7 +39,7 @@ static void do_epoll_client(struct epoll_obj* const _this, int listenfd)
     sockfd = connect_server("183.237.191.186", 6100);
     _this->fops.add_event(_this, sockfd, EPOLLIN);
     printf("[%s-%d] \n", __func__, __LINE__);
-    _this->fops.modify_event(_this, fd, EPOLLOUT);
+    _this->fops.modify_event(_this, listenfd, EPOLLOUT);
     while(1)
     {
         ret = epoll_wait(_this->epollfd, _this->events, EPOLLEVENTS, -1);
@@ -159,7 +159,7 @@ struct epoll_obj* epoll_client_init(void* const _epoll_buf, void* const data)
 {
     struct epoll_obj* _epoll=NULL;
     //_epoll = epoll_obj_base.fops.constructed(&epoll_obj_base, _epoll_buf, do_epoll_listen, handle_events_listen, handle_accept_listen, NULL);
-    _epoll = epoll_obj_base.fops.constructed(&epoll_obj_base, _epoll_buf, do_epoll_client, handle_events_client, NULL, data);
+    _epoll = epoll_obj_base.fops.constructed(&epoll_obj_base, _epoll_buf, do_epoll_client, handle_events_client, NULL, NULL, data);
     return _epoll;
 }
 

@@ -1,3 +1,5 @@
+modules/agreement/server_view.c
+modules/agreement/server_view.h
 trunking.c
 CCU/ccu_client.cpp
 CCU/ccu_client.h
