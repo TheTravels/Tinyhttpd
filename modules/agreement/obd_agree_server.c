@@ -168,6 +168,39 @@ static int handle_request_logout_yj(const struct general_pack_shanghai* const _p
     return 0;
 }
 
+char* itoa(int num,char* str,int radix)
+{
+    /*索引表*/
+    char index[]="0123456789ABCDEF";
+    unsigned unum;/*中间变量*/
+    int i=0,j,k;
+    /*确定unum的值*/
+    if(radix==10&&num<0)/*十进制负数*/
+    {
+        unum=(unsigned)-num;
+        str[i++]='-';
+    }
+    else unum=(unsigned)num;/*其他情况*/
+    /*转换*/
+    do{
+        str[i++]=index[unum%(unsigned)radix];
+        unum/=radix;
+       }while(unum);
+    str[i]='\0';
+    /*逆序*/
+    if(str[0]=='-')
+        k=1;/*十进制负数*/
+    else
+        k=0;
+
+    for(j=k;j<=(i-1)/2;j++)
+    {       char temp;
+        temp=str[j];
+        str[j]=str[i-1+k-j];
+        str[i-1+k-j]=temp;
+    }
+    return str;
+}
 static uint8_t obd_buf[1024*10];
 static int handle_report_real(struct obd_agree_obj* const _agree_ofp, const struct general_pack_shanghai *const _pack, struct obd_agree_ofp_data* const _ofp_data, struct msg_print_obj* const _print,  struct data_base_obj* const _db_report)
 {
@@ -184,8 +217,6 @@ static int handle_report_real(struct obd_agree_obj* const _agree_ofp, const stru
     struct report_head* nmsg=NULL;  // next msg
     const struct report_head* fault=NULL;
     const struct shanghai_data_obd *obd=NULL;
-    const struct shanghai_data_stream *stream=NULL;
-    const struct shanghai_data_att *att=NULL;
     char data[7][128];
     uint8_t _buffer[512];
 
@@ -221,13 +252,14 @@ static int handle_report_real(struct obd_agree_obj* const _agree_ofp, const stru
                     _print->fops->print(_print, "OBD 诊断协议: %d (“0”代表 IOS15765，“1”代表IOS27145，“2”代表 SAEJ1939，“0xFE”表示无效)\n", obd->protocol);
                     _print->fops->print(_print, "MIL 状态: %d (“0”代表未点亮，“1”代表点亮。“0xFE”表示无效)\n", obd->MIL);
                     memset(_buffer, 0, sizeof (_buffer));
-                    //itoa(obd->status, _buffer, 2);
+                    itoa(obd->status, _buffer, 2);
                     //printf("诊断支持状态: %d %s\n", obd->status, _buffer);
-                    _print->fops->print(_print, "诊断支持状态: %d \n", obd->status);
+                    _print->fops->print(_print, "诊断支持状态:[0x%04X %6d %s ]\n", obd->status, obd->status, _buffer);
                     memset(_buffer, 0, sizeof (_buffer));
-                    //itoa(obd->ready, _buffer, 2);
+                    itoa(obd->ready, _buffer, 2);
                     //printf("诊断就绪状态: %d %s\n", obd->ready, _buffer);
-                    _print->fops->print(_print, "诊断就绪状态: %d \n", obd->ready);
+                    //_print->fops->print(_print, "诊断就绪状态: %d \n", obd->ready);
+                    _print->fops->print(_print, "诊断就绪状态:[0x%04X %6d %s ]\n", obd->ready, obd->ready, _buffer);
                     memset(data, 0, sizeof (data));
                     CarInfoSearch(CarListPath, (char*)obd->VIN, data[0]);
                     _print->fops->print(_print, "车辆识别码（VIN）: %s 车型：%s 车牌:%s \n", obd->VIN, data[1], data[6]);
@@ -313,9 +345,9 @@ static int handle_report_real(struct obd_agree_obj* const _agree_ofp, const stru
                 break;
             // 2）数据流信息数据格式和定义见表 A.7 所示，补充数据流信息数据格式和定义见表 A.8 所示。
             case MSG_STREAM:     // 0x02  数据流信息
-                stream = (const struct shanghai_data_stream *)container_of(nmsg, struct shanghai_data_stream, head);
-                //if(*print)
                 {
+                    const struct shanghai_data_stream *stream=NULL;
+                    stream = (const struct shanghai_data_stream *)container_of(nmsg, struct shanghai_data_stream, head);
                     _print->fops->print(_print, "车速: \t\t\t0x%04X \t\t[%4d \t%5.4f km/h] (0~250.996km/h)\n", stream->speed&0xFFFF, stream->speed, FloatConvert(stream->speed, 0, 1.0/256));
                     _print->fops->print(_print, "大气压力: \t\t0x%02X \t\t[%4d \t%5.4f kPa] (0~125kPa)\n", stream->kPa&0xFF, stream->kPa, FloatConvert(stream->kPa, 0, 0.5));
                     _print->fops->print(_print, "发动机净输出扭矩: \t0x%02X \t\t[%4d \t%4d %%] (-125~125 %% “0xFF”表示无效)\n", stream->Nm&0xFF, stream->Nm, IntConvert(stream->Nm, -125, 1));
@@ -331,7 +363,9 @@ static int handle_report_real(struct obd_agree_obj* const _agree_ofp, const stru
                     _print->fops->print(_print, "DPF 压差: \t\t0x%04X \t\t[%4d \t%5.4f kPa] (（或 DPF排气背压）0~6425.5 kPa)\n", stream->DPF&0xFFFF, stream->DPF, FloatConvert(stream->DPF, 0, 0.1));
                     _print->fops->print(_print, "发动机冷却液温度: \t0x%02X \t\t[%4d \t%5.4f ℃] (-40~210℃)\n", stream->coolant_temp&0xFF, stream->coolant_temp, FloatConvert(stream->coolant_temp, -40, 1.0));
                     _print->fops->print(_print, "油箱液位: \t\t0x%02X \t\t[%4d \t%5.4f %%] (0~100%%)\n", stream->tank_level&0xFF, stream->tank_level, FloatConvert(stream->tank_level, 0, 0.4));
-                    _print->fops->print(_print, "定位状态: \t\t%3d \t\t[-%s-%s-%s-]\n", stream->gps_status, gps_valid[stream->gps_status&0x1], gps_latitude[(stream->gps_status>>1)&0x1], gps_longitude[(stream->gps_status>>2)&0x1]);
+                    memset(_buffer, 0, sizeof (_buffer));
+                    itoa(stream->gps_status, _buffer, 2);
+                    _print->fops->print(_print, "定位状态: \t\t%s \t\t[-%s-%s-%s-]\n", _buffer, gps_valid[stream->gps_status&0x1], gps_latitude[(stream->gps_status>>1)&0x1], gps_longitude[(stream->gps_status>>2)&0x1]);
                     _print->fops->print(_print, "经度: \t\t\t0x%08X \t[%4d \t%5.4f°] (0~180.000000°)\n", stream->longitude&0xFFFFFFFF, stream->longitude, DIntConvert(stream->longitude, 0, 0.000001));
                     _print->fops->print(_print, "纬度: \t\t\t0x%08X \t[%4d \t%5.4f°] (0~180.000000°)\n", stream->latitude&0xFFFFFFFF, stream->latitude, DIntConvert(stream->latitude, 0, 0.000001));
                     _print->fops->print(_print, "累计里程: \t\t0x%08X \t[%4u \t%5.4f km] (精度：0.1km)\n", stream->mileages_total&0xFFFFFFFF, stream->mileages_total, DIntConvert(stream->mileages_total, 0, 0.1));
@@ -359,9 +393,9 @@ static int handle_report_real(struct obd_agree_obj* const _agree_ofp, const stru
                 //MySqlSeve(_pack->VIN, DIntConvert(stream->longitude, 0, 0.000001f), DIntConvert(stream->latitude, 0, 0.000001));
                 break;
             case MSG_STREAM_ATT: // 0x80  补充数据流
-                att = (const struct shanghai_data_att *)container_of(nmsg, struct shanghai_data_att, head);
-                //if(*print)
                 {
+                    const struct shanghai_data_att *att=NULL;
+                    att = (const struct shanghai_data_att *)container_of(nmsg, struct shanghai_data_att, head);
                     _print->fops->print(_print, "发动机扭矩模式 : \t%3d \t\t(0：超速失效 1：转速控制 2：扭矩控制 3：转速/扭矩控制 9：正常)\n", att->Nm_mode);
                     _print->fops->print(_print, "油门踏板: \t\t0x%02X \t\t[%3d \t\t%5.4f %%] (0~100%%)\n", att->accelerator&0xFF, att->accelerator, FloatConvert(att->accelerator, 0, 0.4));
                     _print->fops->print(_print, "累计油耗: \t\t0x%08X \t[%3u \t%5.4f L] (0~2 105 540 607.5L)\n", att->oil_consume&0xFFFFFFFF, att->oil_consume, DIntConvert(att->oil_consume, 0, 0.5));
@@ -383,7 +417,7 @@ static int handle_report_real(struct obd_agree_obj* const _agree_ofp, const stru
             case MSG_SMOKE: // 0x81  包含烟雾的数据流信息(自定义)
                 {
                     //struct yunjing_smoke* smoke = (const struct yunjing_smoke *)container_of(nmsg, struct yunjing_smoke, head);
-                    struct yunjing_smoke* smoke = NULL;
+                    const struct yunjing_smoke* smoke = NULL;
                     smoke = (const struct yunjing_smoke *)container_of(nmsg, struct yunjing_smoke, head);
                     _print->fops->print(_print, "烟雾排温: \t\t0x%04X \t\t[%3d \t\t%5.4f ℃] 精度：1℃ /bit \n", smoke->temperature&0xFFFF, smoke->temperature, FloatConvert(smoke->temperature, 0, 1));
                     _print->fops->print(_print, "OBD（烟雾故障码）: \t0x%04X \t\t[%3d \t\t%5.4f ] 精度：1/bit \n", smoke->fault&0xFFFF, smoke->fault, FloatConvert(smoke->fault, 0, 1));
