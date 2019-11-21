@@ -189,5 +189,5 @@ openssl/packages/
 # Development files #
 #####################
 postgresql/
-mysql/
+#mysql/
 /.metadata/
