@@ -18,7 +18,7 @@ TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/modules/obd/,$(basename 
 
 #MYSQL
 #TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/OBD_Report/lib/,$(basename data_base.c sql.c fw.c)))
-TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/modules/lib/,$(basename data_base.c sql.c fw.c)))
+TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/modules/mysql/,$(basename data_base.c sql.c fw.c)))
 
 OBD_DIR  := modules/agreement
 OBD_SRC   = $(notdir $(wildcard $(ROOT)/$(OBD_DIR)/*.c))
@@ -31,8 +31,8 @@ INC      += -I $(ROOT)/RSA
 #INC      += -I $(ROOT)/UTC/GpsUtcAndLocalTime/GpsUtcAndLocalTime
 #INC      += -I $(ROOT)/OBD_Report/mysql
 #INC      += -I $(ROOT)/OBD_Report/mysql/include
-INC      += -I $(ROOT)/modules/lib
-INC      += -I $(ROOT)/modules/lib/include
+INC      += -I $(ROOT)/modules/mysql
+INC      += -I $(ROOT)/modules/mysql/include
 INC      += -I $(ROOT)/modules
 INC      += -I $(ROOT)/modules/UTC
 INC      += -I $(ROOT)/modules/cJSON

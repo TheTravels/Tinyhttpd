@@ -88,3 +88,14 @@ cJSON/fuzzing
 cJSON/tests/unity/examples/example_3/test
 OBD_Report/json
 cJSON/tests/unity/examples/example_2/test
+modules/mysql/include/mysql
+modules/mysql/mysql-connector-c-6.1.11-winx64/include/mysql/psi
+modules/mysql/include
+modules/mysql/include/mysql/psi
+modules/mysql
+modules/mysql/mysql-connector-c-6.1.11-win32/include/mysql/psi
+modules/mysql/mysql-connector-c-6.1.11-winx64/include
+modules/mysql/mysql-connector-c-6.1.11-winx64/include/mysql
+mk
+modules/mysql/mysql-connector-c-6.1.11-win32/include/mysql
+modules/mysql/mysql-connector-c-6.1.11-win32/include

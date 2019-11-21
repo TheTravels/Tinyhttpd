@@ -18,7 +18,7 @@
 #include <ctype.h>
 #include <unistd.h>
 #include "config_data.h"
-#include "../lib/data_base.h"
+#include "../mysql/data_base.h"
 
 static int load_mysql_cfg(struct config_load_obj* const _load_obj, const char *const section, struct mysql_cfg* const _cfg)
 {
