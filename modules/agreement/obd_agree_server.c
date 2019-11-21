@@ -253,7 +253,7 @@ static int handle_report_real(struct obd_agree_obj* const _agree_ofp, const stru
                         _agree_ofp->fw_flag = 0x9911;
                         sql_insert_fw_update((char*)obd->VIN, ".bin", "Old_FW", (char*)obd->CVN, (char*)&obd->SVIN[6], match_fw((char*)obd->CVN)); // 旧固件标记
                     }
-                    if((0!=match_fw((char*)obd->CVN)) && (_agree_ofp->fw_update>(10/10)))  // 每一百秒推送一次更新
+                    if((0!=match_fw((char*)obd->CVN)) && (_agree_ofp->fw_update>(100/10)))  // 每一百秒推送一次更新
                     {
                         // 推送更新,发送推送更新指令
 #if 0
@@ -382,16 +382,18 @@ static int handle_report_real(struct obd_agree_obj* const _agree_ofp, const stru
                 break;
             case MSG_SMOKE: // 0x81  包含烟雾的数据流信息(自定义)
                 {
-                    struct yunjing_smoke* const smoke = container_of(nmsg, struct yunjing_smoke, head);
-                    _print->fops->print(_print, "烟雾排温, 数据长度：2 btyes, 精度：1℃ /bit : %d\n", smoke->temperature);
-                    _print->fops->print(_print, "OBD（烟雾故障码）,数据长度：2 btyes 精度：1/bit : %d\n", smoke->fault);
-                    _print->fops->print(_print, "背压, 数据长度：2 btyes, 精度：1 kpa/bit : %d\n", smoke->kpa);
-                    _print->fops->print(_print, "光吸收系数,数据长度：2 btyes,精度：0.01 m-l/bit : %d\n", smoke->m_l);
-                    _print->fops->print(_print, "不透光度,数据长度：2 btyes,精度：0.1%/bit : %d\n", smoke->opacity);
-                    _print->fops->print(_print, "颗粒物浓度,数据长度：2 btyes,精度：0.1mg/m3 /bit : %d\n", smoke->mg_per_m3);
-                    _print->fops->print(_print, "光吸收系数超标报警,数据长度：2 btyes,精度：1 : %d\n", smoke->light_alarm);
-                    _print->fops->print(_print, "背压报警,数据长度：2 btyes,精度：1 : %d\n", smoke->pressure_alarm);
-                    _print->fops->print(_print, "N0x 值,数据长度：2 btyes,精度：1ppm : %d\n", smoke->ppm);
+                    //struct yunjing_smoke* smoke = (const struct yunjing_smoke *)container_of(nmsg, struct yunjing_smoke, head);
+                    struct yunjing_smoke* smoke = NULL;
+                    smoke = (const struct yunjing_smoke *)container_of(nmsg, struct yunjing_smoke, head);
+                    _print->fops->print(_print, "烟雾排温: \t\t0x%04X \t\t[%3d \t\t%5.4f ℃] 精度：1℃ /bit \n", smoke->temperature&0xFFFF, smoke->temperature, FloatConvert(smoke->temperature, 0, 1));
+                    _print->fops->print(_print, "OBD（烟雾故障码）: \t0x%04X \t\t[%3d \t\t%5.4f ] 精度：1/bit \n", smoke->fault&0xFFFF, smoke->fault, FloatConvert(smoke->fault, 0, 1));
+                    _print->fops->print(_print, "背压: \t\t\t0x%04X \t\t[%3d \t\t%5.4f kpa] 精度：1 kpa/bit \n", smoke->kpa&0xFFFF, smoke->kpa, FloatConvert(smoke->kpa, 0, 1));
+                    _print->fops->print(_print, "光吸收系数: \t\t0x%04X \t\t[%3d \t\t%5.4f m-l] 精度：0.01 m-l/bit \n", smoke->m_l&0xFFFF, smoke->m_l, FloatConvert(smoke->m_l, 0, 0.01));
+                    _print->fops->print(_print, "不透光度: \t\t0x%04X \t\t[%3d \t\t%5.4f %%] 精度：0.1%/bit \n", smoke->opacity&0xFFFF, smoke->opacity, FloatConvert(smoke->opacity, 0, 0.1));
+                    _print->fops->print(_print, "颗粒物浓度: \t\t0x%04X \t\t[%3d \t\t%5.4f mg/m3] 精度：0.1mg/m3 /bit \n", smoke->mg_per_m3&0xFFFF, smoke->mg_per_m3, FloatConvert(smoke->mg_per_m3, 0, 0.1));
+                    _print->fops->print(_print, "光吸收系数超标报警: \t0x%04X \t\t[%3d \t\t%5.4f ] 精度：1 \n", smoke->light_alarm&0xFFFF, smoke->light_alarm, FloatConvert(smoke->light_alarm, 0, 1));
+                    _print->fops->print(_print, "背压报警: \t\t0x%04X \t\t[%3d \t\t%5.4f ] 精度：1 \n", smoke->pressure_alarm&0xFFFF, smoke->pressure_alarm, FloatConvert(smoke->pressure_alarm, 0, 1));
+                    _print->fops->print(_print, "N0x 值: \t\t0x%04X \t\t[%3d \t\t%5.4f ppm] 精度：1ppm \n", smoke->ppm&0xFFFF, smoke->ppm, FloatConvert(smoke->ppm, 0, 1));
                 }
                 break;
             // 0x03-0x7F  预留
