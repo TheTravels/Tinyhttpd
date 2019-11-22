@@ -56,6 +56,16 @@ extern int cmd_parameter(int argc, char *argv[]);
 extern void epoll_pthread_init(const int _thread_max);
 extern int save_log;
 extern int relay;
+extern char daemon_run;
+
+struct fork_process_data {
+    pid_t pid;          // 进程 ID
+    uint16_t port;      // 侦听端口
+    timer_t _time;
+    int reset_time;     // 重启时间
+};
+static struct fork_process_data _fork_process[128];
+static const uint16_t _fork_process_size = sizeof(_fork_process)/sizeof(_fork_process[0]);
 
 /**********************************************************************/
 /* This function starts the process of listening for web connections
@@ -149,6 +159,73 @@ void daemon_thread(void *arg)
 	}
 }
 
+#if 0
+int fork_process(const int _process_size)
+{
+    int i;
+    pid_t pid;
+    for(i=0; i<_process_size; i++)
+    {
+        if(i>_fork_process_size) break;
+        if(_fork_process[i].port<1024) break;
+        pid = fork();
+        if(pid < 0)
+        {
+            perror("fork fail ");
+            exit(1);
+        }
+        else if(pid == 0) //子进程
+        {
+            sleep(1);
+            return i;
+        }
+        else  //父进程
+        {
+            _fork_process[i].pid = pid;
+        }
+    }
+    return -1; //父进程
+}
+#endif
+uint16_t fork_process(struct fork_process_data* const _process)
+{
+    pid_t pid;
+    if(_process->port<1024) return 0; //父进程
+    pid = fork();
+    if(pid < 0)
+    {
+        perror("fork fail ");
+        //exit(1);
+        sleep(1);
+        return 0; //父进程
+    }
+    else if(pid == 0) //子进程
+    {
+        sleep(1);
+        return _process->port;
+    }
+    else  //父进程
+    {
+        _process->pid = pid;
+    }
+    return 0; //父进程
+}
+#include <sys/time.h>
+#include <sys/select.h>
+#include <time.h>
+#include <stdio.h>
+
+/*seconds: the seconds; mseconds: the micro seconds*/
+void setTimer(int seconds, int mseconds)
+{
+    struct timeval temp;
+    temp.tv_sec = seconds;
+    temp.tv_usec = mseconds;
+    select(0, NULL, NULL, NULL, &temp);
+    //printf("timer\n");
+    //return ;
+}
+
 int main(int argc, char *argv[])
 {
 	int server_sock = -1;
@@ -178,9 +255,87 @@ int main(int argc, char *argv[])
 	thread_vin_init(port);
     //server_log_init(port);
     _cfg_data = (struct local_config_data*)_local_config_data->data;
+    // 创建子进程
+    if(1==daemon_run)
+    {
+        int i;
+        int _process_size=0;
+        timer_t _time;
+        struct host_listening*  _server=NULL;
+        struct fork_process_data* _process = NULL;
+        _time = time(NULL);
+        memset(_fork_process, 0, sizeof(_fork_process));
+        printf("[%s-%d] 创建子进程 _time: %d \n", __func__, __LINE__, _time);
+        for(i=0; i<_fork_process_size; i++)
+        //for(i=0; i<10; i++)
+        {
+            _server=&_cfg_data->local_list[i];
+            //printf("[%s-%d] _server->port:%d \n", __func__, __LINE__, _cfg_data->local_list[i].port);
+            //printf("server%d host:%s, port:%d\n", i, _cfg_data->local_list[i].host, _cfg_data->local_list[i].port);
+            if(_server->port<1024) break;
+            _process = &_fork_process[i];
+            _process->port = _server->port;
+            _process->reset_time = (i+127)+600*i+(3600*3); // 重启时间错开
+            _process->_time = _time + _process->reset_time; // 设置重启时间
+        }
+        //_fork_process[i++].port = port;
+        _process = &_fork_process[i++];
+        _process->port = port;
+        _process->reset_time = (i+127)+600*i+(3600*3); // 重启时间错开
+        _process->_time = _time + _process->reset_time; // 设置重启时间
+        _process_size=i;
+        printf("[%s-%d] 子进程数[%d]\n", __func__, __LINE__, i);
+        // fork
+        for(i=0; i<_process_size; i++)
+        {
+            port = fork_process(&_fork_process[i]);
+            if(port>1024) break; //子进程
+        }
+        //index = fork_process(i);
+        if(port<=1024)
+        {
+            printf("[%s-%d] 父进程端口[%d]: %d \n", __func__, __LINE__, index, port);
+            while(port<=1024)
+            {
+                pid_t pid;
+                setTimer(5, 0); // sleep 10s
+                _time = time(NULL);
+                printf("[%s-%d] 父进程 _time: %d \n", __func__, __LINE__, _time);
+                port = 0;
+                for(i=0; i<_process_size; i++)
+                {
+                    pid=0;
+                    _process = &_fork_process[i];
+                    if(_process->pid>0) pid = waitpid(_process->pid, NULL, WNOHANG);
+                    if((_time > _process->_time) || (pid>0)) // timeout, reset
+                    {
+                        if(0==pid)
+                        {
+                            kill(_process->pid, SIGKILL);//杀死 pid 发送进程的信号,kill 给其他进程发送信号，指定进程号
+                            waitpid(_process->pid, NULL, 0); //等待回收子进程的资源
+                        }
+                        _process->pid = 0;
+                        setTimer(1, 0); // sleep 10s
+                        _process->_time = _time + _process->reset_time; // 设置重启时间
+                        port = fork_process(_process);
+                        if(port>1024) //子进程
+                        {
+                            printf("[%s-%d] 子进程端口[%d]: %d \n", __func__, __LINE__, index, port);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        else //子进程
+        {
+            //port = _fork_process[index].port;
+            printf("[%s-%d] 子进程端口[%d]: %d \n", __func__, __LINE__, index, port);
+        }
+    }
     //vin_list_load(_cfg_data->vinList); // vin_list_load("./upload/vin.list");
-    obd_agree_obj_yunjing.fops->base->vin.load(_cfg_data->vinList);  // 加载 VIN 码文件
-    //exit(0);
+    //obd_agree_obj_yunjing.fops->base->vin.load(_cfg_data->vinList);  // 加载 VIN 码文件
+    exit(0);
 #if 0
 	fflush(stdout);
 	setvbuf(stdout,NULL,_IONBF,0);

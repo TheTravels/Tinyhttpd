@@ -140,11 +140,13 @@ static void version(void)
 
 extern int save_log;
 
+char daemon_run=0; //  守护进程
+
 int cmd_parameter(int argc, char *argv[])
 {
 	//u_short port = 4000;
     int port = 9910;
-	char daemon=0;
+    //char daemon=0;
 	int null=0;
     //char _daemon_path[128] = "~/tools/Tinyhttpd";
     char _daemon_path[128] = "./";
@@ -193,7 +195,7 @@ int cmd_parameter(int argc, char *argv[])
 				exit(1);
 				break;
 			case 'd':
-				daemon=1;
+                daemon_run=1;
 				break;
 			case 'N':
 				null = 1;
@@ -271,10 +273,10 @@ int cmd_parameter(int argc, char *argv[])
         local_config_data_init(config_path);
         _local_config_data->load(_local_config_data);
     }
-    if(1==daemon)
+    if(1==daemon_run)
     {
         init_daemon();
-        reset();
+        //reset();
     }
 	chdir(_daemon_path);
     if('\0'==config_path[0])

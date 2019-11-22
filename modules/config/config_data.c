@@ -102,7 +102,7 @@ static int data_load_func(struct config_load_obj* const _load_obj)
         {
             //server[6] = '1' + (char)i;
             memset(server, 0, sizeof(server));
-            snprintf(server, sizeof(server)-1, "Server%d", i);
+            snprintf(server, sizeof(server)-1, "Server%d", i+1);
             //GetPrivateProfileStringEx(server, "Host", "0.0.0.0", local_list[i].host);
             //local_list[i].port = 0xffff & GetPrivateProfileIntEx(server, "Port", def_port);
             load_host_cfg(_load_obj, server, &_data->local_list[i]);
