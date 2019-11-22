@@ -225,7 +225,43 @@ void setTimer(int seconds, int mseconds)
     //printf("timer\n");
     //return ;
 }
+extern char **environ;
 
+void my_initproctitle(char* argv[], char** last)
+{
+    int i = 0;
+    char* p_tmp = NULL;
+    size_t i_size = 0;
+    for(i = 0; environ[i]; i++){
+        i_size += strlen(environ[i]) + 1;
+    }
+    p_tmp = malloc(i_size);
+    if(p_tmp == NULL){
+        return ;
+    }
+    *last = argv[0];
+    for(i = 0; argv[i]; i++){
+        *last += strlen(argv[i]) + 1;
+    }
+    for(i = 0; environ[i]; i++){
+        i_size = strlen(environ[i]) + 1;
+        *last += i_size;
+        strncpy(p_tmp, environ[i], i_size);
+        environ[i] = p_tmp;
+        p_tmp += i_size;
+    }
+    (*last)--;
+    return ;
+}
+void my_setproctitle(char* argv[], char** last, char* title)
+{
+    char* p_tmp = NULL;
+    /* argv[1] = NULL; */
+    p_tmp = argv[0];
+    /* memset(p_tmp, 0, *last - p_tmp); */
+    strncpy(p_tmp, title, *last - p_tmp);
+    return ;
+}
 int main(int argc, char *argv[])
 {
 	int server_sock = -1;
@@ -243,6 +279,8 @@ int main(int argc, char *argv[])
     struct epoll_obj* _epoll_listen=NULL;
     char _epoll_listen_buf[sizeof(struct epoll_obj)];
     struct local_config_data* _cfg_data = NULL;
+    char title[128];
+    char* p_last = NULL;
 	npwd = getpwuid(getuid());
     memset(pwd, 0, sizeof(pwd));
     getcwd(pwd, sizeof(pwd));
@@ -315,12 +353,12 @@ int main(int argc, char *argv[])
                             waitpid(_process->pid, NULL, 0); //等待回收子进程的资源
                         }
                         _process->pid = 0;
-                        setTimer(1, 0); // sleep 10s
+                        setTimer(1, 0); // sleep 1s
                         _process->_time = _time + _process->reset_time; // 设置重启时间
                         port = fork_process(_process);
                         if(port>1024) //子进程
                         {
-                            printf("[%s-%d] 子进程端口[%d]: %d \n", __func__, __LINE__, index, port);
+                            printf("[%s-%d] 子进程端口: %d \n", __func__, __LINE__, port);
                             break;
                         }
                     }
@@ -330,12 +368,17 @@ int main(int argc, char *argv[])
         else //子进程
         {
             //port = _fork_process[index].port;
-            printf("[%s-%d] 子进程端口[%d]: %d \n", __func__, __LINE__, index, port);
+            printf("[%s-%d] 子进程端口: %d \n", __func__, __LINE__, port);
         }
     }
+    memset(title, 0, sizeof(title));
+    snprintf(title, sizeof(title), "%s process[%d]", argv[0], port);
+    my_initproctitle(argv, &p_last);
+    my_setproctitle(argv, &p_last, title);
     //vin_list_load(_cfg_data->vinList); // vin_list_load("./upload/vin.list");
-    //obd_agree_obj_yunjing.fops->base->vin.load(_cfg_data->vinList);  // 加载 VIN 码文件
-    exit(0);
+    obd_agree_obj_yunjing.fops->base->vin.load(_cfg_data->vinList);  // 加载 VIN 码文件
+    //setTimer(20, 0); // sleep 10s
+    //exit(0);
 #if 0
 	fflush(stdout);
 	setvbuf(stdout,NULL,_IONBF,0);
