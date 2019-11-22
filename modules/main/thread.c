@@ -12,7 +12,7 @@ static void* epoll_pthread(void *arg)
 {  
     struct epoll_obj* _epoll_server=NULL;
     char _epoll_server_buf[sizeof(struct epoll_obj)];
-    char _epoll_data[sizeof(struct epoll_thread_data)*epoll_obj_data_size];
+    char _epoll_data[sizeof(struct epoll_thread_data)*(epoll_obj_data_size+10)];
     long _pthread_id = (long)arg;
     //struct local_config_data* _cfg_data = (struct local_config_data*)_local_config_data->data;
     printf("[%s-%d] _pthread_id:%ld\n", __func__, __LINE__, _pthread_id);

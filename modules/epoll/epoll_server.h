@@ -34,6 +34,7 @@ extern "C" {
 struct epoll_thread_data{
     int flag;
     int fd;
+    int _timeout;
     char _obd_obj_buf[sizeof(struct obd_agree_obj)];
     struct obd_agree_obj* _obd_obj;
 };
