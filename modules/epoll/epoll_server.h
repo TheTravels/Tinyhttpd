@@ -41,6 +41,7 @@ struct epoll_thread_data{
 
 extern struct epoll_obj* epoll_listen_init(void* const _epoll_buf);
 extern struct epoll_obj* epoll_server_init(void* const _epoll_buf, void* const data);
+extern struct epoll_obj* epoll_client_init(void* const _epoll_buf, void* const data);
 
 #ifdef __cplusplus
 }

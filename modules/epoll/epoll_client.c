@@ -11,8 +11,21 @@
 ******************************************************************************/
 #include "epoll.h"
 #include "epoll_server.h"
+//设置一个1s延时信号，再注册一个
+#include <stdio.h>
+#include <signal.h>
 
-int connect_server(const char host, const int port)
+static void epoll_timer(int sig)
+{
+    if(SIGALRM == sig)
+    {
+        printf("epoll_timer\n");
+        alarm(1);       //重新继续定时1s
+    }
+    return ;
+}
+#if 0
+static int connect_server(const char host, const int port)
 {
     int sockfd;
     struct sockaddr_in servaddr;
@@ -26,7 +39,32 @@ int connect_server(const char host, const int port)
     //close(sockfd);
     return sockfd;
 }
+#else
+static int connect_server(const char host[], const int port)
+{
+    int sockfd;
+    int len;
+    struct sockaddr_in address;
+    int result;
+    //char ch = 'A';
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = inet_addr(host);
+    address.sin_port = htons(port);
+    len = sizeof(address);
+    result = connect(sockfd, (struct sockaddr *)&address, len);
 
+    if (result == -1)
+    {
+        //perror("oops: client1");
+        //exit(1);
+        return -1;
+    }
+    //write(sockfd, &ch, 1);
+    //read(sockfd, &ch, 1);
+    return sockfd;
+}
+#endif
 //Client
 static void do_epoll_client(struct epoll_obj* const _this, int listenfd)
 {
@@ -37,9 +75,12 @@ static void do_epoll_client(struct epoll_obj* const _this, int listenfd)
     _this->epollfd = epoll_create(FDSIZE);
     printf("[%s-%d] \n", __func__, __LINE__);
     sockfd = connect_server("183.237.191.186", 6100);
+    printf("[%s-%d] sockfd:%d \n", __func__, __LINE__, sockfd);
     _this->fops.add_event(_this, sockfd, EPOLLIN);
     printf("[%s-%d] \n", __func__, __LINE__);
-    _this->fops.modify_event(_this, listenfd, EPOLLOUT);
+    signal(SIGALRM, epoll_timer); //注册安装信号
+    alarm(1);       //触发定时器
+    //_this->fops.modify_event(_this, listenfd, EPOLLOUT);
     while(1)
     {
         ret = epoll_wait(_this->epollfd, _this->events, EPOLLEVENTS, -1);
