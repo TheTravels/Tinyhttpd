@@ -92,7 +92,7 @@ void thread_vin_init(const uint16_t _port)
     //printf("log/thread_vin_%d_%d-%d-%d.txt", _port, _tmp->tm_year+1900, _tmp->tm_mon+1, _tmp->tm_mday); fflush(stdout);
     //printf("时间： %d-%d-%d %02d:%02d:%02d", _tmp->tm_year+1900, _tmp->tm_mon+1, _tmp->tm_mday, _tmp->tm_hour, _tmp->tm_min, _tmp->tm_sec); fflush(stdout);
 }
-
+#if 0
 static void __thread_vin_request_add(const char* const sn)
 {
     struct vin_item *_item;
@@ -144,8 +144,8 @@ int thread_vin_request_get(char _sn[])
     pthread_mutex_unlock (&vin_lock);
     return -1;
 }
-
-extern void csend(const int sockfd, const void *buf, const uint16_t len);
+#endif
+//extern void csend(const int sockfd, const void *buf, const uint16_t len);
 extern int read_threads(int sock, char *buf, int size, int *status);
 //static const char vin_host[] = "yjobdc.cloudscape.net.cn";
 #if (0==BUILD_SERVER_YN)
@@ -154,6 +154,41 @@ extern int read_threads(int sock, char *buf, int size, int *status);
 //static const char vin_host[] = "192.168.0.80";
 #endif
 //static const int vin_port = 6100;
+static int do_read(int const fd, char* const buf, const int _max_size)
+{
+    int nread;
+    nread = read(fd, buf, _max_size);
+    if(nread == -1)
+    {
+        perror("read error:");
+        close(fd);
+    }
+    else if(nread == 0)
+    {
+        fprintf(stderr, "client close.\n");
+        close(fd);
+    }
+    else
+    {
+        //pr_debug("read message is : %s", buf);
+        //_this->fops.modify_event(_this, fd, EPOLLOUT);
+    }
+    return nread;
+}
+static int do_write(int fd, char* buf, const int _size)
+{
+    int nwrite;
+    //nwrite = write(fd, buf, strlen(buf));
+    nwrite = write(fd, buf, _size);
+    if(nwrite == -1)
+    {
+        perror("write error:");
+        close(fd);
+    }
+    //else
+        return nwrite;
+    //memset(buf, 0, MAXSIZE);
+}
 // 获取 VIN码线程
 void thread_get_vin(void *arg)
 {
@@ -170,7 +205,7 @@ void thread_get_vin(void *arg)
     const uint32_t _msize = sizeof(_msg_buf);
     //const struct agreement_ofp* _agree_obd_yj=NULL;
     struct yunjing_userdef _udef;
-    int recv_status=1;
+    //int recv_status=1;
     //int tlen = 0;
     int ret = 0;
     int len = 0;
@@ -238,11 +273,12 @@ connect:
             //net->send(net, _msg_buf, len); memcpy(repeat_buf, _msg_buf, len); repeat_buf_len = len;
             memset(_obd_obj->sn, 0, sizeof(_obd_obj->sn));
             memcpy(_obd_obj->sn, wsn, strlen(wsn));
-            csend(socket, _msg_buf, len);
+            do_write(socket, _msg_buf, len);
             usleep(1000*200);   // 200ms delay
             memset(cache, 0, sizeof(cache));
-            _size = read_threads(socket, cache, cache_size, &recv_status);
-            if(0==recv_status) // close, 重新创建连接
+            //_size = read_threads(socket, cache, cache_size, &recv_status);
+            _size = do_read(socket, cache, cache_size);
+            if(0>=_size) // close, 重新创建连接
             {
                 socket = -1;
 #if BUILD_THREAD_VIN

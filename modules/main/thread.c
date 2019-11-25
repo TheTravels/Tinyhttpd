@@ -19,14 +19,15 @@ static void* epoll_pthread(void *arg)
     memset(_epoll_server_buf, 0, sizeof(_epoll_server_buf));
     memset(_epoll_data, 0, sizeof(_epoll_data));
     //if((1==_cfg_data->_vin_cfg._turn_on) && (0==_pthread_id))
-    if(0==_pthread_id)
+    /*if(0==_pthread_id)
     {
+        //printf("[%s-%d] _pthread_id:%ld _epoll_data:%p\n", __func__, __LINE__, _pthread_id, _epoll_data);
         _epoll_server=epoll_client_init(_epoll_server_buf, _epoll_data);
         while(1)
         {
             _epoll_server->do_epoll(_epoll_server, 0);
         }
-    }
+    }*/
     _epoll_server=epoll_server_init(_epoll_server_buf, _epoll_data);
     //printf("[%s-%d] \n", __func__, __LINE__);
     while(1)

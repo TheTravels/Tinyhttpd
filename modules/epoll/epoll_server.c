@@ -30,7 +30,7 @@ static void do_epoll_listen(struct epoll_obj* const _this, int listenfd)
     while(1)
 	{
         ret = epoll_wait(_this->epollfd, _this->events, EPOLLEVENTS, -1);
-        printf("[%s-%d] \n", __func__, __LINE__);
+        //printf("[%s-%d] \n", __func__, __LINE__);
         _this->handle_events(_this, _this->events, ret, listenfd, buf, sizeof(buf));
 	}
     close(_this->epollfd);

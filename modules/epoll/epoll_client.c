@@ -25,7 +25,8 @@ enum epoll_server_type{
 static struct epoll_obj* _epoll_client=NULL;
 static char __stream[1024*30] = "\0";
 static struct msg_print_obj _print = {&_msg_print_fops, "thread_vin_", __stream, sizeof(__stream), };
-
+static time_t epoll_client_systime = 0;
+static const int epoll_client_timeout = 3;
 
 static int request_vin(struct epoll_obj* const _this, struct epoll_thread_data* const _data)
 {
@@ -49,7 +50,7 @@ static int request_vin(struct epoll_obj* const _this, struct epoll_thread_data* 
         struct yunjing_userdef _udef;
         int len = 0;
         memset(wsn, 0, sizeof(wsn));
-        //printf("@%s-%d\n", __func__, __LINE__);
+        printf("@%s-%d\n", __func__, __LINE__);
         //this->get_vin(pPeerConn, conn->_obd_obj->sn, conn->_obd_obj->VIN);
         if(0==_obd_obj->fops->base->vin.req_get(wsn))
         {
@@ -72,9 +73,9 @@ static int request_vin(struct epoll_obj* const _this, struct epoll_thread_data* 
             //_conn->send((char*)_msg_buf, len);
             //printf("@%s-%d\n", __func__, __LINE__);
             _this->fops.modify_event(_this, _data->fd, EPOLLOUT);
-            //printf("@%s-%d\n", __func__, __LINE__);
-            //_this->fops.do_write(_this, _data->fd, _msg_buf, len);
-            //printf("@%s-%d\n", __func__, __LINE__);
+            printf("@%s-%d fd:%d\n", __func__, __LINE__, _data->fd);
+            _this->fops.do_write(_this, _data->fd, _msg_buf, len);
+            printf("@%s-%d\n", __func__, __LINE__);
             //_print.fops->fflush(&_print);
             return 0;
         }
@@ -86,7 +87,8 @@ static void timer_run_every(struct epoll_obj* const _this)
     int i;
     struct epoll_thread_data* const _data_list = (struct epoll_thread_data*)_this->data;
     struct epoll_thread_data* _data=NULL;
-    int send=-1;
+    //int send=-1;
+    printf("[%s-%d] epoll_client_systime:%d\n", __func__, __LINE__, epoll_client_systime);
     for(i=0; i<epoll_obj_data_size; i++)
     {
         _data = &_data_list[i];
@@ -94,12 +96,19 @@ static void timer_run_every(struct epoll_obj* const _this)
         {
             continue;
         }
-        if((NULL!=_this) && (_data->_timeout>3)) // 3s timeout
+        //_data->_timeout++;
+        if((NULL!=_this) && (_data->_timeout<epoll_client_systime)) // 3s timeout
         {
+#if 0
             send=request_vin(_this, _data);
             if(0==send) _data->_timeout = 0;
+#else
+            printf("[%s-%d] fd:%d epoll_client_systime:%d _timeout:%d\n", __func__, __LINE__, _data->fd, epoll_client_systime, _data->_timeout);
+            request_vin(_this, _data);
+            //_this->fops.modify_event(_this, _data->fd, EPOLLOUT);
+            _data->_timeout = epoll_client_systime + epoll_client_timeout;
+#endif
         }
-        _data->_timeout++;
     }
 }
 
@@ -107,7 +116,8 @@ static void epoll_timer(int sig)
 {
     if(SIGALRM == sig)
     {
-        printf("epoll_timer\n");
+        //printf("epoll_timer\n");
+        epoll_client_systime = time(NULL);
         timer_run_every(_epoll_client);
         alarm(1);       //重新继续定时1s
     }
@@ -160,6 +170,7 @@ static struct epoll_thread_data* get_epoll_data(struct epoll_obj* const _this, c
     int i;
     struct epoll_thread_data* const _data_list = (struct epoll_thread_data*)_this->data;
     struct epoll_thread_data* _data=NULL;
+    //printf("[%s-%d] data:%p\n", __func__, __LINE__, _this->data);
     for(i=0; i<epoll_obj_data_size; i++)
     {
         //printf("[%s-%d] _data_list: %p\n", __func__, __LINE__, _data_list);
@@ -194,8 +205,11 @@ static void do_epoll_client(struct epoll_obj* const _this, int listenfd)
     struct local_config_data* _cfg_data = (struct local_config_data*)_local_config_data->data;
     memset(buf, 0, MAXSIZE);
     _epoll_client=_this;
+    epoll_client_systime = time(NULL);
     _this->epollfd = epoll_create(FDSIZE);
     printf("[%s-%d] \n", __func__, __LINE__);
+    //_this->fops.add_event(_this, stdout, EPOLLOUT);
+    //_this->fops.add_event(_this, STDOUT_FILENO, EPOLLOUT);
     //sockfd = connect_server("183.237.191.186", 6100);
     //printf("[%s-%d] sockfd:%d \n", __func__, __LINE__, sockfd);
     //_this->fops.add_event(_this, sockfd, EPOLLIN);
@@ -207,7 +221,8 @@ static void do_epoll_client(struct epoll_obj* const _this, int listenfd)
     while(1)
     {
         //printf("[%s-%d] _this->fd_count:%d connect_counts:%d\n", __func__, __LINE__, _this->fd_count, _cfg_data->_vin_cfg.connect_counts);
-        if(_this->fd_count<_cfg_data->_vin_cfg.connect_counts)
+        //if(_this->fd_count<_cfg_data->_vin_cfg.connect_counts)
+        if(_this->fd_count<1)
         {
             struct epoll_thread_data* _thread_data = NULL;
             //printf("[%s-%d] \n", __func__, __LINE__);
@@ -217,19 +232,23 @@ static void do_epoll_client(struct epoll_obj* const _this, int listenfd)
             //printf("[%s-%d] _thread_data: %p\n", __func__, __LINE__, _thread_data);
             if(NULL!=_thread_data)
             {
-                printf("[%s-%d] \n", __func__, __LINE__);
+                printf("[%s-%d] _this->fd_count:%d sockfd:%d\n", __func__, __LINE__, _this->fd_count, sockfd);
                 _thread_data->_obd_obj = obd_agree_obj_yunjing.fops->constructed(&obd_agree_obj_yunjing, _thread_data->_obd_obj_buf);
                 _thread_data->flag = SERVER_TYPE_OBD_YJ;
-                _this->fops.add_event(_this, sockfd, EPOLLOUT);
+                _thread_data->_timeout = 0;//epoll_client_systime + epoll_client_timeout;
+                _this->fops.add_event(_this, sockfd, EPOLLIN);
+                //_this->fops.modify_event(_this, _thread_data->fd, EPOLLOUT);
             }
             else
             {
                 close(sockfd);
+                memset(_thread_data, 0, sizeof(struct local_config_data));
             }
         }
         //printf("[%s-%d] \n", __func__, __LINE__);
         ret = epoll_wait(_this->epollfd, _this->events, EPOLLEVENTS, -1);
         printf("[%s-%d] _this->fd_count:%d\n", __func__, __LINE__, _this->fd_count);
+        //timer_run_every(_this);
         _this->handle_events(_this, _this->events, ret, listenfd, buf, sizeof(buf));
     }
     close(_this->epollfd);
@@ -264,6 +283,7 @@ static void handle_events_client(struct epoll_obj* const _this, struct epoll_eve
             int nread;
             int decode; // 解码数据
             //struct epoll_thread_data* const _thread_data = (struct epoll_thread_data*)events[i].data.ptr;
+            printf("[%s-%d ]EPOLLIN\n", __func__, __LINE__);
             _thread_data = get_epoll_data(_this, fd);
             memset(buf, 0, _max_size);
             nread = _this->fops.do_read(_this, fd, buf, _max_size);
@@ -289,7 +309,12 @@ static void handle_events_client(struct epoll_obj* const _this, struct epoll_eve
         }
         else if(events[i].events & EPOLLOUT)
         {
-            _this->fops.do_write(_this, fd, buf, strlen(buf));
+            /*int send=-1;
+            _thread_data = get_epoll_data(_this, fd);
+            send=request_vin(_this, _thread_data);
+            if(0==send) _thread_data->_timeout = 0;*/
+            //_this->fops.do_write(_this, fd, buf, strlen(buf));
+            _this->fops.do_write(_this, fd, buf, 0);
         }
     }
     //_db_report.fops->insert_sql(_db_report);
@@ -304,6 +329,7 @@ struct epoll_obj* epoll_client_init(void* const _epoll_buf, void* const data)
 {
     struct epoll_obj* _epoll=NULL;
     //_epoll = epoll_obj_base.fops.constructed(&epoll_obj_base, _epoll_buf, do_epoll_listen, handle_events_listen, handle_accept_listen, NULL);
+    printf("[%s-%d] data:%p\n", __func__, __LINE__, data);
     _epoll = epoll_obj_base.fops.constructed(&epoll_obj_base, _epoll_buf, do_epoll_client, handle_events_client, NULL, epoll_close_client, data);
     return _epoll;
 }

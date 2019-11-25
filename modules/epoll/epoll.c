@@ -164,15 +164,15 @@ static void epoll_do_write(struct epoll_obj* const _this, int fd, char* buf, con
     //nwrite = write(fd, buf, strlen(buf));
     nwrite = write(fd, buf, _size);
 	if(nwrite == -1)
-	{
+    {
 		perror("write error:");
 		close(fd);
         _this->fops.delete_event(_this, fd, EPOLLIN);
         _this->close(_this, fd);
 	}
-	else
+    else
         _this->fops.modify_event(_this, fd, EPOLLIN);
-	memset(buf, 0, MAXSIZE);
+    //memset(buf, 0, MAXSIZE);
 }
 
 static void epoll_add_event(struct epoll_obj* const _this, int fd, int state)
