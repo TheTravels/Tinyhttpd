@@ -23,6 +23,7 @@
 #include "obd_agree_shanghai.h"
 #include "encrypt.h"
 #include "obd_agree_yunjing.h"
+#include "server_view.h"
 #include "upload.h"
 #include "data_base.h"
 #include "msg_print.h"
@@ -185,6 +186,7 @@ struct obd_agree_obj
     union {
         struct general_pack_shanghai _gen_pack;
         struct general_pack_shanghai _gen_pack_YJ;
+        struct general_pack_view _gen_pack_view;
     };
     uint32_t fw_crc;  // 固件校验码
     char sn[32];      // 序列号
@@ -215,10 +217,13 @@ extern int obd_protocol_client_shanghai(struct obd_agree_obj* const _obd_fops, s
 extern int obj_obd_agree_yunjing_server(struct obd_agree_obj* const _obd_fops, struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const _db_report, struct msg_print_obj* const _print);
 extern int obd_protocol_client_YJ(struct obd_agree_obj* const _obd_fops, struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const _db_report, struct msg_print_obj* const _print);
 
+extern int obj_obd_agree_general_pack_view_server(struct obd_agree_obj* const _obd_fops, struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const _db_report, struct msg_print_obj* const _print);
+
 //extern const struct obd_agree_fops _obd_agree_fops_shanghai;
 extern struct obd_agree_obj obd_agree_obj_shanghai;
 //extern const struct obd_agree_fops _obd_agree_fops_yunjing;
 extern struct obd_agree_obj obd_agree_obj_yunjing;
+extern struct obd_agree_obj obd_agree_obj_view;
 
 extern struct obd_vin_fops _obd_vin_fops;
 extern struct obd_agree_fops_pack _obd_fops_pack;

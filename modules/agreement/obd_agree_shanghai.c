@@ -174,6 +174,12 @@ static enum cmd_unit_shanghai get_cmd(const enum general_pack_type _pack_type)
         case GEN_PACK_USERDEF:      // 用户自定义
             _cmd = CMD_USERDEF;
             break;
+        case GEN_PACK_UDE_REAL_REAL:  // 实时信息上报
+            _cmd = CMD_REPORT_REAL;
+            break;
+        case GEN_PACK_UDE_LATER_LATER: // 补发信息上报
+            _cmd = CMD_REPORT_LATER;
+            break;
         default:
             _cmd = CMD_NULL;
             break;

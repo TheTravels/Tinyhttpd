@@ -48,6 +48,8 @@
      GEN_PACK_REV           = 0x06,       // 0x06~0x7F  上行数据系统预留  上行
      GEN_PACK_USERDEF       = 0x81,       // 0x81~0xFE  用户自定义
      GEN_PACK_NULL          = 0x00,       // error
+     GEN_PACK_UDE_REAL_REAL   = 0x82,       // 0x82  实时信息上报  上行
+     GEN_PACK_UDE_LATER_LATER  = 0x83,       // 0x83  补发信息上报  上行
  };
 #if 0
  struct agreement_ofp{

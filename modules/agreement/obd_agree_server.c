@@ -1453,3 +1453,77 @@ int obj_obd_agree_yunjing_server(struct obd_agree_obj* const _obd_fops, struct o
     return 0;
 }
 
+int obj_obd_agree_general_pack_view_server(struct obd_agree_obj* const _obd_fops, struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const _db_report, struct msg_print_obj* const _print)
+{
+    (void)_db_report;
+    const struct general_pack_view* const pack = &_obd_fops->_gen_pack_view;
+    _obd_fops->_print = 1;
+    _print->fops->print(_print, "起始符:[%c%c%c%c] ", pack->start[0], pack->start[1], pack->start[2], pack->start[3]);
+    _print->fops->print(_print, "命令:[%02X] ", pack->cmd);
+    _print->fops->print(_print, "VIN:[%-17s] ", pack->VIN);
+    _print->fops->print(_print, "SN:[%-17s] ", pack->sn);
+    _print->fops->print(_print, "版本号:[%02X] ", pack->soft_version);
+    _print->fops->print(_print, "数据长度:[%-4d] ", pack->data_len);
+    _print->fops->print(_print, "BCC:[%02X] ", pack->BCC);
+    if(17==strlen((char*)pack->VIN))
+    {
+        memset(_obd_fops->VIN, 0, sizeof (_obd_fops->VIN));
+        memcpy(_obd_fops->VIN, pack->VIN, sizeof (pack->VIN));
+    }
+    if(12<=strlen((char*)pack->sn))
+    {
+        memset(_obd_fops->sn, 0, sizeof (_obd_fops->sn));
+        memcpy(_obd_fops->sn, pack->sn, sizeof (pack->sn));
+    }
+    _obd_fops->_relay = 1;
+    _print->fops->print(_print, "数据:");
+    switch(pack->cmd)
+    {
+        case CMD_VIEW_LOGIN:        // 车辆登入
+            _print->fops->print(_print, "车辆登入,云景\n"); // fflush(stdout);
+            //handle_request_login_yj(pack, _print);
+            {
+                const struct general_pack_view_login *const request = (const struct general_pack_view_login *const)(pack->data);
+                //printf("登入时间:%s\n", request->UTC);
+                _print->fops->print(_print, "登入时间:%04d.%02d.%02d %02d:%02d:%02d \t", request->UTC[0]+2000, request->UTC[1], request->UTC[2]\
+                        , request->UTC[3], request->UTC[4], request->UTC[5]);
+                _print->fops->print(_print, "登入流水号:%d \t", request->count);
+                //_print->fops->print(_print, "设备序列号:%s\n", request->sn);
+                //memcpy(&login_pack, request, sizeof (login_pack));   // save login info
+                //pr_debug("Login : %s \n", request->UTC);
+                // fflush(stdout);
+                //return 0;
+            }
+            break;
+        case CMD_VIEW_GET_OBD:  // 获取实时信息
+            _print->fops->print(_print, "获取实时信息\n"); // fflush(stdout);
+            //handle_report_real(_obd_fops, pack, _ofp_data, _print, _db_report);
+            break;
+        case CMD_VIEW_LOGOUT:       // 车辆登出
+            _print->fops->print(_print, "车辆登出,云景\n"); // fflush(stdout);
+            //handle_request_logout_yj(pack, _print);
+            {
+                const struct general_pack_view_logout *const msg = (const struct general_pack_view_logout *const)(pack->data);
+                //if(msg->count != login_pack.count) return -1;
+                //pr_debug("Logout : %s \n", msg->UTC);
+                _print->fops->print(_print, "登出时间:%04d.%02d.%02d %02d:%02d:%02d \t", msg->UTC[0]+2000, msg->UTC[1], msg->UTC[2]\
+                        , msg->UTC[3], msg->UTC[4], msg->UTC[5]);
+                _print->fops->print(_print, "登出流水号:%d \t", msg->count);
+                //_print->fops->print(_print, "设备序列号:%s\n", msg->sn);
+                // fflush(stdout);
+                //return 0;
+            }
+            break;
+        case CMD_VIEW_USERDEF:      // 用户自定义
+            _print->fops->print(_print, "自定义-"); // fflush(stdout);
+            //handle_request_userdef_yunjing(_obd_fops, pack, _ofp_data, _print);
+            _obd_fops->_relay = 0;
+            break;
+        default:
+            _print->fops->print(_print, "default[0x%02X]\n", pack->cmd); // fflush(stdout);
+            _obd_fops->_relay = 0;
+            break;
+    }
+    return 0;
+}
+

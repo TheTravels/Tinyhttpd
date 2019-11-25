@@ -38,6 +38,8 @@ struct epoll_thread_data{
     time_t _timeout;
     char _obd_obj_buf[sizeof(struct obd_agree_obj)];
     struct obd_agree_obj* _obd_obj;
+    char frame[1024];
+    int frame_size;
 };
 
 

@@ -76,6 +76,12 @@ static enum cmd_unit_yunjing get_cmd(const enum general_pack_type _pack_type)
         case GEN_PACK_USERDEF:      // 用户自定义
             _cmd = CMD_USERDEF_YJ;
             break;
+        case GEN_PACK_UDE_REAL_REAL:  // 实时信息上报
+            _cmd = CMD_UDE_REAL_YJ;
+            break;
+        case GEN_PACK_UDE_LATER_LATER: // 补发信息上报
+            _cmd = CMD_UDE_LATER_YJ;
+            break;
         default:
             _cmd = CMD_YJ_NULL;
             break;
