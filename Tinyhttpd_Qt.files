@@ -1,5 +1,8 @@
 modules/agreement/server_view.c
 modules/agreement/server_view.h
+modules/obd/device_thread.c
+modules/obd/obdii_dev.c
+modules/obd/obdii_dev.h
 trunking.c
 CCU/ccu_client.cpp
 CCU/ccu_client.h

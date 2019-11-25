@@ -2,7 +2,7 @@
 
 OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/modules/main/,$(basename main.c lock.c thread_pool.c parameter.c thread.c)))
 CFG_DIR  := OBD_Report
-CFG_SRC  := json_list.c thread_list.c msg_relay.c trunking.c service.c thread_vin.c
+CFG_SRC  := json_list.c thread_list.c msg_relay.c trunking.c service.c thread_vin.c obdii_dev.c device_thread.c
 #TARGET_OBJS  += $(addsuffix .o,$(addprefix $(BUILD_DIR)/OBD_Report/,$(basename $(CFG_SRC))))
 
 #RSA_DIR  := RSA

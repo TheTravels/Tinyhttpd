@@ -26,6 +26,7 @@
 #include "../agreement/obd_agree_yunjing.h"
 #include "msg_relay.h"
 #include "../config/config_data.h"
+#include "obdii_dev.h"
 
 
 #ifndef BUILD_THREAD_VIN
@@ -35,9 +36,9 @@
 #define BUILD_SERVER_YN   0
 #endif
 
-static struct vin_item vin_item_request[256];
-static const uint16_t vin_item_request_size = sizeof(vin_item_request)/sizeof(vin_item_request[0]);
-static uint16_t vin_item_request_index = 0;
+//static struct vin_item vin_item_request[256];
+//static const uint16_t vin_item_request_size = sizeof(vin_item_request)/sizeof(vin_item_request[0]);
+//static uint16_t vin_item_request_index = 0;
 
 static pthread_mutex_t vin_lock;     // 锁
 
@@ -83,9 +84,9 @@ void thread_vin_init(const uint16_t _port)
     //printf("head_free: 0x%08X 0x%08X 0x%08X \n", _free, _free->next, _free->prev); fflush(stdout);
     //pthread_mutex_lock (&vin_lock);
     //pthread_mutex_unlock (&vin_lock);
-    memset(&vin_item_request, 0, sizeof(vin_item_request));
-    memcpy(vin_item_request[0].sn, "440303ZA0CK90N0224", 18);
-    memcpy(vin_item_request[1].sn, "440303ZA0CK90N0210", 18);
+    //memset(&vin_item_request, 0, sizeof(vin_item_request));
+    //memcpy(vin_item_request[0].sn, "440303ZA0CK90N0224", 18);
+    //memcpy(vin_item_request[1].sn, "440303ZA0CK90N0210", 18);
     memset(log_path, 0, sizeof (log_path));
     //snprintf(log_path, sizeof (log_path)-1, "log/thread_vin_%d_%d-%d-%d.txt", _port, _tmp->tm_year+1900, _tmp->tm_mon+1, _tmp->tm_mday);
     snprintf(log_path, sizeof (log_path)-1, "thread_vin_%d", _port);
@@ -189,8 +190,9 @@ static int do_write(int fd, char* buf, const int _size)
         return nwrite;
     //memset(buf, 0, MAXSIZE);
 }
+extern void setTimer(int seconds, int mseconds);
 // 获取 VIN码线程
-void thread_get_vin(void *arg)
+void thread_get_vin2(void *arg)
 {
     (void)arg;
     struct local_config_data* _cfg_data = (struct local_config_data*)_local_config_data->data;
@@ -199,25 +201,15 @@ void thread_get_vin(void *arg)
     char wsn[32];
     char cache[512];
     const uint32_t cache_size = sizeof(cache);
-    //char _vin[512];
-    //const uint32_t _vsize = sizeof(_vin);
     char _msg_buf[512];
     const uint32_t _msize = sizeof(_msg_buf);
-    //const struct agreement_ofp* _agree_obd_yj=NULL;
     struct yunjing_userdef _udef;
-    //int recv_status=1;
-    //int tlen = 0;
     int ret = 0;
     int len = 0;
     int _size = 0;
     char __stream[1024*30] = "\0";
     char _print_obj_buf[sizeof(struct msg_print_obj)];
     struct msg_print_obj* _print_obj = _msg_obj.fops->constructed(&_msg_obj, _print_obj_buf, log_path, __stream, sizeof(__stream));
-    /*{
-        .fops = &_msg_print_fops,
-        .__stream = __stream,
-        .__n = sizeof(__stream),
-    };*/
     struct obd_agree_ofp_data _ofp_data;
     //const int _get_flag=1;
     time_t timep, tnow;
@@ -226,7 +218,6 @@ void thread_get_vin(void *arg)
     struct obd_agree_obj* const _obd_obj = obd_agree_obj_yunjing.fops->constructed(&obd_agree_obj_yunjing, _obd_obj_buf);
     //_agree_obd_yj = create_agree_obd_yunjing();
     _obd_obj->fops->init(_obd_obj, 0, (const uint8_t*)"IMEI1234567890ABCDEF", (const uint8_t*)"VIN0123456789ABCDEF", 2, "INFO");
-    //memset(msg_buf, 0, sizeof (msg_buf));
     time(&tnow);
     timep = tnow;
     _print_obj->fops->init(_print_obj);
@@ -252,51 +243,37 @@ connect:
     while(socket>=0)
     {
         memset(wsn, 0, sizeof(wsn));
-        //memset(msg_buf, 0, sizeof (msg_buf));
         _print_obj->fops->init(_print_obj);
-        //while(0==thread_vin_request_get(wsn))
         while(0==_obd_obj->fops->base->vin.req_get(wsn))
         {
             _tmp=localtime(&timep);
             _print_obj->fops->print(_print_obj, "[%s-%d] request VIN SN[%d-%d-%d %02d:%02d:%02d]:[%s]\n", __func__, __LINE__, _tmp->tm_year+1900, _tmp->tm_mon+1, _tmp->tm_mday, _tmp->tm_hour, _tmp->tm_min, _tmp->tm_sec, wsn);
             memset(&_udef, 0, sizeof(struct yunjing_userdef));
             memset(cache, 0, sizeof(cache));
-            //memset(_vin, 0, sizeof(_vin));
             memset(_msg_buf, 0, sizeof(_msg_buf));
             _udef.type_msg = USERDEF_YJ_QUERY_VIN; // 请求 VIN码
             memcpy(_udef.msg, wsn, 18);
             //len = userdef_encode_yj(&_udef, cache, cache_size);   // user def
             len = _obd_obj->fops->userdef_encode(_obd_obj, &_udef, cache, cache_size);
             len = _obd_obj->fops->base->pack.encode(_obd_obj, cache, len, (uint8_t*)_msg_buf, _msize); // len = _agree->encode(cache, len, msg_buf, sizeof (msg_buf));
-            //printf("login pack encode len : %d\n", len); fflush(stdout);
-            //csend(0, msg_buf, len);
-            //net->send(net, _msg_buf, len); memcpy(repeat_buf, _msg_buf, len); repeat_buf_len = len;
             memset(_obd_obj->sn, 0, sizeof(_obd_obj->sn));
             memcpy(_obd_obj->sn, wsn, strlen(wsn));
             do_write(socket, _msg_buf, len);
-            usleep(1000*200);   // 200ms delay
+            //usleep(1000*200);   // 200ms delay
+            setTimer(1, 0);
             memset(cache, 0, sizeof(cache));
             //_size = read_threads(socket, cache, cache_size, &recv_status);
             _size = do_read(socket, cache, cache_size);
             if(0>=_size) // close, 重新创建连接
             {
                 socket = -1;
-#if BUILD_THREAD_VIN
                 goto connect;
-#endif
             }
-            //_size = net->recv(net, cache, cache_size, _recv_timeout); // socket_read(cache, cache_size, 4000);
-            //ret = decode_client(_agree_obd_yj, (const uint8_t*)cache, _size, _msg_buf, _msize, _vin, _vsize, &tlen);
             _print_obj->fops->print(_print_obj, "[%s-%d] cache[%d]:%s\n", __func__, __LINE__, _size, cache); fflush(stdout);
             ret = _obd_obj->fops->decode_client(_obd_obj, (uint8_t*)cache, (uint16_t)_size, _msg_buf, _msize, &_ofp_data, _print_obj);
-            //if(tlen>0) net->send(net, _buf, tlen);// csend(0, _buf, tlen);
-            //if(STATUS_CLIENT_DONE==ret) // if((ERR_CLIENT_DOWN==ret) || (STATUS_CLIENT_DONE==ret))
             if((ERR_CLIENT_DOWN==ret) || (STATUS_CLIENT_DONE==ret))
             {
                 _print_obj->fops->print(_print_obj, "[%s-%d] STATUS_VIN OK[%s]:[%s %s]\n", __func__, __LINE__, _obd_obj->sn, wsn, _ofp_data._tbuf); //fflush(stdout);
-                //vin_list_insert(wsn, _vin);
-                //thread_vin_request_del(wsn);
-                //printf("[%s-%d] _obd_obj->sn:%s\n", __func__, __LINE__, _obd_obj->sn); fflush(stdout);
                 _obd_obj->fops->base->vin.insert(_obd_obj->sn, _ofp_data._tbuf);
                 _obd_obj->fops->base->vin.req_del(_obd_obj->sn);
                 _obd_obj->fops->base->vin.req_del(wsn);
@@ -306,9 +283,6 @@ connect:
             //memset(msg_buf, 0, sizeof (msg_buf));
             printf("%s\n", _print_obj->__stream); fflush(stdout);
             _print_obj->fops->fflush(_print_obj);
-#if (0==BUILD_THREAD_VIN)
-            break;
-#endif
             //sleep(1);
         }
         usleep(1000*200);   // 200ms delay
