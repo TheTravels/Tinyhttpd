@@ -38,6 +38,7 @@ extern "C" {
      uint8_t VIN[17+1];        // 车辆识别码（VIN） 17  STRING
      char sn[18+1];        //  0  SN
      uint8_t soft_version;
+     uint8_t protocol;     // data 中数据使用的协议
      uint16_t data_len;    // 22  数据单元长度  WORD 数据单元长度是数据单元的总字节数，有效范围：0~65531
      void*   data;         // 24  数据单元    见数据单元格式和定义
      uint8_t BCC;          // 倒数第 1  校验码  BYTE 采用 BCC（异或校验）法，校验范围聪明星单元的第一个字节开始，同后一个字节异或，直到校验码前一字节为止，校验码占用一个字节

@@ -158,7 +158,8 @@ static int epoll_data_view(struct epoll_obj* const _this, struct obd_agree_obj* 
     for(i=0; i<epoll_obj_data_size; i++)
     {
         _data = &_data_list[i];
-        if((0!=_data->flag) && (SERVER_TYPE_VIEW!=_data->flag))
+        //if((0!=_data->flag) && (SERVER_TYPE_VIEW!=_data->flag))
+        if(0!=_data->flag)
         {
             // send
             memset(_tbuf, 0, _tsize);
@@ -168,9 +169,11 @@ static int epoll_data_view(struct epoll_obj* const _this, struct obd_agree_obj* 
             udef->type_msg = USERDEF_VIEW_OBD;
             udef_obd->len = _data->frame_size;
             memcpy(udef_obd->data, _data->frame, _data->frame_size);
+            _obd_obj->_gen_pack_view.protocol = _data->_obd_obj->fops->protocol;
             len = _obd_obj->fops->userdef_encode(_obd_obj, udef, udef_buf, sizeof(udef_buf));
             len = _obd_obj->fops->base->pack.encode(_obd_obj, udef_buf, len, pack_buf, sizeof(pack_buf));
             _this->fops.do_write(_this, fd, pack_buf, len);
+            printf("[%s-%d] do_write[%d]:%s\n", __func__, __LINE__, len, pack_buf);
         }
     }
     return 0;
@@ -256,7 +259,7 @@ static void handle_events_server(struct epoll_obj* const _this, struct epoll_eve
             memset(buf, 0, _max_size);
             nread = _this->fops.do_read(_this, fd, buf, _max_size);
             if(NULL==_thread_data) continue;
-            printf("[%s-%d] nread[%d]:%s\n", __func__, __LINE__, nread, buf);
+            //printf("[%s-%d] nread[%d]:%s\n", __func__, __LINE__, nread, buf);
             if(nread>0)
             {
                 // handle

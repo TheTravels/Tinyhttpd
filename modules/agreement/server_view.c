@@ -115,6 +115,7 @@ static int check_pack_general(struct obd_agree_obj* const _obd_fops, const void*
     memcpy(_pack->sn, &data[index], 18);                      // 3  SN
     index += 18;
     _pack->soft_version = data[index++];                       //  终端软件版本号  BYTE  终端软件版本号有效值范围 0~255
+    _pack->protocol = data[index++];
     _pack->data_len = merge_16bit(data[index], data[index+1]); // 22  数据单元长度  WORD 数据单元长度是数据单元的总字节数，有效范围：0~65531
     index += 2;
     //pr_debug("decode_pack_general _dsize:%d | %d \n\n", _dsize, (_pack->data_len+index+1)); fflush(stdout);
@@ -447,6 +448,7 @@ static int obd_encode_pack_general(const enum general_pack_type _pack_type, stru
     BUILD_BUG_ON(sizeof (_pack->sn)-1 != 18);
     index += 18;
     buf[index++] = _pack->soft_version;     // 20  终端软件版本号  BYTE  终端软件版本号有效值范围 0~255
+    buf[index++] = _pack->protocol;     //
     index += bigw_16bit(&buf[index], _pack->data_len); // 22  数据单元长度  WORD
     // 24  数据单元
     switch(_pack->cmd)
@@ -552,6 +554,7 @@ static int obd_decode_pack_general(struct obd_agree_obj* const _obd_fops, const 
     memcpy(_pack->sn, &data[index], 18);                      // 3  SN
     index += 18;
     _pack->soft_version = data[index++];                       // 20  终端软件版本号  BYTE  终端软件版本号有效值范围 0~255
+    _pack->protocol = data[index++];
     _pack->data_len = merge_16bit(data[index], data[index+1]); // 22  数据单元长度  WORD 数据单元长度是数据单元的总字节数，有效范围：0~65531
     index += 2;
     //printf("decode_pack_general _dsize:%d | %d \n\n", _dsize, (_pack->data_len+index+1)); fflush(stdout);
