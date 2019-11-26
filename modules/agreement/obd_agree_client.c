@@ -443,6 +443,38 @@ static int handle_request_userdef_yunjing(struct obd_agree_obj* const _obd_fops,
     //printf("%s--%s ret:%d\n", __func__, __LINE__, ret);
     return ret;
 }
+static int handle_request_userdef_view(struct obd_agree_obj* const _obd_fops, const struct general_pack_view* const _pack, struct obd_agree_ofp_data* const _ofp_data, struct msg_print_obj* const _print)
+{
+    const struct shanghai_userdef *const msg = (const struct shanghai_userdef *)(_pack->data);
+    static uint8_t _buffer[1024+512];
+    struct general_pack_view_userdef* const _udef = (struct general_pack_view_userdef*)_buffer;
+    int len;
+    int ret = STATUS_CLIENT_NULL;
+    len = _obd_fops->fops->userdef_decode(_obd_fops, _udef, msg->data, msg->_dsize);
+    ret = STATUS_CLIENT_NULL;
+    if(len<0)
+    {
+        _print->fops->print(_print, "userdef decode error!\n");
+    }
+    else
+    {
+        switch (_udef->type_msg)
+        {
+            case USERDEF_VIEW_OBD:
+                {
+                    struct pack_view_udf_obd* const _obd = _udef->msg;
+                    _print->fops->print(_print, "_obd[%d]: %s\n", _obd->len, _obd->data);
+                }
+                break;
+            default:
+                    break;
+        }
+    }
+    //printf("UPLOAD_VIN [%d]\r\n", ret);
+    //printf("%s--%s \n", __func__, __LINE__);
+    //printf("%s--%s ret:%d\n", __func__, __LINE__, ret);
+    return ret;
+}
 int obd_protocol_client_shanghai(struct obd_agree_obj* const _obd_fops, struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const _db_report, struct msg_print_obj* const _print)
 //static int protocol_shanghai(struct obd_agree_obj* const _obd_fops, const struct general_pack_shanghai* const _pack, char _tbuf[], const unsigned int _tsize, int* const _tlen)
 {
@@ -571,7 +603,42 @@ int obd_protocol_client_YJ(struct obd_agree_obj* const _obd_fops, struct obd_agr
     return ret;
 }
 
-
+int obd_protocol_client_view(struct obd_agree_obj* const _obd_fops, struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const _db_report, struct msg_print_obj* const _print)
+{
+//    char* const _tbuf = _ofp_data->_tbuf;
+//    const unsigned int _tsize = sizeof(_ofp_data->_tbuf);
+//    int* const _tlen = &_ofp_data->_tlen;
+    int ret = 0;
+    const struct general_pack_view* const pack = &_obd_fops->_gen_pack_view;
+    pr_debug("start: %c%c \n", pack->start[0], pack->start[1]);
+    pr_debug("CMD: %d \n", pack->cmd);
+    pr_debug("VIM: %s\n", pack->VIN);
+    pr_debug("soft_version: %d \n", pack->soft_version);
+    pr_debug("protocol: %s \n", pack->protocol);
+    pr_debug("data_len: %d \n", pack->data_len);
+    pr_debug("BCC: %02X \n", pack->BCC);
+    //fflush(stdout);
+    switch(pack->cmd)
+    {
+        case CMD_VIEW_LOGIN:        // Client 登入
+            _print->fops->print(_print, "Client 登入\n");
+            break;
+        case CMD_VIEW_LOGOUT:       // Client 登出
+            _print->fops->print(_print, "Client 登出\n");
+            break;
+        case CMD_VIEW_GET_OBD:          // 获取OBD 数据
+            _print->fops->print(_print, "获取OBD 数据\n");
+            break;
+        case CMD_USERDEF:      // 用户自定义
+            _print->fops->print(_print, "CMD_USERDEF\n"); fflush(stdout);
+            ret = handle_request_userdef_view(_obd_fops, pack, _ofp_data, _print);
+            break;
+        default:
+            _print->fops->print(_print, "default[0x%02X]\n", pack->cmd);
+            break;
+    }
+    return ret;
+}
 
 
 

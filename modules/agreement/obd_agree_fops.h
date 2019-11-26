@@ -192,6 +192,7 @@ extern int obj_obd_agree_yunjing_server(struct obd_agree_obj* const _obd_fops, s
 extern int obd_protocol_client_YJ(struct obd_agree_obj* const _obd_fops, struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const _db_report, struct msg_print_obj* const _print);
 
 extern int obj_obd_agree_general_pack_view_server(struct obd_agree_obj* const _obd_fops, struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const _db_report, struct msg_print_obj* const _print);
+extern int obd_protocol_client_view(struct obd_agree_obj* const _obd_fops, struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const _db_report, struct msg_print_obj* const _print);
 
 //extern const struct obd_agree_fops _obd_agree_fops_shanghai;
 extern struct obd_agree_obj obd_agree_obj_shanghai;
