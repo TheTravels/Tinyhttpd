@@ -131,7 +131,7 @@ static int handle_decode(struct obd_agree_obj* const _obd_fops, const uint8_t _p
     struct general_pack_view *const pack = &_obd_fops->_gen_pack_view;
     int head_len = sizeof (struct general_pack_view);
     int pack_len = 0;
-    //printf("@%s-%d \n", __func__, __LINE__);
+    printf("[%s-%d] _gen_pack_view \n", __func__, __LINE__);
     memset(pack, 0, sizeof (struct general_pack_view));
     pack->data = ((char*)_msg_buf)+head_len;//&_msg_buf[head_len];
     //printf("@%s-%d \n", __func__, __LINE__);
@@ -525,21 +525,22 @@ static int obd_decode_pack_general(struct obd_agree_obj* const _obd_fops, const 
     uint16_t index=0;
     int msg_len = 0;
     int data_len=0;
-    uint8_t rsa_buffer[2048];
     const uint8_t* pdata=NULL;
-    struct general_pack_shanghai * const _pack = &_obd_fops->_gen_pack;
+    struct general_pack_view * const _pack = &_obd_fops->_gen_pack_view;
     index=0;
-    // 0  起始符  STRING  固定为 ASCII 字符’##’，用“0x23，0x23”表示
-    //memset(_pack, 0, sizeof (struct general_pack_shanghai));
+    printf("[%s-%d] _gen_pack_view \n", __func__, __LINE__);
     memset(msg_buf, 0, _msize);
     _pack->start[0] = data[index++];
     _pack->start[1] = data[index++];
-    if(('#'!=_pack->start[0]) || ('#'!=_pack->start[1])) return ERR_DECODE_PACKS; // 包头错误
+    _pack->start[2] = data[index++];
+    _pack->start[3] = data[index++];
+    if(0 != strncmp(_pack->start, "view", 4)) return ERR_DECODE_PACKS; // 包头错误
     _pack->cmd = data[index++];                                // 2  命令单元  BYTE  命令单元定义见  表 A2  命令单元定义
     memcpy(_pack->VIN, &data[index], 17);                      // 3  车辆识别号  STRING 车辆识别码是识别的唯一标识，由 17 位字码组成，字码应符合 GB16735 中 4.5 的规定
     index += 17;
+    memcpy(_pack->sn, &data[index], 18);                      // 3  SN
+    index += 18;
     _pack->soft_version = data[index++];                       // 20  终端软件版本号  BYTE  终端软件版本号有效值范围 0~255
-    _pack->ssl = data[index++];                                // 21  数据加密方式  BYTE
     _pack->data_len = merge_16bit(data[index], data[index+1]); // 22  数据单元长度  WORD 数据单元长度是数据单元的总字节数，有效范围：0~65531
     index += 2;
     //printf("decode_pack_general _dsize:%d | %d \n\n", _dsize, (_pack->data_len+index+1)); fflush(stdout);
@@ -555,45 +556,25 @@ static int obd_decode_pack_general(struct obd_agree_obj* const _obd_fops, const 
     if(bcc != _pack->BCC) return ERR_DECODE_PACKBCC;                // BCC 校验错误
     // 数据解谜
     data_len = _pack->data_len;
-    switch (_pack->ssl)
-    {
-    /*
-        {0x01, "INFO"},  // 0x01：数据不加密
-        {0x02, "RSA" },  // 0x02：数据经过 RSA 算法加密
-        {0x03, "SM2" },  // 0x03：数据经过国密 SM2 算法加密
-        {0xFF, "NULL"},  // “0xFE”标识异常，“0xFF”表示无效，其他预留
-     */
-        case 0x02:  // RSA
-            pr_debug("encode_pack_general RSA data_len: %d\n", data_len);
-            data_len = rsa_decrypt(rsa_buffer, sizeof(rsa_buffer), &data[index], data_len);
-            pdata = rsa_buffer;
-            break;
-        case 0x03:   // SM2
-            pdata = &data[index];
-            break;
-        case 0x01:
-        default:
-            pdata = &data[index];
-            break;
-    }
+    pdata = &data[index];
     // 解码数据
     msg_len = 0;
     switch(_pack->cmd)
     {
-        case CMD_LOGIN:          // 车辆登入  上行
+        case CMD_VIEW_LOGIN:          // 车辆登入  上行
             pr_debug("decode_pack_general CMD_LOGIN \n"); //fflush(stdout);
             msg_len = decode_msg_login((struct general_pack_view_login *)msg_buf, pdata, data_len);
             break;
-        case CMD_LOGOUT:         // 车辆登出  上行
+        case CMD_VIEW_LOGOUT:         // 车辆登出  上行
             pr_debug("decode_pack_general CMD_LOGOUT \n"); //fflush(stdout);
             msg_len = decode_msg_logout((struct general_pack_view_logout *)msg_buf, pdata, data_len);
             //printf("decode_pack_general CMD_LOGOUT [%d %d]\n", msg_len, data_len);
             break;
-        case CMD_UTC:            // 终端校时  上行
-            pr_debug("decode_pack_general CMD_UTC \n"); //fflush(stdout);
+        case CMD_VIEW_GET_OBD:            // 终端校时  上行
+            pr_debug("decode_pack_general CMD_VIEW_GET_OBD \n"); //fflush(stdout);
             msg_len = 0;
             break;
-        case CMD_USERDEF:      // 用户自定义
+        case CMD_VIEW_USERDEF:      // 用户自定义
             pr_debug("decode_pack_general CMD_USERDEF \n"); //fflush(stdout);
             msg_len = decode_msg_userdef((struct general_pack_view_userdef *)msg_buf, pdata, data_len);
             break;

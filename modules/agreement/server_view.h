@@ -26,7 +26,8 @@ extern "C" {
      CMD_VIEW_LOGIN    = 0x01,       // 0x01  Client 登入
      CMD_VIEW_LOGOUT   = 0x02,       // 0x02  Client 登出
      CMD_VIEW_GET_OBD  = 0x03,       // 0x03  获取OBD 数据
-     CMD_VIEW_USERDEF  = 0x04,       // 0x04  empty
+     CMD_VIEW_OBD      = 0x04,       // 0x03  获取OBD 数据
+     CMD_VIEW_USERDEF  = 0x05,       // 0x04  empty
      CMD_VIEW_NULL     = 0x00,       // error
  };
 

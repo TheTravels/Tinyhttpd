@@ -8,16 +8,20 @@
 #include "../epoll/epoll_server.h"
 #include "../config/config_data.h"
 
+static pthread_t _pthread_id[128];
+static char stack_epoll_data[128][sizeof(struct epoll_thread_data)*(epoll_obj_data_size+10)];
+
 static void* epoll_pthread(void *arg)
 {  
     struct epoll_obj* _epoll_server=NULL;
     char _epoll_server_buf[sizeof(struct epoll_obj)];
-    char _epoll_data[sizeof(struct epoll_thread_data)*(epoll_obj_data_size+10)];
+    //char _epoll_data[sizeof(struct epoll_thread_data)*(epoll_obj_data_size+10)];
     long _pthread_id = (long)arg;
+    char* const _epoll_data = &stack_epoll_data[_pthread_id];
     //struct local_config_data* _cfg_data = (struct local_config_data*)_local_config_data->data;
     printf("[%s-%d] _pthread_id:%ld\n", __func__, __LINE__, _pthread_id);
     memset(_epoll_server_buf, 0, sizeof(_epoll_server_buf));
-    memset(_epoll_data, 0, sizeof(_epoll_data));
+    memset(_epoll_data, 0, sizeof(stack_epoll_data[_pthread_id]));
     //if((1==_cfg_data->_vin_cfg._turn_on) && (0==_pthread_id))
     /*if(0==_pthread_id)
     {
@@ -37,8 +41,6 @@ static void* epoll_pthread(void *arg)
     }
     return NULL;
 }  
-
-static pthread_t _pthread_id[1024];
 
 void epoll_pthread_init(const int _thread_max)
 {

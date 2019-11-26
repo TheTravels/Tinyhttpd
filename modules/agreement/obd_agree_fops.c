@@ -393,7 +393,7 @@ int obd_fops_decode_server(struct obd_agree_obj* const _obd_fops, const uint8_t 
     len = _obd_fops->fops->decode(_obd_fops, pack, _psize, _msg_buf, _msize);
     //printf("@%s-%d \n", __func__, __LINE__);
     //printf("@%s-%d decode pack len : %d \n", __func__, __LINE__, len);
-    _print->fops->print(_print, "decode pack len : %d \n", len); //fflush(stdout);
+    _print->fops->print(_print, "@%s-%d decode pack len : %d \n", __func__, __LINE__, len); //fflush(stdout);
     if(len<0) return -1;
     //device->type = _obd_fops->fops->protocol;
     _db_report->fops->init(_db_report); // MySqlInit();
@@ -444,13 +444,13 @@ int obd_fops_decode_server(struct obd_agree_obj* const _obd_fops, const uint8_t 
     //int json_device_save(const char* filename, const struct device_list* const device, const uint8_t pack[], const uint16_t _psize)
     json_obd_save(filename, _obd_fops, pack, len);
     //server_log_write_to_file(_buf, strlen(_buf));
-    if(_obd_fops->_print)
+    /*if(_obd_fops->_print)
     {
         //printf("%s", _ofp_data->_print_buf);
         printf("%s", _print->__stream);
         //_print->fops->fflush(_print);
         fflush(stdout);
-    }
+    }*/
     return 0;
 }
 
