@@ -329,16 +329,6 @@ static int report_later(struct obd_agree_obj* const _obd_fops, const void * cons
     return _obd_fops->fops->encode_pack_general(GEN_PACK_REPORT_LATER, _obd_fops, msg, buf, _size);
 }
 
-struct obd_agree_fops_pack _obd_fops_pack =
-{
-    .encode = handle_encode,
-    .login = login,
-    .logout = logout,
-    .utc = utc,
-    .report = report,
-    .report_later = report_later,
-};
-
 struct obd_agree_fops_base _obd_fops_base =
 {
     .vin = {

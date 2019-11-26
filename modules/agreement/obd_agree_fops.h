@@ -49,33 +49,7 @@ struct obd_vin_fops
     void (*const req_del)(const char* const sn);
     int (*const req_get)(char _sn[]);
 };
-struct obd_agree_fops_pack
-{
-    // 编码自定义数据
-    int (*const encode)(struct obd_agree_obj* const _obd_fops, const void* const data, const uint16_t _dsize, uint8_t pack[], const uint16_t _psize);
-    /*
-     * 登录验证
-     * 参数：登录请求参数与协议的登录数据包相关，具体参数可参考协议登录请求数据包.
-     *    UTC:    数据采集时间
-     *    count:  登录流水号
-     *    ICCID:  SIM 卡的 ICCID 号（集成电路卡识别码）。由 20 位数字的 ASCII 码构成。
-     *    VIN:    车辆 VIN 码是识别车辆的唯一标识
-     *    att:    附加数据，采用文本方式传参，具体为协议需要的其它数据，具体由协议规定，如："Nm=10"(CCU协议),表示发动机参考扭矩为10(Nm为单位).
-     */
-    int (*const login)(struct obd_agree_obj* const _obd_fops, const uint32_t UTC, const uint16_t count, const uint8_t ICCID[20+1], const uint8_t VIN[17+1], const char* att, uint8_t buf[], const uint16_t _size);
-    /*
-     * 登出
-     * UTC:    数据采集时间
-     * count:  登出流水号, 登出流水号与当次登入流水号一致。
-     */
-    int (*const logout)(struct obd_agree_obj* const _obd_fops, const uint32_t UTC, const uint16_t count, uint8_t buf[], const uint16_t _size);
-    // 校时
-    int (*const utc)(struct obd_agree_obj* const _obd_fops, uint8_t buf[], const uint16_t _size);
-    // 数据上报
-    int (*const report)(struct obd_agree_obj* const _obd_fops, const void *const msg, uint8_t buf[], const uint16_t _size);
-    // 补发上报
-    int (*const report_later)(struct obd_agree_obj* const _obd_fops, const void *const msg, uint8_t buf[], const uint16_t _size);
-};
+
 struct obd_agree_fops_base{
     struct /*obd_vin_fops*/
     {
