@@ -11,6 +11,8 @@
 ******************************************************************************/
 #include "epoll.h"
 #include "epoll_server.h"
+#include "../agreement/server_view.h"
+#include "../agreement/obd_agree_fops.h"
 
 enum epoll_server_type{
     SERVER_TYPE_VIEW = 0x02,
@@ -143,11 +145,16 @@ static struct epoll_thread_data* get_epoll_data(struct epoll_obj* const _this, c
     }
     return NULL;
 }
-static int epoll_data_view(struct epoll_obj* const _this, const int fd, char* const _tbuf, const int _tsize)
+static int epoll_data_view(struct epoll_obj* const _this, struct obd_agree_obj* const _obd_obj, const int fd, char* const _tbuf, const int _tsize)
 {
     int i;
     struct epoll_thread_data* const _data_list = (struct epoll_thread_data*)_this->data;
     struct epoll_thread_data* _data=NULL;
+    struct general_pack_view_userdef* const udef = (struct general_pack_view_userdef*)_tbuf;
+    struct pack_view_udf_obd* const udef_obd = (struct pack_view_udf_obd*)udef->msg;
+    int len;
+    uint8_t pack_buf[4096];
+    uint8_t udef_buf[4096];
     for(i=0; i<epoll_obj_data_size; i++)
     {
         _data = &_data_list[i];
@@ -155,8 +162,15 @@ static int epoll_data_view(struct epoll_obj* const _this, const int fd, char* co
         {
             // send
             memset(_tbuf, 0, _tsize);
-            memcpy(_tbuf, _data->frame, _data->frame_size);
-            _this->fops.do_write(_this, fd, _tbuf, _data->frame_size);
+            memset(pack_buf, 0, sizeof(pack_buf));
+            memset(udef_buf, 0, sizeof(udef_buf));
+            //memcpy(_tbuf, _data->frame, _data->frame_size);
+            udef->type_msg = USERDEF_VIEW_OBD;
+            udef_obd->len = _data->frame_size;
+            memcpy(udef_obd->data, _data->frame, _data->frame_size);
+            len = _obd_obj->fops->userdef_encode(_obd_obj, udef, udef_buf, sizeof(udef_buf));
+            len = _obd_obj->fops->base->pack.encode(_obd_obj, udef_buf, len, pack_buf, sizeof(pack_buf));
+            _this->fops.do_write(_this, fd, pack_buf, len);
         }
     }
     return 0;
@@ -248,6 +262,7 @@ static void handle_events_server(struct epoll_obj* const _this, struct epoll_eve
                 // handle
                 struct obd_agree_obj* _obd_obj = _thread_data->_obd_obj;
                 memset(&_ofp_data._tbuf, 0, sizeof(_ofp_data._tbuf));
+                _ofp_data._tlen = 0;
                 _print.fops->init(&_print);
                 memset(_thread_data->frame, 0, sizeof(_thread_data->frame));
                 _thread_data->frame_size = nread;
@@ -262,7 +277,7 @@ static void handle_events_server(struct epoll_obj* const _this, struct epoll_eve
                     {
                         if(CMD_VIEW_GET_OBD == _obd_obj->_gen_pack_view.cmd)
                         {
-                            epoll_data_view(_this, fd, _ofp_data._tbuf, sizeof(_ofp_data._tbuf));
+                            epoll_data_view(_this, _obd_obj, fd, _ofp_data._tbuf, sizeof(_ofp_data._tbuf));
                         }
                     }
                 }
@@ -325,7 +340,7 @@ static void handle_events_server(struct epoll_obj* const _this, struct epoll_eve
                                 _thread_data->flag = SERVER_TYPE_VIEW;
                                 if(CMD_VIEW_GET_OBD == _obd_obj->_gen_pack_view.cmd)
                                 {
-                                    epoll_data_view(_this, fd, _ofp_data._tbuf, sizeof(_ofp_data._tbuf));
+                                    epoll_data_view(_this, _obd_obj, fd, _ofp_data._tbuf, sizeof(_ofp_data._tbuf));
                                 }
                             }
                         }

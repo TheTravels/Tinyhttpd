@@ -26,8 +26,8 @@ extern "C" {
      CMD_VIEW_LOGIN    = 0x01,       // 0x01  Client 登入
      CMD_VIEW_LOGOUT   = 0x02,       // 0x02  Client 登出
      CMD_VIEW_GET_OBD  = 0x03,       // 0x03  获取OBD 数据
-     CMD_VIEW_OBD      = 0x04,       // 0x03  获取OBD 数据
-     CMD_VIEW_USERDEF  = 0x05,       // 0x04  empty
+     //CMD_VIEW_OBD      = 0x04,       // 0x04  获取OBD 数据
+     CMD_VIEW_USERDEF  = 0x05,       // 0x05  empty
      CMD_VIEW_NULL     = 0x00,       // error
  };
 
@@ -41,6 +41,7 @@ extern "C" {
      uint16_t data_len;    // 22  数据单元长度  WORD 数据单元长度是数据单元的总字节数，有效范围：0~65531
      void*   data;         // 24  数据单元    见数据单元格式和定义
      uint8_t BCC;          // 倒数第 1  校验码  BYTE 采用 BCC（异或校验）法，校验范围聪明星单元的第一个字节开始，同后一个字节异或，直到校验码前一字节为止，校验码占用一个字节
+     uint8_t userdef;
  };
  // login 包结构
  struct general_pack_view_login{
@@ -59,12 +60,22 @@ extern "C" {
      //char data[512];       // 20  数据单元    见数据单元格式和定义
  };
  // OBD 包结构
- struct general_pack_view_obd{
+ /*struct general_pack_view_obd{
      //char sn[18+1];        //  0  SN
      uint16_t data_len;    // 18  数据单元长度  WORD 数据单元长度是数据单元的总字节数，有效范围：0~65531
      char data[1024];       // 20  数据单元    见数据单元格式和定义
+ };*/
+
+ // 0x81~0xFE  用户自定义
+ enum general_pack_view_userdef_cmd{
+     USERDEF_VIEW_REQ_OBD     = 0x01,  // 请求 OBD
+     USERDEF_VIEW_OBD         = 0x02,  // 下发 OBD
  };
 
+ struct pack_view_udf_obd{
+     uint16_t len;
+     char data[1024];
+ };
  struct general_pack_view_userdef{
      uint16_t count;       // 信息流水号
      uint8_t type_msg;     // 信息类型标志

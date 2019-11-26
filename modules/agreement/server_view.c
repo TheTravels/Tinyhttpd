@@ -61,6 +61,9 @@ static enum cmd_unit_shanghai get_cmd(const enum general_pack_type _pack_type)
         case GEN_PACK_LOGOUT:       // 车辆登出
             _cmd = CMD_VIEW_LOGOUT;
             break;
+        case GEN_PACK_USERDEF:       // 车辆登出
+            _cmd = CMD_VIEW_USERDEF;
+            break;
         default:
             _cmd = CMD_VIEW_GET_OBD;
             break;
@@ -150,13 +153,18 @@ static int userdef_encode_view(struct obd_agree_obj* const _obd_fops, const stru
     memset(_buffer, 0, _size);
     index += bigw_16bit(&buffer[index], _udef->count+1); // 以天为单位，每包实时信息流水号唯一，从 1 开始累加
     buffer[index++] = _udef->type_msg;
+    _obd_fops->_gen_pack_view.userdef = _udef->type_msg;
     switch(_udef->type_msg)
     {
-        case USERDEF_YJ_QUERY_VIN:   // 请求 VIN 码
+        case USERDEF_VIEW_REQ_OBD:   // 请求 OBD
             memcpy(&buffer[index], _udef->msg, 18); index += 18; // 18位SN号
             break;
-        case USERDEF_YJ_ACK_VIN:    // 下发 VIN 码
-            memcpy(&buffer[index], _udef->msg, 17); index += 17; // 17位VIN码
+        case USERDEF_VIEW_OBD:    // 下发 OBD
+            {
+                const struct pack_view_udf_obd* const _obd = (struct pack_view_udf_obd*)_udef->msg;
+                index += bigw_16bit(&buffer[index], _obd->len);
+                memcpy(&buffer[index], _obd->data, _obd->len); index += _obd->len; // OBD Data
+            }
             break;
         case USERDEF_YJ_QUERY_TIME:  // 请求校时
             ; // 校时数据体为空
@@ -256,11 +264,15 @@ static int userdef_decode_view(struct obd_agree_obj* const _obd_fops, struct gen
     _udef->type_msg = data[index++];
     switch(_udef->type_msg)
     {
-        case USERDEF_YJ_QUERY_VIN:   // 请求 VIN 码
+        case USERDEF_VIEW_REQ_OBD:   // 请求 OBD
             memcpy(_udef->msg, &data[index], 18); index += 18; // 18位SN号
             break;
-        case USERDEF_YJ_ACK_VIN:    // 下发 VIN 码
-            memcpy(_udef->msg, &data[index], 17); index += 17; // 17位VIN码
+        case USERDEF_VIEW_OBD:    // 下发 OBD
+            {
+                struct pack_view_udf_obd* const _obd = (struct pack_view_udf_obd*)_udef->msg;
+                _obd->len = merge_16bit(data[index], data[index+1]); index+= 2;
+                memcpy(_obd->data, &data[index], _obd->len); index += _obd->len; // OBD Data
+            }
             break;
         case USERDEF_YJ_QUERY_TIME:  // 请求校时
             ; // 校时数据体为空
@@ -418,7 +430,6 @@ static int obd_encode_pack_general(const enum general_pack_type _pack_type, stru
     uint8_t bcc=0;
     uint16_t index=0;
     int data_len=0;
-    uint8_t rsa_buffer[2048];
     struct general_pack_view * const _pack = &_obd_fops->_gen_pack_view;
     _pack->cmd = get_cmd(_pack_type);
     if(_size<sizeof (struct general_pack_view)) return ERR_ENCODE_PACKL;
@@ -440,16 +451,16 @@ static int obd_encode_pack_general(const enum general_pack_type _pack_type, stru
     // 24  数据单元
     switch(_pack->cmd)
     {
-        case CMD_LOGIN:        // 车辆登入
+        case CMD_VIEW_LOGIN:        // 车辆登入
             data_len = encode_msg_login((const struct general_pack_view_login *const)msg, &buf[index], _size-index-1);
             break;
-        case CMD_LOGOUT:       // 车辆登出
+        case CMD_VIEW_LOGOUT:       // 车辆登出
             data_len = encode_msg_logout((const struct general_pack_view_logout *const)msg, &buf[index], _size-index-1);
             break;
-        case CMD_UTC:          // 终端校时
+        case CMD_VIEW_GET_OBD:          // 终端校时
             data_len = 0;      // 车载终端校时的数据单元为空。
             break;
-        case CMD_USERDEF:      // 用户自定义
+        case CMD_VIEW_USERDEF:      // 用户自定义
             data_len = encode_msg_userdef(_obd_fops, (const struct shanghai_userdef *)msg, &buf[index], _size-index-1);
             break;
         default:
