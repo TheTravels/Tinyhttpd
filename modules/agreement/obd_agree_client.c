@@ -462,7 +462,10 @@ static int handle_request_userdef_view(struct obd_agree_obj* const _obd_fops, co
         {
             case USERDEF_VIEW_OBD:
                 {
-                    struct pack_view_udf_obd* const _obd = _udef->msg;
+                    const struct pack_view_udf_obd* const _obd = (const struct pack_view_udf_obd*)_udef->msg;
+                    memset(_ofp_data->_tbuf, 0, sizeof(_ofp_data->_tbuf));
+                    _ofp_data->_tlen = _obd->len;
+                    memcpy(_ofp_data->_tbuf, _obd->data, _obd->len);
                     _print->fops->print(_print, "_obd[%d]: %s\n", _obd->len, _obd->data);
                 }
                 break;
@@ -605,9 +608,6 @@ int obd_protocol_client_YJ(struct obd_agree_obj* const _obd_fops, struct obd_agr
 
 int obd_protocol_client_view(struct obd_agree_obj* const _obd_fops, struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const _db_report, struct msg_print_obj* const _print)
 {
-//    char* const _tbuf = _ofp_data->_tbuf;
-//    const unsigned int _tsize = sizeof(_ofp_data->_tbuf);
-//    int* const _tlen = &_ofp_data->_tlen;
     int ret = 0;
     const struct general_pack_view* const pack = &_obd_fops->_gen_pack_view;
     pr_debug("start: %c%c \n", pack->start[0], pack->start[1]);
@@ -629,7 +629,7 @@ int obd_protocol_client_view(struct obd_agree_obj* const _obd_fops, struct obd_a
         case CMD_VIEW_GET_OBD:          // 获取OBD 数据
             _print->fops->print(_print, "获取OBD 数据\n");
             break;
-        case CMD_USERDEF:      // 用户自定义
+        case CMD_VIEW_USERDEF:      // 用户自定义
             _print->fops->print(_print, "CMD_USERDEF\n"); fflush(stdout);
             ret = handle_request_userdef_view(_obd_fops, pack, _ofp_data, _print);
             break;

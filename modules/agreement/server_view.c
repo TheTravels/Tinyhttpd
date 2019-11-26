@@ -135,7 +135,7 @@ static int handle_decode(struct obd_agree_obj* const _obd_fops, const uint8_t _p
     struct general_pack_view *const pack = &_obd_fops->_gen_pack_view;
     int head_len = sizeof (struct general_pack_view);
     int pack_len = 0;
-    printf("[%s-%d] _gen_pack_view \n", __func__, __LINE__);
+    //printf("[%s-%d] _gen_pack_view \n", __func__, __LINE__);
     memset(pack, 0, sizeof (struct general_pack_view));
     pack->data = ((char*)_msg_buf)+head_len;//&_msg_buf[head_len];
     //printf("@%s-%d \n", __func__, __LINE__);
@@ -541,7 +541,7 @@ static int obd_decode_pack_general(struct obd_agree_obj* const _obd_fops, const 
     const uint8_t* pdata=NULL;
     struct general_pack_view * const _pack = &_obd_fops->_gen_pack_view;
     index=0;
-    printf("[%s-%d] _gen_pack_view \n", __func__, __LINE__);
+    //printf("[%s-%d] _gen_pack_view \n", __func__, __LINE__);
     memset(msg_buf, 0, _msize);
     _pack->start[0] = data[index++];
     _pack->start[1] = data[index++];
