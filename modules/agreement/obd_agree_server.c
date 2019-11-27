@@ -1462,6 +1462,7 @@ int obj_obd_agree_general_pack_view_server(struct obd_agree_obj* const _obd_fops
     _print->fops->print(_print, "命令:[%02X] ", pack->cmd);
     _print->fops->print(_print, "VIN:[%-17s] ", pack->VIN);
     _print->fops->print(_print, "SN:[%-17s] ", pack->sn);
+     _print->fops->print(_print, "C:[%2d] ", pack->count);
     _print->fops->print(_print, "版本号:[%02X] ", pack->soft_version);
     _print->fops->print(_print, "数据长度:[%-4d] ", pack->data_len);
     _print->fops->print(_print, "BCC:[%02X] ", pack->BCC);

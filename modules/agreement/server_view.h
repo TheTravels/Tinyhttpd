@@ -37,6 +37,7 @@ extern "C" {
      uint8_t cmd;          //  2  命令单元  BYTE  命令单元定义见  表 A2  命令单元定义
      uint8_t VIN[17+1];        // 车辆识别码（VIN） 17  STRING
      char sn[18+1];        //  0  SN
+     uint16_t count;         // 6  流水号
      uint8_t soft_version;
      uint8_t protocol;     // data 中数据使用的协议
      uint16_t data_len;    // 22  数据单元长度  WORD 数据单元长度是数据单元的总字节数，有效范围：0~65531

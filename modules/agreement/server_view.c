@@ -114,6 +114,8 @@ static int check_pack_general(struct obd_agree_obj* const _obd_fops, const void*
     index += 17;
     memcpy(_pack->sn, &data[index], 18);                      // 3  SN
     index += 18;
+    _pack->count = merge_16bit(data[index], data[index+1]); //
+    index += 2;
     _pack->soft_version = data[index++];                       //  终端软件版本号  BYTE  终端软件版本号有效值范围 0~255
     _pack->protocol = data[index++];
     _pack->data_len = merge_16bit(data[index], data[index+1]); // 22  数据单元长度  WORD 数据单元长度是数据单元的总字节数，有效范围：0~65531
@@ -448,6 +450,7 @@ static int obd_encode_pack_general(const enum general_pack_type _pack_type, stru
     memcpy(&buf[index], _pack->sn, 18);    // 3  车辆识别号  STRING 车辆识别码是识别的唯一标识，由 17 位字码组成，字码应符合 GB16735 中 4.5 的规定
     BUILD_BUG_ON(sizeof (_pack->sn)-1 != 18);
     index += 18;
+    index += bigw_16bit(&buf[index], _pack->count+1);
     buf[index++] = _pack->soft_version;     // 20  终端软件版本号  BYTE  终端软件版本号有效值范围 0~255
     buf[index++] = _pack->protocol;     //
     index += bigw_16bit(&buf[index], _pack->data_len); // 22  数据单元长度  WORD
@@ -554,6 +557,8 @@ static int obd_decode_pack_general(struct obd_agree_obj* const _obd_fops, const 
     index += 17;
     memcpy(_pack->sn, &data[index], 18);                      // 3  SN
     index += 18;
+    _pack->count = merge_16bit(data[index], data[index+1]); //
+    index += 2;
     _pack->soft_version = data[index++];                       // 20  终端软件版本号  BYTE  终端软件版本号有效值范围 0~255
     _pack->protocol = data[index++];
     _pack->data_len = merge_16bit(data[index], data[index+1]); // 22  数据单元长度  WORD 数据单元长度是数据单元的总字节数，有效范围：0~65531

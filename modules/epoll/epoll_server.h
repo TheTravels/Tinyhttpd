@@ -40,6 +40,8 @@ struct epoll_thread_data{
     struct obd_agree_obj* _obd_obj;
     char frame[1024];
     int frame_size;
+    int epoll_index;
+    int data_index;
 };
 
 

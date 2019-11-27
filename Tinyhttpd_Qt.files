@@ -1,3 +1,4 @@
+modules/agreement/obd_agree_view.c
 modules/agreement/server_view.c
 modules/agreement/server_view.h
 modules/obd/device_thread.c

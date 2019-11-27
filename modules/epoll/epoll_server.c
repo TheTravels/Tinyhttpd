@@ -137,6 +137,7 @@ static struct epoll_thread_data* get_epoll_data(struct epoll_obj* const _this, c
         _data = &_data_list[i];
         if(0==_data->flag)
         {
+            memset(_data, 0, sizeof(struct epoll_thread_data));
             _data->fd = fd;
             _data->flag = 1;
             _data->_obd_obj = NULL;
@@ -150,21 +151,25 @@ static int __epoll_data_view(struct epoll_obj* const _this, struct epoll_thread_
     int i;
     //struct epoll_thread_data* const _data_list = (struct epoll_thread_data*)_this->data;
     struct epoll_thread_data* _data=NULL;
+    struct epoll_thread_data* const _this_data = (struct epoll_thread_data*)_this->data;
     struct general_pack_view_userdef* const udef = (struct general_pack_view_userdef*)_tbuf;
     struct pack_view_udf_obd* const udef_obd = (struct pack_view_udf_obd*)udef->msg;
     int len;
+    int data_index = _this_data->data_index;
     uint8_t pack_buf[4096];
     uint8_t udef_buf[4096];
-    for(i=0; i<epoll_obj_data_size; i++)
+    if(data_index>epoll_obj_data_size) data_index = 0;
+    memset(_tbuf, 0, _tsize);
+    memset(pack_buf, 0, sizeof(pack_buf));
+    memset(udef_buf, 0, sizeof(udef_buf));
+    for(i=data_index; i<epoll_obj_data_size; i++)
     {
         _data = &_data_list[i];
+        _this_data->data_index = i;
         //if((0!=_data->flag) && (SERVER_TYPE_VIEW!=_data->flag))
         if(0!=_data->flag)
         {
             // send
-            memset(_tbuf, 0, _tsize);
-            memset(pack_buf, 0, sizeof(pack_buf));
-            memset(udef_buf, 0, sizeof(udef_buf));
             //memcpy(_tbuf, _data->frame, _data->frame_size);
             udef->type_msg = USERDEF_VIEW_OBD;
             udef_obd->len = _data->frame_size;
@@ -172,24 +177,68 @@ static int __epoll_data_view(struct epoll_obj* const _this, struct epoll_thread_
             _obd_obj->_gen_pack_view.protocol = _data->_obd_obj->fops->protocol;
             len = _obd_obj->fops->userdef_encode(_obd_obj, udef, udef_buf, sizeof(udef_buf));
             len = _obd_obj->fops->base->pack.encode(_obd_obj, udef_buf, len, pack_buf, sizeof(pack_buf));
+            //_this->fops.modify_event(_this, fd, EPOLLOUT);
             _this->fops.do_write(_this, fd, pack_buf, len);
             printf("[%s-%d] do_write[%d]:%s\n", __func__, __LINE__, len, pack_buf);
+            return 0;
         }
     }
-    return 0;
+    for(i=0; i<data_index; i++)
+    {
+        _data = &_data_list[i];
+        _this_data->data_index = i;
+        //if((0!=_data->flag) && (SERVER_TYPE_VIEW!=_data->flag))
+        if(0!=_data->flag)
+        {
+            // send
+            //memcpy(_tbuf, _data->frame, _data->frame_size);
+            udef->type_msg = USERDEF_VIEW_OBD;
+            udef_obd->len = _data->frame_size;
+            memcpy(udef_obd->data, _data->frame, _data->frame_size);
+            _obd_obj->_gen_pack_view.protocol = _data->_obd_obj->fops->protocol;
+            len = _obd_obj->fops->userdef_encode(_obd_obj, udef, udef_buf, sizeof(udef_buf));
+            len = _obd_obj->fops->base->pack.encode(_obd_obj, udef_buf, len, pack_buf, sizeof(pack_buf));
+            //_this->fops.modify_event(_this, fd, EPOLLOUT);
+            _this->fops.do_write(_this, fd, pack_buf, len);
+            printf("[%s-%d] do_write[%d]:%s\n", __func__, __LINE__, len, pack_buf);
+            return 0;
+        }
+    }
+    return -1;
 }
 static int epoll_data_view(struct epoll_obj* const _this, struct obd_agree_obj* const _obd_obj, const int fd, char* const _tbuf, const int _tsize)
 {
     struct epoll_obj* _obj=NULL;
+    struct epoll_thread_data* const _data = (struct epoll_thread_data*)_this->data;
+    int epoll_index = _data->epoll_index;
     int i;
+    if(epoll_index>epoll_obj_list_size) epoll_index = 0;
     // 遍历,查找连接数最少的对象
-    for(i=0; i<epoll_obj_list_size; i++)
+    for(i=epoll_index; i<epoll_obj_list_size; i++)
     {
         _obj=_this->fops.get_epoll_obj(_this, i);
-        if(NULL==_obj) continue;
-        __epoll_data_view(_this, (struct epoll_thread_data*)_obj->data, _obd_obj, fd, _tbuf, _tsize);
+        _data->epoll_index = i;
+        if(NULL==_obj)
+        {
+            _data->data_index = 0;
+            continue;
+        }
+        if(0==__epoll_data_view(_this, (struct epoll_thread_data*)_obj->data, _obd_obj, fd, _tbuf, _tsize)) return 0;
+        _data->data_index = 0;
     }
-    return 0;
+    for(i=0; i<epoll_index; i++)
+    {
+        _obj=_this->fops.get_epoll_obj(_this, i);
+        _data->epoll_index = i;
+        if(NULL==_obj)
+        {
+            _data->data_index = 0;
+            continue;
+        }
+        if(0==__epoll_data_view(_this, (struct epoll_thread_data*)_obj->data, _obd_obj, fd, _tbuf, _tsize)) return 0;
+        _data->data_index = 0;
+    }
+    return -1;
 }
 static void epoll_close_server(struct epoll_obj* const _this, const int fd)
 {
