@@ -145,10 +145,10 @@ static struct epoll_thread_data* get_epoll_data(struct epoll_obj* const _this, c
     }
     return NULL;
 }
-static int epoll_data_view(struct epoll_obj* const _this, struct obd_agree_obj* const _obd_obj, const int fd, char* const _tbuf, const int _tsize)
+static int __epoll_data_view(struct epoll_obj* const _this, struct epoll_thread_data* const _data_list, struct obd_agree_obj* const _obd_obj, const int fd, char* const _tbuf, const int _tsize)
 {
     int i;
-    struct epoll_thread_data* const _data_list = (struct epoll_thread_data*)_this->data;
+    //struct epoll_thread_data* const _data_list = (struct epoll_thread_data*)_this->data;
     struct epoll_thread_data* _data=NULL;
     struct general_pack_view_userdef* const udef = (struct general_pack_view_userdef*)_tbuf;
     struct pack_view_udf_obd* const udef_obd = (struct pack_view_udf_obd*)udef->msg;
@@ -175,6 +175,19 @@ static int epoll_data_view(struct epoll_obj* const _this, struct obd_agree_obj* 
             _this->fops.do_write(_this, fd, pack_buf, len);
             printf("[%s-%d] do_write[%d]:%s\n", __func__, __LINE__, len, pack_buf);
         }
+    }
+    return 0;
+}
+static int epoll_data_view(struct epoll_obj* const _this, struct obd_agree_obj* const _obd_obj, const int fd, char* const _tbuf, const int _tsize)
+{
+    struct epoll_obj* _obj=NULL;
+    int i;
+    // 遍历,查找连接数最少的对象
+    for(i=0; i<epoll_obj_list_size; i++)
+    {
+        _obj=_this->fops.get_epoll_obj(_this, i);
+        if(NULL==_obj) continue;
+        __epoll_data_view(_this, (struct epoll_thread_data*)_obj->data, _obd_obj, fd, _tbuf, _tsize);
     }
     return 0;
 }

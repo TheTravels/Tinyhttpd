@@ -129,6 +129,7 @@ struct obd_agree_fops
     {
         // server
         int (*const decode_server)(struct obd_agree_obj* const _obd_fops, const uint8_t pack[], const uint16_t _psize, void* const _msg_buf, const uint16_t _msize, struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const _db_report, struct msg_print_obj* const _print);
+        int (*const decode_view)(struct obd_agree_obj* const _this, const uint8_t pack[], const uint16_t _psize, void* const _msg_buf, const uint16_t _msize, struct msg_print_obj* const _print);
         // client
         int (*const decode_client)(struct obd_agree_obj* const _obd_fops, const uint8_t pack[], const uint16_t _psize, void* const _msg_buf, const uint16_t _msize, struct obd_agree_ofp_data* const _ofp_data, struct msg_print_obj* const _print);
     };
@@ -136,6 +137,7 @@ struct obd_agree_fops
     {
         // 服务端接口函数
         int (*const protocol_server)(struct obd_agree_obj* const _obd_fops, struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const _db_report, struct msg_print_obj* const _print);
+        int (*const protocol_view)(struct obd_agree_obj* const _this, struct msg_print_obj* const _print);
         // 客户端接口函数
         int (*const protocol_client)(struct obd_agree_obj* const _obd_fops, struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const _db_report, struct msg_print_obj* const _print);
     };
@@ -184,15 +186,20 @@ struct obd_agree_obj
 
 extern struct obd_agree_obj* obd_agree_fops_constructed(struct obd_agree_obj* const _obd_fops, void* const _obj_fops);
 extern int obd_fops_decode_server(struct obd_agree_obj* const _obd_fops, const uint8_t pack[], const uint16_t _psize, void* const _msg_buf, const uint16_t _msize, struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const _db_report, struct msg_print_obj* const _print);
-extern int obj_obd_agree_shanghai_server(struct obd_agree_obj* const _obd_fops, struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const _db_report, struct msg_print_obj* const _print);
+extern int obd_fops_decode_view(struct obd_agree_obj* const _this, const uint8_t pack[], const uint16_t _psize, void* const _msg_buf, const uint16_t _msize, struct msg_print_obj* const _print);
 extern int obd_fops_decode_client(struct obd_agree_obj* const _obd_fops, const uint8_t pack[], const uint16_t _psize, void* const _msg_buf, const uint16_t _msize, struct obd_agree_ofp_data* const _ofp_data, struct msg_print_obj* const _print);
+
+extern int obj_obd_agree_shanghai_server(struct obd_agree_obj* const _obd_fops, struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const _db_report, struct msg_print_obj* const _print);
 extern int obd_protocol_client_shanghai(struct obd_agree_obj* const _obd_fops, struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const _db_report, struct msg_print_obj* const _print);
+extern int obd_protocol_view_shanghai(struct obd_agree_obj* const _this, struct msg_print_obj* const _print);
 
 extern int obj_obd_agree_yunjing_server(struct obd_agree_obj* const _obd_fops, struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const _db_report, struct msg_print_obj* const _print);
 extern int obd_protocol_client_YJ(struct obd_agree_obj* const _obd_fops, struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const _db_report, struct msg_print_obj* const _print);
+extern int obd_protocol_view_yunjing(struct obd_agree_obj* const _this, struct msg_print_obj* const _print);
 
 extern int obj_obd_agree_general_pack_view_server(struct obd_agree_obj* const _obd_fops, struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const _db_report, struct msg_print_obj* const _print);
 extern int obd_protocol_client_view(struct obd_agree_obj* const _obd_fops, struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const _db_report, struct msg_print_obj* const _print);
+extern int obd_protocol_view(struct obd_agree_obj* const _this, struct msg_print_obj* const _print);
 
 //extern const struct obd_agree_fops _obd_agree_fops_shanghai;
 extern struct obd_agree_obj obd_agree_obj_shanghai;

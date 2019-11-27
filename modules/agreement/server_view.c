@@ -154,7 +154,7 @@ static int userdef_encode_view(struct obd_agree_obj* const _obd_fops, const stru
     memset(_buffer, 0, _size);
     index += bigw_16bit(&buffer[index], _udef->count+1); // 以天为单位，每包实时信息流水号唯一，从 1 开始累加
     buffer[index++] = _udef->type_msg;
-    _obd_fops->_gen_pack_view.userdef = _udef->type_msg;
+    //_obd_fops->_gen_pack_view.userdef = _udef->type_msg;
     switch(_udef->type_msg)
     {
         case USERDEF_VIEW_REQ_OBD:   // 请求 OBD
@@ -263,6 +263,7 @@ static int userdef_decode_view(struct obd_agree_obj* const _obd_fops, struct gen
     memset(_udef, 0, sizeof(struct yunjing_userdef));
     _udef->count = merge_16bit(data[index], data[index+1]); index+= 2;
     _udef->type_msg = data[index++];
+    _obd_fops->_gen_pack_view.userdef = _udef->type_msg;
     switch(_udef->type_msg)
     {
         case USERDEF_VIEW_REQ_OBD:   // 请求 OBD
@@ -541,7 +542,7 @@ static int obd_decode_pack_general(struct obd_agree_obj* const _obd_fops, const 
     const uint8_t* pdata=NULL;
     struct general_pack_view * const _pack = &_obd_fops->_gen_pack_view;
     index=0;
-    //printf("[%s-%d] _gen_pack_view \n", __func__, __LINE__);
+    pr_debug("[%s-%d] _gen_pack_view \n", __func__, __LINE__);
     memset(msg_buf, 0, _msize);
     _pack->start[0] = data[index++];
     _pack->start[1] = data[index++];
@@ -619,10 +620,12 @@ static const struct obd_agree_fops _obd_agree_fops_view = {
     .userdef_decode = userdef_decode,
     .upload_push = upload_push,
     .decode_server = obd_fops_decode_server,
+    .decode_view = obd_fops_decode_view,
     .decode_client = obd_fops_decode_client,
     .encode_pack_general = obd_encode_pack_general,
     .decode_pack_general = obd_decode_pack_general,
     .protocol_server = obj_obd_agree_general_pack_view_server,
+    .protocol_view = obd_protocol_view,
     .protocol_client = obd_protocol_client_view,
     .agree_des = "OBD View协议",
     //.vin = &_obd_vin_fops,

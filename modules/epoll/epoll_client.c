@@ -50,14 +50,14 @@ static int request_vin(struct epoll_obj* const _this, struct epoll_thread_data* 
         struct yunjing_userdef _udef;
         int len = 0;
         memset(wsn, 0, sizeof(wsn));
-        printf("@%s-%d\n", __func__, __LINE__);
+        //printf("@%s-%d\n", __func__, __LINE__);
         //this->get_vin(pPeerConn, conn->_obd_obj->sn, conn->_obd_obj->VIN);
         if(0==_obd_obj->fops->base->vin.req_get(wsn))
         {
             _tmp=localtime(&timep);
             _print.fops->print(&_print, "[%s-%d] request VIN SN[%d-%d-%d %02d:%02d:%02d]:[%s]\n", __func__, __LINE__, _tmp->tm_year+1900, _tmp->tm_mon+1, _tmp->tm_mday, _tmp->tm_hour, _tmp->tm_min, _tmp->tm_sec, wsn);
             //printf("@%s-%d wsn:%s secket:%s\n", __func__, __LINE__, wsn, _conn->localAddress().toIpPort().c_str());
-            printf("@%s-%d wsn:%s secket:%d\n", __func__, __LINE__, wsn, _data->fd);
+            _print.fops->print(&_print, "@%s-%d wsn:%s secket:%d\n", __func__, __LINE__, wsn, _data->fd);
             //printf("@%s-%d wsn:%s\n", __func__, __LINE__, wsn);
             memset(&_udef, 0, sizeof(struct yunjing_userdef));
             memset(cache, 0, sizeof(cache));
@@ -73,9 +73,9 @@ static int request_vin(struct epoll_obj* const _this, struct epoll_thread_data* 
             //_conn->send((char*)_msg_buf, len);
             //printf("@%s-%d\n", __func__, __LINE__);
             _this->fops.modify_event(_this, _data->fd, EPOLLOUT);
-            printf("@%s-%d fd:%d\n", __func__, __LINE__, _data->fd);
+            //printf("@%s-%d fd:%d\n", __func__, __LINE__, _data->fd);
             _this->fops.do_write(_this, _data->fd, _msg_buf, len);
-            printf("@%s-%d\n", __func__, __LINE__);
+            //printf("@%s-%d\n", __func__, __LINE__);
             //_print.fops->fflush(&_print);
             return 0;
         }
@@ -88,7 +88,7 @@ static void timer_run_every(struct epoll_obj* const _this)
     struct epoll_thread_data* const _data_list = (struct epoll_thread_data*)_this->data;
     struct epoll_thread_data* _data=NULL;
     //int send=-1;
-    printf("[%s-%d] epoll_client_systime:%d\n", __func__, __LINE__, epoll_client_systime);
+    //printf("[%s-%d] epoll_client_systime:%d\n", __func__, __LINE__, epoll_client_systime);
     for(i=0; i<epoll_obj_data_size; i++)
     {
         _data = &_data_list[i];
@@ -103,7 +103,7 @@ static void timer_run_every(struct epoll_obj* const _this)
             send=request_vin(_this, _data);
             if(0==send) _data->_timeout = 0;
 #else
-            printf("[%s-%d] fd:%d epoll_client_systime:%d _timeout:%d\n", __func__, __LINE__, _data->fd, epoll_client_systime, _data->_timeout);
+            //printf("[%s-%d] fd:%d epoll_client_systime:%d _timeout:%d\n", __func__, __LINE__, _data->fd, epoll_client_systime, _data->_timeout);
             request_vin(_this, _data);
             //_this->fops.modify_event(_this, _data->fd, EPOLLOUT);
             _data->_timeout = epoll_client_systime + epoll_client_timeout;
@@ -283,7 +283,7 @@ static void handle_events_client(struct epoll_obj* const _this, struct epoll_eve
             int nread;
             int decode; // 解码数据
             //struct epoll_thread_data* const _thread_data = (struct epoll_thread_data*)events[i].data.ptr;
-            printf("[%s-%d ]EPOLLIN\n", __func__, __LINE__);
+            //printf("[%s-%d ]EPOLLIN\n", __func__, __LINE__);
             _thread_data = get_epoll_data(_this, fd);
             memset(buf, 0, _max_size);
             nread = _this->fops.do_read(_this, fd, buf, _max_size);

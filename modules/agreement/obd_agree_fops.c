@@ -444,6 +444,21 @@ int obd_fops_decode_server(struct obd_agree_obj* const _obd_fops, const uint8_t 
     return 0;
 }
 
+int obd_fops_decode_view(struct obd_agree_obj* const _this, const uint8_t pack[], const uint16_t _psize, void* const _msg_buf, const uint16_t _msize, struct msg_print_obj* const _print)
+{
+    int len = 0;
+    //printf("@%s-%d \n", __func__, __LINE__);
+    len = _this->fops->decode(_this, pack, _psize, _msg_buf, _msize);
+    //printf("@%s-%d decode pack len : %d \n", __func__, __LINE__, len);
+    _print->fops->print(_print, "@%s-%d decode pack len : %d \n", __func__, __LINE__, len);
+    if(len<0) return -1;
+    //printf("[@%s-%d] _print:%p fops:%p print:%p \n", __func__, __LINE__, _print, _print->fops, _print->fops->print);
+    _print->fops->print(_print, "协议:[%s]\t", _this->fops->agree_des);
+    _this->fops->protocol_view(_this, _print);
+    //printf("@%s-%d \n", __func__, __LINE__);
+    return 0;
+}
+
 int obd_fops_decode_client(struct obd_agree_obj* const _obd_fops, const uint8_t pack[], const uint16_t _psize, void* const _msg_buf, const uint16_t _msize, struct obd_agree_ofp_data* const _ofp_data, struct msg_print_obj* const _print)
 {
     int len = 0;

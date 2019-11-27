@@ -630,7 +630,7 @@ int obd_protocol_client_view(struct obd_agree_obj* const _obd_fops, struct obd_a
             _print->fops->print(_print, "获取OBD 数据\n");
             break;
         case CMD_VIEW_USERDEF:      // 用户自定义
-            _print->fops->print(_print, "CMD_USERDEF\n"); fflush(stdout);
+            _print->fops->print(_print, "CMD_VIEW_USERDEF\n"); fflush(stdout);
             ret = handle_request_userdef_view(_obd_fops, pack, _ofp_data, _print);
             break;
         default:

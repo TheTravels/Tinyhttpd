@@ -38,6 +38,9 @@
      PRO_TYPE_VIEW = 0x05,  // VIEW
      PRO_TYPE_NULL,
  };
+
+#define protocol_type_str(_type)   (#_type)
+
  // 结构定义
  enum general_pack_type{
      GEN_PACK_LOGIN         = 0x01,       // 0x01  车辆登入  上行
