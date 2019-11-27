@@ -165,7 +165,7 @@ static int __epoll_data_view(struct epoll_obj* const _this, struct epoll_thread_
     for(i=data_index; i<epoll_obj_data_size; i++)
     {
         _data = &_data_list[i];
-        _this_data->data_index = i;
+        _this_data->data_index = i+1;
         //if((0!=_data->flag) && (SERVER_TYPE_VIEW!=_data->flag))
         if(0!=_data->flag)
         {
@@ -183,10 +183,11 @@ static int __epoll_data_view(struct epoll_obj* const _this, struct epoll_thread_
             return 0;
         }
     }
+#if 0
     for(i=0; i<data_index; i++)
     {
         _data = &_data_list[i];
-        _this_data->data_index = i;
+        _this_data->data_index = i+1;
         //if((0!=_data->flag) && (SERVER_TYPE_VIEW!=_data->flag))
         if(0!=_data->flag)
         {
@@ -204,6 +205,7 @@ static int __epoll_data_view(struct epoll_obj* const _this, struct epoll_thread_
             return 0;
         }
     }
+#endif
     return -1;
 }
 static int epoll_data_view(struct epoll_obj* const _this, struct obd_agree_obj* const _obd_obj, const int fd, char* const _tbuf, const int _tsize)
@@ -217,7 +219,7 @@ static int epoll_data_view(struct epoll_obj* const _this, struct obd_agree_obj* 
     for(i=epoll_index; i<epoll_obj_list_size; i++)
     {
         _obj=_this->fops.get_epoll_obj(_this, i);
-        _data->epoll_index = i;
+        _data->epoll_index = i+1;
         if(NULL==_obj)
         {
             _data->data_index = 0;
@@ -226,10 +228,11 @@ static int epoll_data_view(struct epoll_obj* const _this, struct obd_agree_obj* 
         if(0==__epoll_data_view(_this, (struct epoll_thread_data*)_obj->data, _obd_obj, fd, _tbuf, _tsize)) return 0;
         _data->data_index = 0;
     }
+#if 0
     for(i=0; i<epoll_index; i++)
     {
         _obj=_this->fops.get_epoll_obj(_this, i);
-        _data->epoll_index = i;
+        _data->epoll_index = i+1;
         if(NULL==_obj)
         {
             _data->data_index = 0;
@@ -238,6 +241,7 @@ static int epoll_data_view(struct epoll_obj* const _this, struct obd_agree_obj* 
         if(0==__epoll_data_view(_this, (struct epoll_thread_data*)_obj->data, _obd_obj, fd, _tbuf, _tsize)) return 0;
         _data->data_index = 0;
     }
+#endif
     // send end
     {
         struct general_pack_view_userdef* const udef = (struct general_pack_view_userdef*)_tbuf;
@@ -254,6 +258,8 @@ static int epoll_data_view(struct epoll_obj* const _this, struct obd_agree_obj* 
         _this->fops.do_write(_this, fd, pack_buf, len);
         printf("[%s-%d] do_write[%d]:%s\n", __func__, __LINE__, len, pack_buf);
     }
+    _data->epoll_index = 0;
+    _data->data_index = 0;
     return -1;
 }
 static void epoll_close_server(struct epoll_obj* const _this, const int fd)
