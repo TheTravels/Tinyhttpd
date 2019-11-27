@@ -1300,6 +1300,111 @@ static int handle_request_userdef_yunjing(struct obd_agree_obj* const _agree_ofp
     return 0;
 }
 
+static int handle_request_userdef_view(struct obd_agree_obj* const _agree_ofp, const struct general_pack_view* const _pack, struct obd_agree_ofp_data* const _ofp_data, struct msg_print_obj* const _print)
+{
+    const struct shanghai_userdef *const msg = (const struct shanghai_userdef *const)(_pack->data);
+    struct yunjing_userdef _userdef;
+    int len;
+    const struct userdef_yj_qure* const _qure = (const struct userdef_yj_qure*)_userdef.msg;
+    memset(&_userdef, 0, sizeof(struct yunjing_userdef));
+    //len = userdef_decode_yj(&_userdef, msg->data, msg->_dsize);
+    len = _agree_ofp->fops->userdef_decode(_agree_ofp, &_userdef, msg->data, msg->_dsize);
+    //_print->fops->print(_print, "userdef_decode_yj:%d\n", len);
+    if(len<0)
+    {
+        _print->fops->print(_print, "userdef decode error!\n");
+    }
+    else
+    {
+#if 0
+        _print->fops->print(_print, "decode cmd : 0x%02X\n", decode.cmd); // fflush(stdout);
+        _print->fops->print(_print, "decode total : %d\n", decode.pack_total); // fflush(stdout);
+        _print->fops->print(_print, "decode index : %d\n", decode.pack_index); // fflush(stdout);
+        _print->fops->print(_print, "decode checksum : 0x%02X\n", decode.checksum); // fflush(stdout);
+        _print->fops->print(_print, "decode Model : %s\n", decode.Model); // fflush(stdout);
+        _print->fops->print(_print, "decode len : %d\n", decode.data_len); // fflush(stdout);
+        _print->fops->print(_print, "decode data : %s\n", decode.data); // fflush(stdout);
+        _print->fops->print(_print, "decode CRC : 0x%02X\n", decode.CRC); // fflush(stdout);
+#endif
+        switch (_userdef.type_msg)
+        {
+            case USERDEF_VIEW_REQ_OBD:   // 请求 VIN 码
+                _print->fops->print(_print, "USERDEF_VIEW_REQ_OBD\n");
+                break;
+            case USERDEF_VIEW_OBD:    // 下发 VIN 码
+                _print->fops->print(_print, "USERDEF_VIEW_OBD\n");
+                break;
+            case USERDEF_VIEW_OBD_END:  //
+                _print->fops->print(_print, "USERDEF_VIEW_OBD_END\n");
+                break;
+            /*case USERDEF_YJ_PUSH_TIME:   // 下发校时
+                memcpy(&buffer[index], _udef->msg, 6); index += 6; // 6位GMT+8 时间,年月日时分秒
+                break;*/
+            case USERDEF_YJ_DEV_FAULT:   // 设备故障
+                _print->fops->print(_print, "设备故障\n");
+                {
+                    uint8_t count;
+                    struct userdef_yj_fault* const fault = (struct userdef_yj_fault*)_userdef.msg;
+                    _print->fops->print(_print, "设备故障:%d\n", fault->sum);
+                    for(count=0; count<fault->sum; count++)
+                    {
+                        _print->fops->print(_print, "%04X\t", fault->value[count]);
+                    }
+                    _print->fops->print(_print, "\n");
+                }
+                break;
+            case USERDEF_YJ_DEV_OFFLINE: // 设备离线
+                // 设备离线指令数据体为空
+                _print->fops->print(_print, "设备离线\n");
+                break;
+            case USERDEF_YJ_QUERY_CFG:   // 查询配置文件更新
+                _print->fops->print(_print, "查询 CFG\n");
+                _userdef.type_msg = USERDEF_YJ_ACK_CFG;
+                upload_query_yunjing((char*)_pack->VIN, _agree_ofp, &_userdef, _qure->sn, _qure->checksum, ".cfg", _ofp_data, _print);
+                break;
+            case USERDEF_YJ_ACK_CFG:     // 响应
+                _print->fops->print(_print, "ACK_CFG\n");
+                break;
+            case USERDEF_YJ_QUERY_FW:    // 查询固件更新
+                _print->fops->print(_print, "查询 FW\n");
+                _userdef.type_msg = USERDEF_YJ_ACK_FW;
+                upload_query_yunjing((char*)_pack->VIN, _agree_ofp, &_userdef, _qure->sn, _qure->checksum, ".bin", _ofp_data, _print);
+                break;
+            case USERDEF_YJ_ACK_FW:      // 响应
+                _print->fops->print(_print, "ACK_FW\n");
+                break;
+            case USERDEF_YJ_QUERY_FWB:    // 查询固件更新,获取固件块信息
+                _print->fops->print(_print, "块查询\n");
+                _userdef.type_msg = USERDEF_YJ_ACK_FWB;
+                upload_query_block_yunjing((char*)_pack->VIN, _agree_ofp, &_userdef, _qure->sn, _qure->checksum, ".bin", _ofp_data, _print);
+                break;
+            case USERDEF_YJ_ACK_FWB:      // 响应
+                _print->fops->print(_print, "ACK_FWB\n");
+                break;
+            case USERDEF_YJ_DOWNLOAD:     // 下载
+                _print->fops->print(_print, "下载\n");
+                {
+                    _print->fops->print(_print, "USERDEF_YJ_DOWNLOAD\n");
+                    const struct userdef_yj_download* const _download = (const struct userdef_yj_download*)_userdef.msg;
+                    _userdef.type_msg = USERDEF_YJ_ACK_DOWNLOAD;
+                    upload_download_yunjing(_agree_ofp, &_userdef, _download->key, _download->_seek, _download->_total, _download->block, _ofp_data, _print);
+                }
+                break;
+            case USERDEF_YJ_ACK_DOWNLOAD: // 响应
+                _print->fops->print(_print, "ACK_DOWNLOAD\n");
+                break;
+            case USERDEF_YJ_PUSH:         // 推送
+                _print->fops->print(_print, "PUSH\n");
+                break;
+            default:
+                _print->fops->print(_print, "DEFAULT\n");
+                break;
+        }
+    }
+    // fflush(stdout);
+    return 0;
+}
+
 int obj_obd_agree_shanghai_server(struct obd_agree_obj* const _obd_fops, struct obd_agree_ofp_data* const _ofp_data, struct data_base_obj* const _db_report, struct msg_print_obj* const _print)
 {
     const char* ssl_type[] = {
@@ -1517,7 +1622,7 @@ int obj_obd_agree_general_pack_view_server(struct obd_agree_obj* const _obd_fops
             break;
         case CMD_VIEW_USERDEF:      // 用户自定义
             _print->fops->print(_print, "自定义-"); // fflush(stdout);
-            //handle_request_userdef_yunjing(_obd_fops, pack, _ofp_data, _print);
+            handle_request_userdef_view(_obd_fops, pack, _ofp_data, _print);
             _obd_fops->_relay = 0;
             break;
         default:

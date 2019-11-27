@@ -72,6 +72,7 @@ extern "C" {
  enum general_pack_view_userdef_cmd{
      USERDEF_VIEW_REQ_OBD     = 0x01,  // 请求 OBD
      USERDEF_VIEW_OBD         = 0x02,  // 下发 OBD
+     USERDEF_VIEW_OBD_END     = 0x03,  // 下发 OBD end
  };
 
  struct pack_view_udf_obd{

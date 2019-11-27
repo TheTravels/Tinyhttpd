@@ -460,6 +460,8 @@ static int handle_request_userdef_view(struct obd_agree_obj* const _obd_fops, co
     {
         switch (_udef->type_msg)
         {
+            case USERDEF_VIEW_REQ_OBD:
+                break;
             case USERDEF_VIEW_OBD:
                 {
                     const struct pack_view_udf_obd* const _obd = (const struct pack_view_udf_obd*)_udef->msg;
@@ -468,6 +470,9 @@ static int handle_request_userdef_view(struct obd_agree_obj* const _obd_fops, co
                     memcpy(_ofp_data->_tbuf, _obd->data, _obd->len);
                     _print->fops->print(_print, "_obd[%d]: %s\n", _obd->len, _obd->data);
                 }
+                break;
+            case USERDEF_VIEW_OBD_END:
+                _print->fops->print(_print, "USERDEF_VIEW_OBD_END\n");
                 break;
             default:
                     break;

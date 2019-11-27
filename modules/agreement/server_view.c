@@ -169,7 +169,7 @@ static int userdef_encode_view(struct obd_agree_obj* const _obd_fops, const stru
                 memcpy(&buffer[index], _obd->data, _obd->len); index += _obd->len; // OBD Data
             }
             break;
-        case USERDEF_YJ_QUERY_TIME:  // 请求校时
+        case USERDEF_VIEW_OBD_END:  // 请求校时
             ; // 校时数据体为空
             break;
         case USERDEF_YJ_ACK_TIME:   // 下发校时
@@ -278,7 +278,7 @@ static int userdef_decode_view(struct obd_agree_obj* const _obd_fops, struct gen
                 memcpy(_obd->data, &data[index], _obd->len); index += _obd->len; // OBD Data
             }
             break;
-        case USERDEF_YJ_QUERY_TIME:  // 请求校时
+        case USERDEF_VIEW_OBD_END:  // 请求校时
             ; // 校时数据体为空
             break;
         case USERDEF_YJ_ACK_TIME:   // 下发校时

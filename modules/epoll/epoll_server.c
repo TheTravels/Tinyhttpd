@@ -238,6 +238,22 @@ static int epoll_data_view(struct epoll_obj* const _this, struct obd_agree_obj* 
         if(0==__epoll_data_view(_this, (struct epoll_thread_data*)_obj->data, _obd_obj, fd, _tbuf, _tsize)) return 0;
         _data->data_index = 0;
     }
+    // send end
+    {
+        struct general_pack_view_userdef* const udef = (struct general_pack_view_userdef*)_tbuf;
+        int len;
+        uint8_t pack_buf[128];
+        uint8_t udef_buf[128];
+        memset(_tbuf, 0, _tsize);
+        memset(pack_buf, 0, sizeof(pack_buf));
+        memset(udef_buf, 0, sizeof(udef_buf));
+        udef->type_msg = USERDEF_VIEW_OBD_END;
+        _obd_obj->_gen_pack_view.protocol = _data->_obd_obj->fops->protocol;
+        len = _obd_obj->fops->userdef_encode(_obd_obj, udef, udef_buf, sizeof(udef_buf));
+        len = _obd_obj->fops->base->pack.encode(_obd_obj, udef_buf, len, pack_buf, sizeof(pack_buf));
+        _this->fops.do_write(_this, fd, pack_buf, len);
+        printf("[%s-%d] do_write[%d]:%s\n", __func__, __LINE__, len, pack_buf);
+    }
     return -1;
 }
 static void epoll_close_server(struct epoll_obj* const _this, const int fd)
