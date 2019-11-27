@@ -68,6 +68,13 @@ static int load_host_cfg(struct config_load_obj* const _load_obj, const char *co
     _cfg->port = 0xffff & _load_obj->fops.get_int(_load_obj, section, "Port", 0);
     return 0;
 }
+static int load_fork_cfg(struct config_load_obj* const _load_obj, const char *const section, struct fork_listening* const _cfg)
+{
+    _load_obj->fops.get_field_value(_load_obj, section, "Host", "0.0.0.0", _cfg->host);
+    _load_obj->fops.get_field_value(_load_obj, section, "Work_DIR", "./", _cfg->work_dir);
+    _cfg->port = 0xffff & _load_obj->fops.get_int(_load_obj, section, "Port", 0);
+    return 0;
+}
 static int data_load_func(struct config_load_obj* const _load_obj)
 {
     int i;
@@ -105,8 +112,8 @@ static int data_load_func(struct config_load_obj* const _load_obj)
             snprintf(server, sizeof(server)-1, "Server%d", i+1);
             //GetPrivateProfileStringEx(server, "Host", "0.0.0.0", local_list[i].host);
             //local_list[i].port = 0xffff & GetPrivateProfileIntEx(server, "Port", def_port);
-            load_host_cfg(_load_obj, server, &_data->local_list[i]);
-            if(_data->local_list[i].port > 0) {printf("server%d host:%s, port:%d\n", i, _data->local_list[i].host, _data->local_list[i].port); fflush(stdout);}
+            load_fork_cfg(_load_obj, server, &_data->local_list[i]);
+            if(_data->local_list[i].port > 0) {printf("server%d host:%s, port:%d Work_DIR:%s\n", i, _data->local_list[i].host, _data->local_list[i].port, _data->local_list[i].work_dir); fflush(stdout);}
             //LOG_INFO << "server, listenning on " << local_list[i].host << ":" << local_list[i].port;
         }
         // mysql

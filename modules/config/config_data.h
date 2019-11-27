@@ -25,6 +25,11 @@ struct host_listening {
     char host[64];
     uint16_t port;
 };
+struct fork_listening {
+    char host[64];
+    char work_dir[64];
+    uint16_t port;
+};
 // MYSQL
 struct mysql_cfg{
     char host[64];
@@ -54,7 +59,7 @@ struct local_config_data{
     struct host_listening		local_listen;
     struct host_listening		local_listenCXX;
     struct host_listening		device_cfg;
-    struct host_listening       local_list[20];  // 进程数
+    struct fork_listening       local_list[20];  // 进程数
     struct mysql_cfg            _mysql_cfg;
     // 数据转发
     struct data_transfer_cfg _data_transfer_cfg;

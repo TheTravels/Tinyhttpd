@@ -293,6 +293,7 @@ int main(int argc, char *argv[])
 	thread_vin_init(port);
     //server_log_init(port);
     _cfg_data = (struct local_config_data*)_local_config_data->data;
+    chdir(_cfg_data->local_list[0].work_dir);
     // 创建子进程
     if(1==daemon_run)
     {
